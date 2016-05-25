@@ -2,6 +2,7 @@
  * Copyright 2015, Yahoo! Inc.
  * Licensed under the terms of the Apache License 2.0. See LICENSE file at the project root for terms.
  */
+
 package com.yahoo.sketches.demo;
 
 import static java.lang.Math.sqrt;
@@ -71,7 +72,8 @@ public class DemoImpl {
   
   /**
    * Constuct the demo.
-   * @param streamLen  The total stream length. Must be > 1000. Will be rounded up to nearest 1000.
+   * @param streamLen  The total stream length. Must be &gt; 1000. Will be rounded up to nearest 
+   * 1000.
    * @param uniquesFraction the fraction of streamLen values less than 1.0, that will be unique. 
    * The actual # of uniques will vary around this value, because it is computed statistically.
    */
