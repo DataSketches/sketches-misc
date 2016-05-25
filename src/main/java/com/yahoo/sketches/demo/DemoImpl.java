@@ -5,6 +5,7 @@
 package com.yahoo.sketches.demo;
 
 import static java.lang.Math.sqrt;
+import static com.yahoo.sketches.demo.Util.*;
 import static com.yahoo.sketches.hash.MurmurHash3.hash;
 
 import com.yahoo.sketches.Family;
@@ -13,10 +14,8 @@ import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.theta.Sketches;
 import com.yahoo.sketches.theta.UpdateSketch;
 
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
 import java.nio.ByteBuffer;
 import java.nio.channels.SeekableByteChannel;
 import java.nio.file.Files;
@@ -52,7 +51,8 @@ public class DemoImpl {
   //Stream Configuration
   private int byteBufCap_ = 1000000; //ByteBuffer capacity
   private long n_ = (long)1E8; //stream length
-  private final int threshold_; //equivalent uniquesFraction on integer scale
+  private int batchSz_ = 1000; //batch size
+  private final double uniquesFrac_; //fraction to be unique
   
   //Sketch configuration
   private int lgK_ = 14; //16K
@@ -67,24 +67,28 @@ public class DemoImpl {
   private Path path = Paths.get("tmp/test.txt");
   private long[] vArr_ = new long[1]; //reuse this array
   private long fileBytes_ = 0;
-  private long u_ = 0;    //unique count;
+  private long u_;    //global unique count;
   
   /**
    * Constuct the demo.
-   * @param streamLen  The total stream length.
+   * @param streamLen  The total stream length. Must be > 1000. Will be rounded up to nearest 1000.
    * @param uniquesFraction the fraction of streamLen values less than 1.0, that will be unique. 
    * The actual # of uniques will vary around this value, because it is computed statistically.
    */
   public DemoImpl(long streamLen, double uniquesFraction) {
-    if (uniquesFraction == 1.0) {
-      this.threshold_ = Integer.MAX_VALUE;
+    if ((uniquesFraction <= 0.0) || (uniquesFraction > 1.0)) {
+      throw new IllegalArgumentException(
+          "uniquesFraction must be > 0.0 and <= 1.0: "+uniquesFraction);
     }
-    else {
-      this.threshold_ = (int)(Integer.MAX_VALUE * uniquesFraction);
+    uniquesFrac_ = uniquesFraction;
+    long m = streamLen/1000;
+    if (m *1000 == streamLen) {
+      n_ = streamLen;
+    } else {
+      n_ = (m+1)*1000;
     }
-    n_ = streamLen;
     lgK_ = 14; //Log-base 2 of the configured sketch size = 16K
-    File dir = new File("tmp");
+    File dir = new File("tmp"); //new directory tmp
     if (!dir.exists()) {
       try {
         dir.mkdir();
@@ -106,13 +110,13 @@ public class DemoImpl {
     
     println("## SORT & REMOVE DUPLICATES");
     String sortCmd = "sort -u -o tmp/sorted.txt tmp/test.txt";
-    exactTimeMS += runUnixCmd("sort", sortCmd);
+    exactTimeMS += UnixCmd.run("sort", sortCmd);
     
     println("\n## LINE COUNT");
     String wcCmd = "wc -l tmp/sorted.txt";
-    exactTimeMS += runUnixCmd("wc", wcCmd);
+    exactTimeMS += UnixCmd.run("wc", wcCmd);
     
-    println("Total Exact "+getMinSec(exactTimeMS) +LS+LS);
+    println("Total Exact "+getMinSecFromMilli(exactTimeMS) +LS+LS);
     
     println("# COMPUTE DISTINCT COUNT USING SKETCHES");
     configureThetaSketch();
@@ -133,7 +137,7 @@ public class DemoImpl {
   private long buildFile() {
     println("## BUILD FILE:");
     ByteBuffer byteBuf = ByteBuffer.allocate(byteBufCap_);
-    u_ = 0;
+    u_ = 0; //reset global unique counter
     fileBytes_ = 0;
     long testStartTime_mS = System.currentTimeMillis();
     try (SeekableByteChannel sbc = Files.newByteChannel(path, C, W, TE)) {
@@ -167,77 +171,22 @@ public class DemoImpl {
   /**
    * @return total test time in milliseconds
    */
-  private static long runUnixCmd(String name, String cmd) {
-    StringBuilder sbOut = new StringBuilder();
-    StringBuilder sbErr = new StringBuilder();
-    String out = null;
-    String err = null;
-    Process p = null;
-    String[] envp = {"LC_ALL=C"}; //https://bugs.launchpad.net/ubuntu/+source/coreutils/+bug/846628
-    long testStartTime_mS = System.currentTimeMillis();
-    try {
-      // run the Unix cmd using the Runtime exec method:
-      p = Runtime.getRuntime().exec(cmd, envp);
-      BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-      BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
-
-      // read the output from the command
-      boolean outFlag = true;
-      while ((out = stdInput.readLine()) != null) {
-        if (outFlag) {
-          sbOut.append("Output from "+name+" command:").append(LS);
-          outFlag = false;
-        }
-        sbOut.append(out).append(LS);
-      }
-
-      // read any errors from the attempted command
-      boolean errFlag = true;
-      while ((err = stdError.readLine()) != null) {
-        if (errFlag) {
-          sbErr.append("\nError from "+name+" command:").append(LS);
-          errFlag = false;
-        }
-        sbErr.append(err).append(LS);
-      }
-    }
-    catch (IOException e) {
-      System.out.println("Exception: ");
-      e.printStackTrace();
-      System.exit( -1);
-    }
-    if ((p != null) && (p.isAlive())) {
-      p.destroy();
-    }
-    long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
-    println("Unix cmd: "+cmd);
-    println(getMinSec(testTime_mS));
-    if (sbOut.length() > 0) { println(sbOut.toString()); }
-    if (sbErr.length() > 0) { println(sbErr.toString()); }
-    return testTime_mS;
-  }
-  
-  /**
-   * @return total test time in milliseconds
-   */
   private long buildSketch() {
-    u_ = 0; //unique counter for accuracy computation
-    long testStartTime_mS = System.currentTimeMillis();
+    u_ = 0; //reset global unique counter
+    long stLen = 0;
+    long[] vArr = new long[batchSz_];
+    long testTime_nS = 0;
     
-    if (tSketch_ != null) { //Theta Sketch
-      for (long i = 0; i < n_; i++) {
-        long v = nextValue();
-        tSketch_.update(v);
-      }
-    } 
-    else { //HLL Sketch
-      for (long i = 0; i < n_; i++) {
-        long v = nextValue();
-        hllSketch_.update(v);
+    while (stLen < n_) {
+      for (int i = 0; i<batchSz_; i++) { vArr[i] = nextValue(); }
+      stLen += batchSz_;
+      if (tSketch_ != null) { //Theta Sketch
+        testTime_nS += timeThetaSketch(tSketch_, vArr);
+      } else {
+        testTime_nS += timeHllSketch(hllSketch_, vArr);
       }
     }
-    long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
-    
+    long testTime_mS = testTime_nS/1000000;
     //Print sketch name
     String sk = (tSketch_ != null)? "THETA" : "HLL";
     println("## USING "+sk+" SKETCH");
@@ -247,6 +196,26 @@ public class DemoImpl {
     //Print sketch results
     printSketchResults(u_, maxMemSkBytes_, rse2_);
     return testTime_mS;
+  }
+  
+  //return nanoseconds
+  private static long timeThetaSketch(UpdateSketch tSketch, long[] batchArr) {
+    int batLen = batchArr.length;
+    long testBatchStart_nS = System.nanoTime();
+    for (int i = 0; i<batLen; i++) {
+      tSketch.update(batchArr[i]);
+    }
+    return System.nanoTime() - testBatchStart_nS;
+  }
+  
+//return nanoseconds
+  private static long timeHllSketch(HllSketch hSketch, long[] batchArr) {
+    int batLen = batchArr.length;
+    long testBatchStart_nS = System.nanoTime();
+    for (int i = 0; i<batLen; i++) {
+      hSketch.update(batchArr[i]);
+    }
+    return System.nanoTime() - testBatchStart_nS;
   }
   
   /**
@@ -310,20 +279,19 @@ public class DemoImpl {
   }
   
   /**
-   * @return next hashed long value
+   * @return next hashed long value with (1.0 - uniqueFrac_) as duplicates
    */
   private long nextValue() { 
-    if (((rand.nextInt() >>> 1) < threshold_) || (u_ == 0)) {
-      u_++;
+    long out;
+    if ( (rand.nextDouble() < uniquesFrac_) || (u_ <= 1)) {
+      out = ++u_; //unique
+    } else {
+      out = nextLong(0, u_); //duplicate
     }
-    vArr_[0] = u_;
+    //return out;
+    vArr_[0] = out;
     return hash(vArr_, 0L)[0];
   }
-  
-//  private long nextValue() {  //Faster version, always 100% uniques
-//    vArr_[0] = ++u_;
-//    return hash(vArr_, 0L)[0];
-//  }
   
   private final void configureThetaSketch() {
     int k = 1 << lgK_; //14 
@@ -350,10 +318,10 @@ public class DemoImpl {
         build();
   }
   
-  private static void printCommon(long testTime, long n, long u) {
-    println(getMinSec(testTime));
+  private static void printCommon(long testTimeMilli, long n, long u) {
+    println(getMinSecFromMilli(testTimeMilli));
     println("Total Values: "+String.format("%,d",n));
-    int nSecRate = (int) (testTime *1000000.0/n);
+    int nSecRate = (int) (testTimeMilli *1000000.0/n);
     println("Build Rate: "+ String.format("%d nSec/Value", nSecRate));
     println("Exact Uniques: "+String.format("%,d", u));
   }
@@ -367,16 +335,5 @@ public class DemoImpl {
     println("Sketch Relative Error: "+String.format("%.3f%%, +/- %.3f%%", err*100, rse2*100));
     println("Max Sketch Size Bytes: "+ String.format("%,d", maxMemSkBytes));
   }
-  
-  private static String getMinSec(long mSec) {
-    int totSec = (int)(mSec/1000.0);
-    int min = totSec/60;
-    int sec = totSec%60;
-    int ms  = (int)(mSec - totSec * 1000);
-    String t = String.format("Time Min:Sec.mSec = %d:%02d.%03d", min, sec, ms);
-    return t;
-  }
-  
-  private static void println(String s) { System.out.println(s); }
   
 }

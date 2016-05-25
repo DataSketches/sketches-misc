@@ -30,13 +30,23 @@ import com.yahoo.sketches.frequencies.ErrorType;
 public class CommandLine {
   private static final String BOLD = "\033[1m";
   private static final String OFF = "\033[0m";
+  private final boolean disablePrint;
   
-  public static void main(String[] args) {
-    if (args.length == 0) help();
-    else parseType(args);
+  CommandLine() {
+    disablePrint = false;
   }
   
-   static void parseType(String[] args) {
+  CommandLine(boolean disablePrint) {
+    this.disablePrint = disablePrint;
+  }
+  
+  public static void main(String[] args) {
+    CommandLine cl = new CommandLine();
+    if (args.length == 0) cl.help();
+    else cl.parseType(args);
+  }
+  
+  private void parseType(String[] args) {
     String token1 = args[0].toLowerCase();
     switch (token1) {
       case "uniq": parseUniq(args); break;
@@ -76,7 +86,7 @@ public class CommandLine {
     return ret;
   }
   
-  private static void parseUniq(String[] args) {
+  private void parseUniq(String[] args) {
     UpdateSketchBuilder bldr = Sketches.updateSketchBuilder();
     UpdateSketch sketch;
     int argsCase = parseArgsCase(args);
@@ -97,7 +107,7 @@ public class CommandLine {
     }
   }
   
-  private static void doUniq(BufferedReader br, UpdateSketch sketch) {
+  private void doUniq(BufferedReader br, UpdateSketch sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -110,7 +120,7 @@ public class CommandLine {
     println(sketch.toString());
   }
   
-  private static void parseRank(String[] args) {
+  private void parseRank(String[] args) {
     QuantilesSketchBuilder bldr = new QuantilesSketchBuilder();
     QuantilesSketch sketch;
     int argsCase = parseArgsCase(args);
@@ -131,7 +141,7 @@ public class CommandLine {
     }
   }
   
-  private static void doRank(BufferedReader br, QuantilesSketch sketch) {
+  private void doRank(BufferedReader br, QuantilesSketch sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -151,7 +161,7 @@ public class CommandLine {
     }
   }
   
-  private static void parseHist(String[] args) {
+  private void parseHist(String[] args) {
     QuantilesSketchBuilder bldr = new QuantilesSketchBuilder();
     QuantilesSketch sketch;
     int argsCase = parseArgsCase(args);
@@ -172,7 +182,7 @@ public class CommandLine {
     }
   }
   
-  private static void doHist(BufferedReader br, QuantilesSketch sketch) {
+  private void doHist(BufferedReader br, QuantilesSketch sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -200,7 +210,7 @@ public class CommandLine {
     }
   }
   
-  private static void parseLogHist(String[] args) {
+  private void parseLogHist(String[] args) {
     QuantilesSketchBuilder bldr = new QuantilesSketchBuilder();
     QuantilesSketch sketch;
     int argsCase = parseArgsCase(args);
@@ -221,7 +231,7 @@ public class CommandLine {
     }
   }
   
-  private static void doLogHist(BufferedReader br, QuantilesSketch sketch) {
+  private void doLogHist(BufferedReader br, QuantilesSketch sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -250,7 +260,7 @@ public class CommandLine {
     }
   }
   
-  private static void parseFreq(String[] args) {
+  private void parseFreq(String[] args) {
     FrequentItemsSketch<String> sketch;
     int defaultSize = 1 << 17; //128K
     int argsCase = parseArgsCase(args);
@@ -273,7 +283,7 @@ public class CommandLine {
     }
   }
   
-  private static void doFreq(BufferedReader br, FrequentItemsSketch<String> sketch) {
+  private void doFreq(BufferedReader br, FrequentItemsSketch<String> sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -329,7 +339,7 @@ public class CommandLine {
     return true;
   }
   
-  private static BufferedReader getBR(String token) {
+  private BufferedReader getBR(String token) {
     BufferedReader br = null;
     try {
       if ((token == null) || (token.length() == 0)) {
@@ -344,7 +354,7 @@ public class CommandLine {
     return br;
   }
   
-  private static void uniqHelp() {
+  private void uniqHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"UNIQ SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch uniq help").append(LS);
@@ -352,7 +362,7 @@ public class CommandLine {
     println(sb.toString());
   }
   
-  private static void rankHelp() {
+  private void rankHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"RANK SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch rank help").append(LS);
@@ -360,7 +370,7 @@ public class CommandLine {
     println(sb.toString());
   }
   
-  private static void histHelp() {
+  private void histHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"HIST SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch hist help").append(LS);
@@ -368,7 +378,7 @@ public class CommandLine {
     println(sb.toString());
   }
   
-  private static void logHistHelp() {
+  private void logHistHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"LOGHIST SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch loghist help").append(LS);
@@ -376,7 +386,7 @@ public class CommandLine {
     println(sb.toString());
   }
   
-  private static void freqHelp() {
+  private void freqHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"FREQ SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch freq help").append(LS);
@@ -384,7 +394,7 @@ public class CommandLine {
     println(sb.toString());
   }
   
-  static void help() {
+  public void help() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"NAME"+OFF).append(LS);
     sb.append("    sketch - sketch Uniques, Quantiles, Histograms, or Frequent Items.").append(LS);
@@ -414,7 +424,13 @@ public class CommandLine {
     freqHelp();
   }
   
-  private static void printlnErr(String s) { System.err.println(s); }
+  private void printlnErr(String s) { 
+    if (disablePrint) return;
+    System.err.println(s); 
+  }
   
-  private static void println(String s) { System.out. println(s); }
+  private void println(String s) { 
+    if (disablePrint) return;
+    System.out. println(s); 
+  }
 }

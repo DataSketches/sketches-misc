@@ -52,7 +52,7 @@ public class ExactVsSketchDemo {
   public static void main(String[] args) {
     int argsLen = args.length;
     long streamLen = (long)1E8;   //The default stream length
-    double uFrac = 1.0;          //The default fraction that are unique
+    double uFrac = .50;          //The default fraction that are unique
     if (argsLen == 1) {
       streamLen = (long)(Double.parseDouble(args[0]));
     } else if (argsLen > 1) {
