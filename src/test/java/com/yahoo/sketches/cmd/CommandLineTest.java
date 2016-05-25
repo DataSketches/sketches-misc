@@ -18,22 +18,46 @@ public class CommandLineTest {
   private static String CmdLine = " com.yahoo.sketches.cmd.CommandLine ";
   private static String sketch = "java -cp " + classPath + CmdLine;
   
+  @SuppressWarnings("unused")
   @Test
-  public void checkSketchUniq() {
-    String cmd = sketch + " uniq " + "/Users/lrhodes/tenMillionNumbers.txt";
-    UnixCmd.run("sketch uniq", cmd);
+  public void checkHelpDirect() {
+    String[] args = new String[] {""};
+    boolean disablePrint = false;
+    CommandLine cl = new CommandLine(disablePrint, args);
+    
+    args = new String[] {"uniq","help"};
+    cl = new CommandLine(disablePrint, args);
+    
+    args = new String[] {"rank","help"};
+    cl = new CommandLine(disablePrint, args);
+    
+    args = new String[] {"hist","help"};
+    cl = new CommandLine(disablePrint, args);
+    
+    args = new String[] {"loghist","help"};
+    cl = new CommandLine(disablePrint, args);
+    
+    args = new String[] {"freq","help"};
+    cl = new CommandLine(disablePrint, args);
+  }
+  
+  
+  @Test
+  public void checkHelpViaUnix() {
+    String cmd = sketch + " help";
+    UnixCmd.run("\" + cmd + \"", cmd);
   }
   
   @Test
-  public void checkSketchUniqHelp() {
+  public void checkUniqHelpViaUnix() {
     String cmd = sketch + " uniq help";
     UnixCmd.run("sketch uniq", cmd);
   }
   
   @Test
-  public void checkHelp() {
-    String cmd = sketch + " help";
-    UnixCmd.run("\"sketch help\"", cmd);
+  public void checkUniqFileViaUnix() {
+    String cmd = sketch + " uniq " + "/Users/lrhodes/tenMillionNumbers.txt";
+    UnixCmd.run("sketch uniq", cmd);
   }
   
 }

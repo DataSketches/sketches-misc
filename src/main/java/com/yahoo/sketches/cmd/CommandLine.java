@@ -25,28 +25,38 @@ import com.yahoo.sketches.frequencies.FrequentLongsSketch.Row;
 import com.yahoo.sketches.frequencies.ErrorType;
 
 /**
- * Command line access to the basic sketch functions. 
+ * Command line access to the basic sketch functions.  This is intentionally a very simple parser 
+ * with limited functionality that can be used for small experiments and for demos. 
+ * Although the sketching library can be used on a single machine, the more typical use case is on 
+ * large, highly distributed system architectures where a CLI is not of much use.  
  */
 public class CommandLine {
   private static final String BOLD = "\033[1m";
   private static final String OFF = "\033[0m";
-  private final boolean disablePrint;
+  private boolean disablePrint = false;
   
-  CommandLine() {
-    disablePrint = false;
-  }
+  CommandLine() {}
   
-  CommandLine(boolean disablePrint) {
+  /**
+   * Used for testing
+   * @param disablePrint if true, disables normal System.out messages, but not System.err messages.
+   * @param args the same args list as used for main.
+   */
+  CommandLine(boolean disablePrint, String[] args) {
     this.disablePrint = disablePrint;
+    this.parseType(args);
   }
   
   public static void main(String[] args) {
     CommandLine cl = new CommandLine();
-    if (args.length == 0) cl.help();
-    else cl.parseType(args);
+    cl.parseType(args);
   }
   
   private void parseType(String[] args) {
+    if ((args == null) || (args.length == 0) || (args[0].isEmpty())) {
+      help();
+      return;
+    }
     String token1 = args[0].toLowerCase();
     switch (token1) {
       case "uniq": parseUniq(args); break;
@@ -339,7 +349,7 @@ public class CommandLine {
     return true;
   }
   
-  private BufferedReader getBR(String token) {
+  private static BufferedReader getBR(String token) {
     BufferedReader br = null;
     try {
       if ((token == null) || (token.length() == 0)) {
@@ -358,7 +368,7 @@ public class CommandLine {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"UNIQ SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch uniq help").append(LS);
-    sb.append("    sketch uniq [SIZE] [FILE]");
+    sb.append("    sketch uniq [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
   
@@ -366,7 +376,7 @@ public class CommandLine {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"RANK SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch rank help").append(LS);
-    sb.append("    sketch rank [SIZE] [FILE]");
+    sb.append("    sketch rank [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
   
@@ -374,7 +384,7 @@ public class CommandLine {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"HIST SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch hist help").append(LS);
-    sb.append("    sketch hist [SIZE] [FILE]");
+    sb.append("    sketch hist [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
   
@@ -382,7 +392,7 @@ public class CommandLine {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"LOGHIST SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch loghist help").append(LS);
-    sb.append("    sketch loghist [SIZE] [FILE]");
+    sb.append("    sketch loghist [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
   
@@ -390,10 +400,13 @@ public class CommandLine {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"FREQ SYNOPSIS"+OFF).append(LS);
     sb.append("    sketch freq help").append(LS);
-    sb.append("    sketch freq [SIZE] [FILE]");
+    sb.append("    sketch freq [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
   
+  /**
+   * Prints the help summaries.
+   */
   public void help() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"NAME"+OFF).append(LS);
@@ -415,7 +428,8 @@ public class CommandLine {
        "Sketch the linear-axis value-frequency distribution of numeric value stream.").append(LS);
     sb.append("    sketch loghist : "+
         "Sketch the log-axis value-frequency distribution of numeric value stream.").append(LS);
-    sb.append("    sketch freq    : Sketch the Heavy Hitters of a string item stream.");
+    sb.append("    sketch freq    : "+
+        "Sketch the Heavy Hitters of a string item stream.").append(LS);
     println(sb.toString());
     uniqHelp();
     rankHelp();
@@ -424,8 +438,7 @@ public class CommandLine {
     freqHelp();
   }
   
-  private void printlnErr(String s) { 
-    if (disablePrint) return;
+  private static void printlnErr(String s) { 
     System.err.println(s); 
   }
   
