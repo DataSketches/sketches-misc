@@ -300,7 +300,7 @@ public class DemoImpl {
   private final void configureThetaSketch() {
     int k = 1 << lgK_; //14 
     hllSketch_ = null;
-    maxMemSkBytes_ = k *16; //includs full hash table
+    maxMemSkBytes_ = k *16; //includes full hash table
     rse2_ = 2.0/sqrt(k);    //Error for 95% confidence
     tSketch_ = Sketches.updateSketchBuilder().
         setResizeFactor(ResizeFactor.X1).
@@ -331,12 +331,12 @@ public class DemoImpl {
   }
   
   private void printSketchResults(long u, int maxMemSkBytes, double rse2) {
-    String sk = (tSketch_ != null)? "THETA" : "HLL";
-    println("## USING "+sk+" SKETCH");
+    println("## SKETCH STATS");
     double rounded = Math.round((tSketch_ != null)? tSketch_.getEstimate() : hllSketch_.getEstimate());
     println("Sketch Estimate of Uniques: "+ String.format("%,d", (long)rounded));
     double err = (u == 0)? 0 : (rounded/u - 1.0);
-    println("Sketch Relative Error: "+String.format("%.3f%%, +/- %.3f%%", err*100, rse2*100));
+    println("Sketch Actual Relative Error: "+String.format("%.3f%%", err*100));
+    println("Sketch 95%ile Error Bounds  : "+String.format("+/- %.3f%%", rse2*100));
     println("Max Sketch Size Bytes: "+ String.format("%,d", maxMemSkBytes));
   }
   
