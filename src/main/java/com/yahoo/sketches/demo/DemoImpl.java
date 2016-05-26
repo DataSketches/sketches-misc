@@ -140,7 +140,7 @@ public class DemoImpl {
     println("## BUILD FILE:");
     rand = new Random(9001);
     ByteBuffer byteBuf = ByteBuffer.allocate(byteBufCap_);
-    u_ = 0; //reset global unique counter
+    u_ = 1; //reset global unique counter
     fileBytes_ = 0;
     long testStartTime_mS = System.currentTimeMillis();
     try (SeekableByteChannel sbc = Files.newByteChannel(path, C, W, TE)) {
@@ -176,7 +176,7 @@ public class DemoImpl {
    */
   private long buildSketch() {
     rand = new Random(9001);
-    u_ = 0; //reset global unique counter
+    u_ = 1; //reset global unique counter
     long stLen = 0;
     long[] vArr = new long[batchSz_];
     long testTime_nS = 0;
@@ -230,7 +230,7 @@ public class DemoImpl {
   private long buildFileAndSketch() {
     println("## BUILD FILE AND SKETCH:");
     ByteBuffer byteBuf = ByteBuffer.allocate(byteBufCap_);
-    u_ = 0;
+    u_ = 1;
     fileBytes_ = 0;
     long testStartTime_mS = System.currentTimeMillis();
     try (SeekableByteChannel sbc = Files.newByteChannel(path, C, W, TE)) {
@@ -288,7 +288,7 @@ public class DemoImpl {
   private long nextValue() { 
     long out;
     if ( (rand.nextDouble() < uniquesFrac_) || (u_ <= 1)) {
-      out = ++u_; //unique
+      out = u_++; //unique
     } else {
       out = nextLong(0, u_); //duplicate
     }
