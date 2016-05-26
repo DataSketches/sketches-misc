@@ -12,9 +12,14 @@ import org.testng.annotations.Test;
 import com.yahoo.sketches.demo.UnixCmd;
 
 public class CommandLineTest {
-  private static String miscDir = "/Users/lrhodes/dev/git/sketches-misc/target/classes/";
-  private static String coreDir = "/Users/lrhodes/dev/git/sketches-core/target/classes/";
-  private static String classPath = miscDir+":"+coreDir;
+  private static String mver = "0.0.1";
+  private static String cver = "0.5.2";
+  private static String home = "/Users/lrhodes";
+  private static String miscCP = home +
+      "/.m2/repository/com/yahoo/datasketches/sketches-misc/"+mver+"/sketches-misc-"+mver+".jar";
+  private static String coreCP = home +
+      "/.m2/repository/com/yahoo/datasketches/sketches-core/"+cver+"/sketches-core-"+cver+".jar";
+  private static String classPath = miscCP+":"+coreCP;
   private static String CmdLine = " com.yahoo.sketches.cmd.CommandLine ";
   private static String sketch = "java -cp " + classPath + CmdLine;
   
@@ -40,7 +45,6 @@ public class CommandLineTest {
     args = new String[] {"freq","help"};
     cl = new CommandLine(disablePrint, args);
   }
-  
   
   @Test
   public void checkHelpViaUnix() {

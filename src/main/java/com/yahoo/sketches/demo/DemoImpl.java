@@ -44,7 +44,7 @@ public class DemoImpl {
   //Static constants
   private static final String LS = System.getProperty("line.separator");
   private static final byte LS_BYTE = LS.getBytes()[0];
-  private static Random rand = new Random();
+  private static Random rand = new Random(9001);
   private static StandardOpenOption C = StandardOpenOption.CREATE;
   private static StandardOpenOption W = StandardOpenOption.WRITE;
   private static StandardOpenOption TE = StandardOpenOption.TRUNCATE_EXISTING;
@@ -138,6 +138,7 @@ public class DemoImpl {
    */
   private long buildFile() {
     println("## BUILD FILE:");
+    rand = new Random(9001);
     ByteBuffer byteBuf = ByteBuffer.allocate(byteBufCap_);
     u_ = 0; //reset global unique counter
     fileBytes_ = 0;
@@ -174,6 +175,7 @@ public class DemoImpl {
    * @return total test time in milliseconds
    */
   private long buildSketch() {
+    rand = new Random(9001);
     u_ = 0; //reset global unique counter
     long stLen = 0;
     long[] vArr = new long[batchSz_];
