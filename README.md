@@ -1,3 +1,6 @@
+[![][travis img]][travis]
+[![][mavenbadge img]][mavenbadge] [![][versioneye img]][versioneye]
+
 # sketches-misc
 
 Demos, characterization testing and other code not related to production deployment.  
@@ -13,5 +16,11 @@ The core sketch library can be used from a command line with the simple CommandL
 This has limited utility as it can only be run on a single machine, while the DataSketches library 
 was primarily writen for large-scale distributed systems.
 
+[travis]:https://travis-ci.org//DataSketches/sketches-misc/builds?branch=master
+[travis img]:https://secure.travis-ci.org/DataSketches/sketches-misc.svg?branch=master
 
+[mavenbadge]:http://search.maven.org/#search|gav|1|g%3A%22com.yahoo.datasketches%22%20AND%20a%3A%22sketches-misc%22
+[mavenbadge img]:https://maven-badges.herokuapp.com/maven-central/com.yahoo.datasketches/sketches-misc/badge.svg
 
+[versioneye]:https://www.versioneye.com/user/projects/5751f0527757a00041b3a1fb
+[versioneye img]:https://www.versioneye.com/user/projects/5751f0527757a00041b3a1fb/badge.svg?style=flat
