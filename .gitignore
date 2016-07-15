@@ -12,7 +12,10 @@ bin/
 
 #Test output
 test-output/
-/.clover/
+.clover/
+local/
+reports/
+.pmd
 tmp/
 
 # Build artifacts
@@ -25,6 +28,7 @@ build.xml
 .idea
 *.iml
 *.properties
+*.releaseBackup
 
 # Jekyll
 Gemfile
