@@ -18,10 +18,10 @@ import java.io.InputStreamReader;
 import com.yahoo.sketches.theta.Sketches;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
-import com.yahoo.sketches.quantiles.QuantilesSketchBuilder;
-import com.yahoo.sketches.quantiles.QuantilesSketch;
-import com.yahoo.sketches.frequencies.FrequentItemsSketch;
-import com.yahoo.sketches.frequencies.FrequentLongsSketch.Row;
+import com.yahoo.sketches.quantiles.DoublesSketchBuilder;
+import com.yahoo.sketches.quantiles.DoublesSketch;
+import com.yahoo.sketches.frequencies.ItemsSketch;
+import com.yahoo.sketches.frequencies.LongsSketch.Row;
 import com.yahoo.sketches.frequencies.ErrorType;
 
 /**
@@ -131,8 +131,8 @@ public class CommandLine {
   }
   
   private void parseRank(String[] args) {
-    QuantilesSketchBuilder bldr = new QuantilesSketchBuilder();
-    QuantilesSketch sketch;
+    DoublesSketchBuilder bldr = new DoublesSketchBuilder();
+    DoublesSketch sketch;
     int argsCase = parseArgsCase(args);
     switch (argsCase) {
       case 1:
@@ -151,7 +151,7 @@ public class CommandLine {
     }
   }
   
-  private void doRank(BufferedReader br, QuantilesSketch sketch) {
+  private void doRank(BufferedReader br, DoublesSketch sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -172,8 +172,8 @@ public class CommandLine {
   }
   
   private void parseHist(String[] args) {
-    QuantilesSketchBuilder bldr = new QuantilesSketchBuilder();
-    QuantilesSketch sketch;
+    DoublesSketchBuilder bldr = new DoublesSketchBuilder();
+    DoublesSketch sketch;
     int argsCase = parseArgsCase(args);
     switch (argsCase) {
       case 1:
@@ -192,7 +192,7 @@ public class CommandLine {
     }
   }
   
-  private void doHist(BufferedReader br, QuantilesSketch sketch) {
+  private void doHist(BufferedReader br, DoublesSketch sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -221,8 +221,8 @@ public class CommandLine {
   }
   
   private void parseLogHist(String[] args) {
-    QuantilesSketchBuilder bldr = new QuantilesSketchBuilder();
-    QuantilesSketch sketch;
+    DoublesSketchBuilder bldr = new DoublesSketchBuilder();
+    DoublesSketch sketch;
     int argsCase = parseArgsCase(args);
     switch (argsCase) {
       case 1:
@@ -241,7 +241,7 @@ public class CommandLine {
     }
   }
   
-  private void doLogHist(BufferedReader br, QuantilesSketch sketch) {
+  private void doLogHist(BufferedReader br, DoublesSketch sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -271,29 +271,29 @@ public class CommandLine {
   }
   
   private void parseFreq(String[] args) {
-    FrequentItemsSketch<String> sketch;
+    ItemsSketch<String> sketch;
     int defaultSize = 1 << 17; //128K
     int argsCase = parseArgsCase(args);
     switch (argsCase) {
       case 1:
-        sketch = new FrequentItemsSketch<String>(defaultSize);
+        sketch = new ItemsSketch<String>(defaultSize);
         doFreq(getBR(null), sketch); break; //[default k], [System.in]
       case 2:
         freqHelp(); break; //help
       case 3: //2nd arg not numeric, must be a filename
-        sketch = new FrequentItemsSketch<String>(defaultSize);
+        sketch = new ItemsSketch<String>(defaultSize);
         doFreq(getBR(args[1]), sketch); break; //[default k], file
       case 4: //2nd arg is numeric, no filename
-        sketch = new FrequentItemsSketch<String>(Integer.parseInt(args[1])); //args[1] is numeric = k
+        sketch = new ItemsSketch<String>(Integer.parseInt(args[1])); //args[1] is numeric = k
         doFreq(getBR(null), sketch); //user k, [System.in]
         break;
       case 5: //3 valid args
-        sketch = new FrequentItemsSketch<String>(Integer.parseInt(args[1])); //args[1] is numeric = k
+        sketch = new ItemsSketch<String>(Integer.parseInt(args[1])); //args[1] is numeric = k
         doFreq(getBR(args[2]), sketch);
     }
   }
   
-  private void doFreq(BufferedReader br, FrequentItemsSketch<String> sketch) {
+  private void doFreq(BufferedReader br, ItemsSketch<String> sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
@@ -304,7 +304,7 @@ public class CommandLine {
       System.exit(1);
     }
     //NFP is a subset of NFN
-    FrequentItemsSketch<String>.Row[] rowArr = sketch.getFrequentItems(ErrorType.NO_FALSE_POSITIVES);
+    ItemsSketch.Row<String>[] rowArr = sketch.getFrequentItems(ErrorType.NO_FALSE_POSITIVES);
     int len = rowArr.length;
     println("Qualifying Rows: "+len);
     println(Row.getRowHeader());
@@ -313,13 +313,13 @@ public class CommandLine {
     }
   }
   
-  private static double[] getEvenSplits(QuantilesSketch sketch, int splitPoints) {
+  private static double[] getEvenSplits(DoublesSketch sketch, int splitPoints) {
     double min = sketch.getMinValue();
     double max = sketch.getMaxValue();
     return getSplits(min, max, splitPoints);
   }
   
-  private static double[] getLogSplits(QuantilesSketch sketch, int splitPoints) {
+  private static double[] getLogSplits(DoublesSketch sketch, int splitPoints) {
     double min = sketch.getMinValue();
     double max = sketch.getMaxValue();
     double logMin = log10(min);
