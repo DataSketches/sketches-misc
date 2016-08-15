@@ -10,15 +10,15 @@ import static com.yahoo.sketches.memory.UnsafeUtil.unsafe;
 import static java.lang.Math.pow;
 
 public final class MemoryPerformance {
-  private int arrLongs_;    //# entries in array
-  private int lgMinTrials_; //minimum # of trials
-  private int lgMaxTrials_; //maximum # of trials
-  private int lgMinLongs_;  //minimum array longs
-  private int lgMaxLongs_;  //maximum array longs
-  private int ppo_;         //points per octave of arrLongs (x-axis)
-  private int minGI_;     //min generating index
-  private int maxGI_;     //max generating index
-  private int lgMaxOps_;    //lgMaxLongs_ + lgMinTrials_
+  private int arrLongs_;     //# entries in array
+  private int lgMinTrials_;  //minimum # of trials
+  private int lgMaxTrials_;  //maximum # of trials
+  private int lgMinLongs_;   //minimum array longs
+  private int lgMaxLongs_;   //maximum array longs
+  private int ppo_;          //points per octave of arrLongs (x-axis)
+  private int minGI_;        //min generating index
+  private int maxGI_;        //max generating index
+  private int lgMaxOps_;     //lgMaxLongs_ + lgMinTrials_
   private long address_ = 0; //used for unsafe
   
   public MemoryPerformance() {
@@ -74,13 +74,13 @@ public final class MemoryPerformance {
       
       //Do all write trials at this array size point
       long sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) {
-        sumWriteTrials_nS += trial_HeapArrayByIndex(array, false); //a single trial write
+      for (int t=0; t<p.trials; t++) { //do writes first
+        sumWriteTrials_nS += trial_HeapArrayByIndex(array, p.arrLongs, false); //a single trial write
       }
       //Do all read trials at this array size point
       long sumReadTrials_nS  = 0;
       for (int t=0; t<p.trials; t++) {
-        sumReadTrials_nS += trial_HeapArrayByIndex(array, true); //a single trial read
+        sumReadTrials_nS += trial_HeapArrayByIndex(array, p.arrLongs, true); //a single trial read
       }
       //Print Results
       printOut(p.gi, sumReadTrials_nS, sumWriteTrials_nS, p.trials, p.arrLongs);
@@ -88,8 +88,7 @@ public final class MemoryPerformance {
   }
   
   //Must do writes first
-  private static final long trial_HeapArrayByIndex(long[] array, boolean read) {
-    int arrLongs = array.length;
+  private static final long trial_HeapArrayByIndex(long[] array, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
     long startTime_nS, stopTime_nS; 
     if (read) {
@@ -116,7 +115,6 @@ public final class MemoryPerformance {
   private void testNativeArrayByUnsafe() {
     println("LgLongs\tLongs\tTrials\t#Ops\tAvgRTrial_nS\tAvgROp_nS\tAvgWTrial_nS\tAvgWOp_nS");
     Point p = new Point(minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
-    address_ = 0L;
     while ((p = getNextPoint(p)) != null) {
       address_ = unsafe.allocateMemory(p.arrLongs << 3);
       //Do all write trials at this array size point
@@ -159,7 +157,8 @@ public final class MemoryPerformance {
   
   /*************************************/
   
-  private void printOut(int gi, long sumReadTrials_nS, long sumWriteTrials_nS, int trials, int arrLongs) {
+  private void printOut(int gi, long sumReadTrials_nS, long sumWriteTrials_nS, int trials, 
+      int arrLongs) {
     double logArrLongs = gi/(double)ppo_;
     double rTrial_nS = (double)sumReadTrials_nS/trials;
     double wTrial_nS = (double)sumWriteTrials_nS/trials;
