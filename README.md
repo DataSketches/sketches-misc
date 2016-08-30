@@ -9,8 +9,7 @@ This code is offered "as is".  It has been written mostly as "hacks" to get a pa
 does not have unit tests, and was never intended to survive the original objectives. 
 Nonetheless, some folks have found it useful.  If you find it useful, go for it. 
 
-### [Memory Performance Experiments](/docs/MemoryPerformance.html)
-
+### [Memory Performance Experiments](https://github.com/DataSketches/sketches-misc/blob/master/docs/MemoryPerformance.html)
 
 ### "sketch" Command Line Capability
 
