@@ -2,7 +2,7 @@
 
 # Memory Performance
 
-<img style="display: block; margin-left: auto; margin-right: auto; width: 400px; background-repeat: no-repeat;" src="img/Read_C_Java_Unsafe.png" alt="img/Read_C_Java_Unsafe.png" />
+<img style="max-width:50%;" src="img/Read_C_Java_Unsafe.png" alt="img/Read_C_Java_Unsafe.png"></img>
 
 
 
