@@ -1,6 +1,6 @@
 # Memory Performance
 
-## 
+## Results Summary
 
 The performance tests were very simple: the write test stores longs of 0 to k-1 into arrays of size k where k varied from 2^5 to 2^26.
 The read test then read those longs from those arrays. A trial consisted of the tight loop that filled or read the entire array.
@@ -78,21 +78,44 @@ and not sacrifice the nice features that the package provides.
 
 
 
+## Running the Code
+
+The code for this suite of tests is located in com.yahoo.sketches.memory package and the program with main is MemoryPerformance.
+This program runs the java based tests.  The C code tests are run separately.
+
+The program is configured in two places:
+
+1. Lines 30 to 36 configure 5 running parameters:
+  * LgMinTrials, log-base2 of the minimum number of trials to be run at any single test point, which is an array size in longs.
+  * LgMaxTrials, log-base2 of the maximum number of trials to be run at any single test point, which is an array size in longs.
+  * LgMinLongs,  log-base2 of the minimum array size, in # of longs, to be tested.
+  * LgMaxLongs,  log-base2 of the maximum array size, in # of longs, to be tested.
+  * ppo = the number of points per octave (factor of 2).  This determines how fine grained are the array sizes. 
+  If ppo = 1, the array sizes will increment by factors of 2:  32, 64, 128, ...
+  If ppo = 4, the array sizes will increment by factors of fourth-root of 2 or 2^(1/4).
+  If ppo = 0.5 the array sizes will increment by factors of 2^2 or 4:  32, 128, ...
+  If plotted on a log-axis, these points will be evenly spaced.
+  
+2. The actual tests to be run are configured in the go() method, line 869.  Comment out tests that you don't care about. 
+
+The first two tests under go() test the long[] access on heap, and then direct calls to Unsafe.
+
+The next four tests under go() test the ByteBuffer and LongBuffer performance.
+
+The next two tests under go() test the current implementation of the Memory package.
+
+The remaining tests under go() test variations of Memory that is in the FastMemory class in the same package.
+
+The actual timings reflect, of course, the actual R/W time plus some minimal amout of work that I think needs to be done so that the JIT optimizer doesn't eliminate the entire loop. 
+For the on-heap long[] array access, it is a simple addition. For the Unsafe it is a simple addition and a shift. 
+I have tried putting the effect of the shift into the for loop, but the result was slower.
+
+I don't know how to make the timing loops any simpler! 
+
+So my claim is not that these timings are the *actual* R/W access times but comparison across the different access methods should be relatively correct.
 
 
-
-
-
-
-
-
-
-
-
-
-
-
-### Measurement System
+## Measurement System
   Model Name:	MacBook Pro<br>
   Model Identifier:	MacBookPro10,1<br>
   Processor Name:	Intel Core i7<br>
