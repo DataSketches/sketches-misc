@@ -106,7 +106,7 @@ The next two tests under go() test the current implementation of the Memory pack
 
 The remaining tests under go() test variations of Memory that is in the FastMemory class in the same package.
 
-The actual timings reflect, of course, the actual R/W time plus some minimal amout of work that I think needs to be done so that the JIT optimizer doesn't eliminate the entire loop. 
+The actual timings reflect, of course, the actual R/W time plus some minimal amount of work that I think needs to be done so that the JIT optimizer doesn't eliminate the entire loop. 
 For the on-heap long[] array access, it is a simple addition. For the Unsafe it is a simple addition and a shift. 
 I have tried putting the effect of the shift into the for loop, but the result was slower.
 
@@ -114,6 +114,7 @@ I don't know how to make the timing loops any simpler!
 
 So my claim is not that these timings are the *actual* R/W access times but comparison across the different access methods should be relatively correct.
 
+The Excel spreadsheet in the docs folder has all the raw data for all the tests.
 
 ## Measurement System
   Model Name:	MacBook Pro<br>
