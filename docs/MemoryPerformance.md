@@ -1,5 +1,4 @@
 <style>
-<!--
 .doc-img-full {
   display: block; 
   margin: 0 auto;
@@ -22,7 +21,6 @@
   width: 200px;
   background-repeat: no-repeat;
 }
--->
 </style>
 
 # Memory Performance
