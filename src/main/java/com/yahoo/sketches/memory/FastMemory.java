@@ -137,6 +137,42 @@ public class FastMemory {
     unsafe.putLong(rawAddress, value);
   }
 
+  //NEW: No Interface, Static, Final, PASS FastMemory
+  public static final long getLong_ISF(FastMemory mem, long offsetBytes) {
+    long capBytes = mem.capacityBytes_;
+    assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capBytes);
+    long add = mem.getAddress(offsetBytes);
+    return unsafe.getLong(mem.memArray_, add);
+  }
+
+  //NEW: No Interface, Static, Final, PASS FastMemory
+  public static final void putLong_ISF(FastMemory mem, long offsetBytes, long srcValue) {
+    long capBytes = mem.capacityBytes_;
+    assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capBytes);
+    long add = mem.getAddress(offsetBytes);
+    unsafe.putLong(mem.memArray_, add, srcValue);
+  }
+  
+  //NEW: No Interface, Static, Final, PASS All
+  public static final long getLong_ISF2(Object array, long objectBaseOffset, 
+      long nativeRawStartAddress, long capacityBytes, long offsetBytes) {
+    assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes);
+    assert (nativeRawStartAddress > 0) ^ (objectBaseOffset > 0); //only one must be zero
+    assert (nativeRawStartAddress > 0) ^ (array != null); //only one must exist
+    long add = nativeRawStartAddress + objectBaseOffset + offsetBytes;
+    return unsafe.getLong(array, add);
+  }
+
+  //NEW: No Interface, Static, Final, PASS All
+  public static final void putLong_ISF2(Object array, long objectBaseOffset, 
+      long nativeRawStartAddress, long capacityBytes, long offsetBytes, long srcValue) {
+    assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes);
+    assert (nativeRawStartAddress > 0) ^ (objectBaseOffset > 0); //only one must be zero
+    assert (nativeRawStartAddress > 0) ^ (array != null); //only one must exist
+    long add = nativeRawStartAddress + objectBaseOffset + offsetBytes;
+    unsafe.putLong(array, add, srcValue);
+  }
+  
   //Non-data Memory interface methods
 
   public final long getAddress(final long offsetBytes) {
