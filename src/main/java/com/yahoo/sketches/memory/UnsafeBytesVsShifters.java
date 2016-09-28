@@ -1,14 +1,15 @@
 /*
- * Copyright 2016, Yahoo! Inc. Licensed under the terms of the 
+ * Copyright 2016, Yahoo! Inc. Licensed under the terms of the
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
 package com.yahoo.sketches.memory;
 
+import static com.yahoo.sketches.TestingUtil.milliSecToString;
 import static com.yahoo.sketches.memory.UnsafeUtil.unsafe;
 import static java.lang.Math.pow;
 
-import static com.yahoo.sketches.memory.MemoryPerformance.*;
+//import static com.yahoo.sketches.memory.MemoryPerformance.*;
 
 
 public class UnsafeBytesVsShifters {
@@ -22,7 +23,7 @@ public class UnsafeBytesVsShifters {
   private double maxGI_;     //max generating index
   private int lgMaxOps_;     //lgMaxLongs_ + lgMinTrials_
   private long address_ = 0; //used for unsafe
-  
+
   public UnsafeBytesVsShifters() {
     //Configure
     lgMinTrials_ = 10;  //was 6
@@ -35,7 +36,7 @@ public class UnsafeBytesVsShifters {
     maxGI_ = ppo_ * lgMaxLongs_;
     minGI_ = ppo_ * lgMinLongs_;
   }
-  
+
   private static class Point {
     double ppo;
     double gi;
@@ -43,18 +44,18 @@ public class UnsafeBytesVsShifters {
     int trials;
     long sumReadTrials_nS = 0;
     long sumWriteTrials_nS = 0;
-    
+
     Point(double ppo, double gi, int arrLongs, int trials) {
       this.ppo = ppo;
       this.gi = gi;
       this.arrLongs = arrLongs;
       this.trials = trials;
     }
-    
+
     public static void printHeader() {
       println("LgLongs\tLongs\tTrials\t#Ops\tAvgRTrial_nS\tAvgROp_nS\tAvgWTrial_nS\tAvgWOp_nS");
     }
-    
+
     public void printRow() {
       long numOps = (long)((double)trials * arrLongs);
       double logArrLongs = gi/ppo;
@@ -63,12 +64,12 @@ public class UnsafeBytesVsShifters {
       double rOp_nS = rTrial_nS/arrLongs;
       double wOp_nS = wTrial_nS/arrLongs;
       //Print
-      String out = String.format("%6.2f\t%d\t%d\t%d\t%.1f\t%8.3f\t%.1f\t%8.3f", 
+      String out = String.format("%6.2f\t%d\t%d\t%d\t%.1f\t%8.3f\t%.1f\t%8.3f",
           logArrLongs, arrLongs, trials, numOps, rTrial_nS, rOp_nS, wTrial_nS, wOp_nS);
       println(out);
     }
   }
-  
+
   private Point getNextPoint(Point p) {
     int lastArrLongs = (int)pow(2.0, p.gi/ppo_);
     int nextArrLongs;
@@ -84,11 +85,11 @@ public class UnsafeBytesVsShifters {
     p.trials = (int)pow(2.0, logTrials);
     return p;
   }
-  
+
   /*************************************/
   // UNSAFE BYTE
   /*************************************/
-  
+
   private void testUnsafeByte() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -108,11 +109,11 @@ public class UnsafeBytesVsShifters {
       freeMemory();
     }
   }
-  
+
 //Must do writes first
   private static final long trial_UnsafeByte(long address, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -153,11 +154,11 @@ public class UnsafeBytesVsShifters {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   // BYTES VIA SHIFTERS
   /*************************************/
-  
+
   private void testBytesByShifters() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -177,11 +178,11 @@ public class UnsafeBytesVsShifters {
       freeMemory();
     }
   }
-  
+
 //Must do writes first
   private static final long trial_BytesByShifters(long address, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -225,16 +226,16 @@ public class UnsafeBytesVsShifters {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
-  
+
   private final void freeMemory() {
     if (address_ != 0) {
       unsafe.freeMemory(address_);
       address_ = 0L;
     }
   }
-  
+
   /**
    * If the JVM calls this method and a "freeMemory() has not been called" a <i>System.err</i>
    * message will be logged.
@@ -242,7 +243,7 @@ public class UnsafeBytesVsShifters {
   @Override
   protected void finalize() {
     if (address_ > 0L) {
-      System.err.println("ERROR: freeMemory() has not been called: Address: " + address_ 
+      System.err.println("ERROR: freeMemory() has not been called: Address: " + address_
         + ", capacity: " + (arrLongs_ << 3));
       java.lang.StackTraceElement[] arr = Thread.currentThread().getStackTrace();
       for (int i = 0; i < arr.length; i++) {
@@ -252,7 +253,7 @@ public class UnsafeBytesVsShifters {
       address_ = 0L;
     }
   }
-  
+
   public void go() {
     long startMillis = System.currentTimeMillis();
     println("Test Unsafe Byte");
@@ -262,12 +263,12 @@ public class UnsafeBytesVsShifters {
     long testMillis = System.currentTimeMillis() - startMillis;
     println("Total Time: "+ milliSecToString(testMillis));
   }
-  
+
   //MAIN
   public static void main(String[] args) {
     UnsafeBytesVsShifters test = new UnsafeBytesVsShifters();
     test.go();
   }
-  
+
   public static void println(String s) {System.out.println(s); }
 }

@@ -1,15 +1,15 @@
 /*
- * Copyright 2016, Yahoo! Inc. Licensed under the terms of the 
+ * Copyright 2016, Yahoo! Inc. Licensed under the terms of the
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
 package com.yahoo.sketches.memory;
 
-import static com.yahoo.sketches.Util.zeroPad;
-import static com.yahoo.sketches.memory.UnsafeUtil.unsafe;
+import static com.yahoo.sketches.TestingUtil.milliSecToString;
 import static com.yahoo.sketches.memory.UnsafeUtil.ARRAY_LONG_BASE_OFFSET;
-import static com.yahoo.sketches.memory.UnsafeUtil.ARRAY_BYTE_BASE_OFFSET;
+import static com.yahoo.sketches.memory.UnsafeUtil.unsafe;
 import static java.lang.Math.pow;
+
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.LongBuffer;
@@ -26,7 +26,7 @@ public final class MemoryPerformance {
   private double maxGI_;     //max generating index
   private int lgMaxOps_;     //lgMaxLongs_ + lgMinTrials_
   private long address_ = 0; //used for unsafe
-  
+
   public MemoryPerformance() {
     //Configure
     lgMinTrials_ = 6;  //was 6
@@ -38,9 +38,9 @@ public final class MemoryPerformance {
     lgMaxOps_ = lgMaxLongs_ + lgMinTrials_;
     maxGI_ = ppo_ * lgMaxLongs_;
     minGI_ = ppo_ * lgMinLongs_;
-    
+
   }
-  
+
   private static class Point {
     double ppo;
     double gi;
@@ -48,18 +48,18 @@ public final class MemoryPerformance {
     int trials;
     long sumReadTrials_nS = 0;
     long sumWriteTrials_nS = 0;
-    
+
     Point(double ppo, double gi, int arrLongs, int trials) {
       this.ppo = ppo;
       this.gi = gi;
       this.arrLongs = arrLongs;
       this.trials = trials;
     }
-    
+
     public static void printHeader() {
       println("LgLongs\tLongs\tTrials\t#Ops\tAvgRTrial_nS\tAvgROp_nS\tAvgWTrial_nS\tAvgWOp_nS");
     }
-    
+
     public void printRow() {
       long numOps = (long)((double)trials * arrLongs);
       double logArrLongs = gi/ppo;
@@ -68,12 +68,12 @@ public final class MemoryPerformance {
       double rOp_nS = rTrial_nS/arrLongs;
       double wOp_nS = wTrial_nS/arrLongs;
       //Print
-      String out = String.format("%6.2f\t%d\t%d\t%d\t%.1f\t%8.3f\t%.1f\t%8.3f", 
+      String out = String.format("%6.2f\t%d\t%d\t%d\t%.1f\t%8.3f\t%.1f\t%8.3f",
           logArrLongs, arrLongs, trials, numOps, rTrial_nS, rOp_nS, wTrial_nS, wOp_nS);
       println(out);
     }
   }
-  
+
   private Point getNextPoint(Point p) {
     int lastArrLongs = (int)pow(2.0, p.gi/ppo_);
     int nextArrLongs;
@@ -89,11 +89,11 @@ public final class MemoryPerformance {
     p.trials = (int)pow(2.0, logTrials);
     return p;
   }
-  
+
   /*************************************/
   // JAVA HEAP
   /*************************************/
-  
+
   private void testHeapArrayByIndex() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -109,15 +109,15 @@ public final class MemoryPerformance {
       for (int t=0; t<p.trials; t++) {
         p.sumReadTrials_nS += trial_HeapArrayByIndex(array, p.arrLongs, true); //a single trial read
       }
-      
+
       p.printRow();
     }
   }
-  
+
   //Must do write trial first
   private static final long trial_HeapArrayByIndex(long[] array, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -134,11 +134,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  UNSAFE DIRECT
   /*************************************/
-  
+
   private void testNativeArrayByUnsafe() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -158,11 +158,11 @@ public final class MemoryPerformance {
       freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_NativeArrayByUnsafe(long address, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -180,11 +180,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  BYTE BUFFER
   /*************************************/
-  
+
   private void testByteBufferHeap() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -204,11 +204,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_ByteBufferHeap(ByteBuffer buf, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -225,7 +225,7 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   private void testByteBufferDirect() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -245,11 +245,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_ByteBufferDirect(ByteBuffer buf, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -266,11 +266,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  LONG BUFFER
   /*************************************/
-  
+
   private void testLongBufferHeap() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -291,11 +291,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_LongBufferHeap(LongBuffer buf, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -312,7 +312,7 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   private void testLongBufferDirect() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -333,11 +333,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_LongBufferDirect(LongBuffer buf, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -354,11 +354,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  NATIVE MEMORY FROM LIBRARY
   /*************************************/
-  
+
   private void testMemoryHeap() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -378,11 +378,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_MemoryHeap(NativeMemory mem, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -399,8 +399,8 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
+
+
   private void testMemoryDirect() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -420,11 +420,11 @@ public final class MemoryPerformance {
       mem.freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_MemoryDirect(NativeMemory mem, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -441,11 +441,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  FAST MEMORY, NO INTERFACE
   /*************************************/
-  
+
   private void testFastMemoryHeap_I() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -465,11 +465,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryHeap_I(FastMemory mem, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -486,8 +486,8 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
+
+
   private void testFastMemoryDirect_I() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -507,11 +507,11 @@ public final class MemoryPerformance {
       mem.freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryDirect_I(FastMemory mem, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -528,11 +528,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  FAST MEMORY, NO INTERFACE, NO ASSERTS
   /*************************************/
-  
+
   private void testFastMemoryHeap_IA() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -552,11 +552,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryHeap_IA(FastMemory mem, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -573,8 +573,8 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
+
+
   private void testFastMemoryDirect_IA() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -594,11 +594,11 @@ public final class MemoryPerformance {
       mem.freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryDirect_IA(FastMemory mem, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -615,12 +615,12 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
+
+
   /*************************************/
   //  FAST MEMORY, NO INTERFACE, NO ASSERTS, STATIC
   /*************************************/
-  
+
   private void testFastMemoryHeap_IAS() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -640,11 +640,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryHeap_IAS(long[] array, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -661,8 +661,8 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
+
+
   private void testFastMemoryDirect_IAS() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -682,7 +682,7 @@ public final class MemoryPerformance {
       mem.freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryDirect_IAS(FastMemory mem, int arrLongs, boolean read) {
     final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
@@ -704,11 +704,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  FAST MEMORY, NO INTERFACE, NO ASSERTS, STATIC, FINAL
   /*************************************/
-  
+
   private void testFastMemoryHeap_IASF() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -728,11 +728,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryHeap_IASF(long[] array, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
@@ -749,8 +749,8 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
+
+
   private void testFastMemoryDirect_IASF() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -770,7 +770,7 @@ public final class MemoryPerformance {
       mem.freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryDirect_IASF(FastMemory mem, int arrLongs, boolean read) {
     final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
@@ -792,11 +792,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  FAST MEMORY, NO INTERFACE, NO ASSERTS, STATIC, FINAL, No Object, For DirectOnly
   /*************************************/
-  
+
   private void testFastMemoryDirect_IASFO() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -816,7 +816,7 @@ public final class MemoryPerformance {
       mem.freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryDirect_IASFO(FastMemory mem, int arrLongs, boolean read) {
     final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
@@ -838,11 +838,11 @@ public final class MemoryPerformance {
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  NEW FAST MEMORY, NO INTERFACE, STATIC, FINAL, PASS FAST MEMORY
   /*************************************/
-  
+
   private void testFastMemoryHeap_ISF() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -862,16 +862,16 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryHeap_ISF(FastMemory mem, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { 
+      for (int i=0; i<arrLongs; i++) {
         trialSum += FastMemory.getLong_ISF(mem, (i << 3));
       }
       stopTime_nS = System.nanoTime();
@@ -880,15 +880,15 @@ public final class MemoryPerformance {
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { 
-        FastMemory.putLong_ISF(mem, (i << 3), i); 
+      for (int i=0; i<arrLongs; i++) {
+        FastMemory.putLong_ISF(mem, (i << 3), i);
       }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
+
+
   private void testFastMemoryDirect_ISF() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -908,7 +908,7 @@ public final class MemoryPerformance {
       mem.freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryDirect_ISF(FastMemory mem, int arrLongs, boolean read) {
     final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
@@ -918,8 +918,8 @@ public final class MemoryPerformance {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { 
-        trialSum += FastMemory.getLong_ISF(mem, (i << 3)); 
+      for (int i=0; i<arrLongs; i++) {
+        trialSum += FastMemory.getLong_ISF(mem, (i << 3));
       }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
@@ -927,18 +927,18 @@ public final class MemoryPerformance {
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { 
-        FastMemory.putLong_ISF(mem, (i << 3), i); 
+      for (int i=0; i<arrLongs; i++) {
+        FastMemory.putLong_ISF(mem, (i << 3), i);
       }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
   }
-  
+
   /*************************************/
   //  NEW FAST MEMORY, NO INTERFACE, STATIC, FINAL, PASS ALL
   /*************************************/
-  
+
   private void testFastMemoryHeap_ISF2() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -958,11 +958,11 @@ public final class MemoryPerformance {
       p.printRow();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryHeap_ISF2(FastMemory mem, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    long startTime_nS, stopTime_nS; 
+    long startTime_nS, stopTime_nS;
     Object array = mem.memArray_;
     long objectBaseOffset = mem.objectBaseOffset_;
     long nativeRawStartAddress = mem.nativeRawStartAddress_;
@@ -972,7 +972,7 @@ public final class MemoryPerformance {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (long i=0; i<arrLongs; i++) { 
+      for (long i=0; i<arrLongs; i++) {
         trialSum += FastMemory.getLong_ISF2(
             array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3));
       }
@@ -982,16 +982,16 @@ public final class MemoryPerformance {
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (long i=0; i<arrLongs; i++) { 
+      for (long i=0; i<arrLongs; i++) {
         FastMemory.putLong_ISF2(
-            array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3), i); 
+            array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3), i);
       }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
+
+
   private void testFastMemoryDirect_ISF2() {
     Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
     Point.printHeader();
@@ -1011,7 +1011,7 @@ public final class MemoryPerformance {
       mem.freeMemory();
     }
   }
-  
+
   //Must do writes first
   private static final long trial_FastMemoryDirect_ISF2(FastMemory mem, int arrLongs, boolean read) {
     final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
@@ -1021,14 +1021,14 @@ public final class MemoryPerformance {
     long objectBaseOffset = mem.objectBaseOffset_;
     long nativeRawStartAddress = mem.nativeRawStartAddress_;
     long capacityBytes = mem.capacityBytes_;
-    
+
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { 
+      for (int i=0; i<arrLongs; i++) {
         trialSum += FastMemory.getLong_ISF2(
-            array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3)); 
+            array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3));
       }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
@@ -1036,27 +1036,27 @@ public final class MemoryPerformance {
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { 
+      for (int i=0; i<arrLongs; i++) {
         FastMemory.putLong_ISF2(
-            array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3), i); 
+            array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3), i);
       }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
   }
-  
-  
-  
-  
+
+
+
+
   /*************************************/
-  
+
   private final void freeMemory() {
     if (address_ != 0) {
       unsafe.freeMemory(address_);
       address_ = 0L;
     }
   }
-  
+
   /**
    * If the JVM calls this method and a "freeMemory() has not been called" a <i>System.err</i>
    * message will be logged.
@@ -1064,7 +1064,7 @@ public final class MemoryPerformance {
   @Override
   protected void finalize() {
     if (address_ > 0L) {
-      System.err.println("ERROR: freeMemory() has not been called: Address: " + address_ 
+      System.err.println("ERROR: freeMemory() has not been called: Address: " + address_
         + ", capacity: " + (arrLongs_ << 3));
       java.lang.StackTraceElement[] arr = Thread.currentThread().getStackTrace();
       for (int i = 0; i < arr.length; i++) {
@@ -1074,7 +1074,7 @@ public final class MemoryPerformance {
       address_ = 0L;
     }
   }
-  
+
   public void go() {
     long startMillis = System.currentTimeMillis();
 //    println("Test Long Array On Heap");
@@ -1111,21 +1111,21 @@ public final class MemoryPerformance {
 //    testFastMemoryDirect_IASF();
 //    println("\nTest FastStaticMemory Direct, IASFO");
 //    testFastMemoryDirect_IASFO();
-    
+
 //    println("\nTest FastMemory Heap, ISF, Pass FastMemory");
 //    testFastMemoryHeap_ISF();
 //    println("\nTest FastStaticMemory Direct, ISF, Pass FastMemroy");
 //    testFastMemoryDirect_ISF();
-    
+
     println("\nTest FastMemory Heap, ISF, Pass All");
     testFastMemoryHeap_ISF2();
     println("\nTest FastStaticMemory Direct, ISF, Pass All");
     testFastMemoryDirect_ISF2();
-    
+
     long testMillis = System.currentTimeMillis() - startMillis;
     println("Total Time: "+ milliSecToString(testMillis));
   }
-  
+
   //MAIN
   public static void main(String[] args) {
     MemoryPerformance test = new MemoryPerformance();
@@ -1133,49 +1133,49 @@ public final class MemoryPerformance {
     //testMilliSec();
     //testNanoSec();
   }
-  
+
   //Handy utils
-  
-  public static void testMilliSec() {
-    int hr = 1;
-    int min = 23;
-    int sec = 45;
-    int mS = 678;
-    long mSec = mS + 1000*sec + 60000*min + 3600000*hr;
-    println(milliSecToString(mSec));
-  }
-  
-  public static void testNanoSec() {
-    int sec = 98;
-    int mS = 765;
-    int uS = 432;
-    int nS = 123;
-    long nSec = nS + 1000*uS + 1000000*mS + 1000000000L*sec;
-    println(nanoSecToString(nSec));
-  }
-  
-  public static String nanoSecToString(long nS) {
-    long rem_nS = (long)(nS % 1000.0);
-    long rem_uS = (long)((nS / 1000.0) % 1000.0);
-    long rem_mS = (long)((nS / 1000000.0) % 1000.0);
-    long sec    = (long)(nS / 1000000000.0);
-    String nSstr = zeroPad(Long.toString(rem_nS), 3);
-    String uSstr = zeroPad(Long.toString(rem_uS), 3);
-    String mSstr = zeroPad(Long.toString(rem_mS), 3);
-    return String.format("%d.%3s %3s %3s", sec, mSstr, uSstr, nSstr);
-  }
-  
-  public static String milliSecToString(long mS) {
-    long rem_mS = (long)(mS % 1000.0);
-    long rem_sec = (long)((mS / 1000.0) % 60.0);
-    long rem_min = (long)((mS / 60000.0) % 60.0);
-    long hr  =     (long)(mS / 3600000.0);
-    String mSstr = zeroPad(Long.toString(rem_mS), 3);
-    String secStr = zeroPad(Long.toString(rem_sec), 2);
-    String minStr = zeroPad(Long.toString(rem_min), 2);
-    return String.format("%d:%2s:%2s.%3s", hr, minStr, secStr, mSstr);
-  }
-  
+
+//  public static void testMilliSec() {
+//    int hr = 1;
+//    int min = 23;
+//    int sec = 45;
+//    int mS = 678;
+//    long mSec = mS + 1000*sec + 60000*min + 3600000*hr;
+//    println(milliSecToString(mSec));
+//  }
+//
+//  public static void testNanoSec() {
+//    int sec = 98;
+//    int mS = 765;
+//    int uS = 432;
+//    int nS = 123;
+//    long nSec = nS + 1000*uS + 1000000*mS + 1000000000L*sec;
+//    println(nanoSecToString(nSec));
+//  }
+//
+//  public static String nanoSecToString(long nS) {
+//    long rem_nS = (long)(nS % 1000.0);
+//    long rem_uS = (long)((nS / 1000.0) % 1000.0);
+//    long rem_mS = (long)((nS / 1000000.0) % 1000.0);
+//    long sec    = (long)(nS / 1000000000.0);
+//    String nSstr = zeroPad(Long.toString(rem_nS), 3);
+//    String uSstr = zeroPad(Long.toString(rem_uS), 3);
+//    String mSstr = zeroPad(Long.toString(rem_mS), 3);
+//    return String.format("%d.%3s %3s %3s", sec, mSstr, uSstr, nSstr);
+//  }
+//
+//  public static String milliSecToString(long mS) {
+//    long rem_mS = (long)(mS % 1000.0);
+//    long rem_sec = (long)((mS / 1000.0) % 60.0);
+//    long rem_min = (long)((mS / 60000.0) % 60.0);
+//    long hr  =     (long)(mS / 3600000.0);
+//    String mSstr = zeroPad(Long.toString(rem_mS), 3);
+//    String secStr = zeroPad(Long.toString(rem_sec), 2);
+//    String minStr = zeroPad(Long.toString(rem_min), 2);
+//    return String.format("%d:%2s:%2s.%3s", hr, minStr, secStr, mSstr);
+//  }
+
   public static void println(String s) {System.out.println(s); }
-  
+
 }
