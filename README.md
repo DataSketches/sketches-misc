@@ -9,6 +9,10 @@ This code is offered "as is".  It has been written mostly as "hacks" to get a pa
 does not have unit tests, and was never intended to survive the original objectives. 
 Nonetheless, some folks have found it useful.  If you find it useful, go for it. 
 
+This project may not build due to being out-of-sync with the released versions of other DataSketches repositories. 
+This is a temporary condition, so please be patient :) .  
+You may have better luck if you build this and the dependent repository snapshot together. 
+
 ### [Memory Performance Experiments](https://github.com/DataSketches/sketches-misc/blob/master/docs/MemoryPerformance.md)
 
 ### "sketch" Command Line Capability
