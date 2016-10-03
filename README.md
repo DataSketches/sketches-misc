@@ -10,7 +10,7 @@ does not have unit tests, and was never intended to survive the original objecti
 Nonetheless, some folks have found it useful.  If you find it useful, go for it. 
 
 This project may not build due to being out-of-sync with the released versions of other DataSketches repositories. 
-This is a temporary condition, so please be patient :) .  
+Additionally, this project may depend on methods in the test branch of other DataSketches repositories which are not included in jar releases.
 You may have better luck if you build this and the dependent repository snapshot together. 
 
 ### [Memory Performance Experiments](https://github.com/DataSketches/sketches-misc/blob/master/docs/MemoryPerformance.md)
