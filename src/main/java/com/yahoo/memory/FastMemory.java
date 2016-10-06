@@ -1,14 +1,22 @@
 /*
- * Copyright 2016, Yahoo! Inc. Licensed under the terms of the 
+ * Copyright 2016, Yahoo! Inc. Licensed under the terms of the
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.memory;
+package com.yahoo.memory;
 
-import static com.yahoo.sketches.memory.UnsafeUtil.*;
+import static com.yahoo.memory.UnsafeUtil.ARRAY_BYTE_BASE_OFFSET;
+import static com.yahoo.memory.UnsafeUtil.ARRAY_LONG_BASE_OFFSET;
+import static com.yahoo.memory.UnsafeUtil.ARRAY_LONG_INDEX_SCALE;
+import static com.yahoo.memory.UnsafeUtil.LONG_SHIFT;
+import static com.yahoo.memory.UnsafeUtil.LS;
+import static com.yahoo.memory.UnsafeUtil.assertBounds;
+import static com.yahoo.memory.UnsafeUtil.unsafe;
 
 import java.nio.ByteBuffer;
 
+import com.yahoo.memory.MemoryRequest;
+import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.SketchesArgumentException;
 
 //@SuppressWarnings({"unused", "restriction"})
@@ -29,14 +37,19 @@ public class FastMemory {
   }
 
   public FastMemory(NativeMemory mem) {
-    this.objectBaseOffset_ = mem.objectBaseOffset_;
-    this.memArray_ = mem.memArray_;
-    this.byteBuf_ = mem.byteBuf_;
-    this.nativeRawStartAddress_ = mem.nativeRawStartAddress_;
-    this.capacityBytes_ = mem.capacityBytes_;
-    this.memReq_ = mem.memReq_;
+    this.memArray_ = mem.array();
+    if (memArray_ == null) {
+      this.objectBaseOffset_ = 0L;
+      this.nativeRawStartAddress_ = mem.getAddress(0L);
+    } else {
+      this.objectBaseOffset_ = mem.getAddress(0L);
+      this.nativeRawStartAddress_ = 0L;
+    }
+    this.byteBuf_ = mem.byteBuffer();
+    this.capacityBytes_ = mem.getCapacity();
+    this.memReq_ = mem.getMemoryRequest();
   }
-  
+
   /**
    * Provides access to the given byteArray using Memory interface
    * @param byteArray an on-heap byte array
@@ -50,13 +63,13 @@ public class FastMemory {
     nativeRawStartAddress_ = 0L;
     capacityBytes_ = byteArray.length;
   }
-  
+
   /**
    * Provides access to the given longArray using Memory interface
    * @param longArray an on-heap long array
    */
   public FastMemory(long[] longArray) {
-    this(ARRAY_LONG_BASE_OFFSET, longArray, null); 
+    this(ARRAY_LONG_BASE_OFFSET, longArray, null);
     if ((longArray == null) || (longArray.length == 0)) {
       throw new SketchesArgumentException(
           "Array must must not be null and have a length greater than zero.");
@@ -64,7 +77,7 @@ public class FastMemory {
     nativeRawStartAddress_ = 0L;
     capacityBytes_ = longArray.length << LONG_SHIFT;
   }
-  
+
   /**
    * Provides access to the backing store of the given ByteBuffer using Memory interface
    * @param byteBuf the given ByteBuffer
@@ -75,7 +88,7 @@ public class FastMemory {
       memArray_ = null;
       byteBuf_ = byteBuf;
       nativeRawStartAddress_ = ((sun.nio.ch.DirectBuffer)byteBuf).address();
-    } 
+    }
     else { //must have array
       objectBaseOffset_ = ARRAY_BYTE_BASE_OFFSET;
       memArray_ = byteBuf.array();
@@ -96,7 +109,7 @@ public class FastMemory {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes_);
     unsafe.putLong(memArray_, getAddress(offsetBytes), srcValue);
   }
-  
+
   //No Interface, No Asserts
   public long getLong_IA(long offsetBytes) {
     return unsafe.getLong(memArray_, getAddress(offsetBytes));
@@ -106,32 +119,32 @@ public class FastMemory {
   public void putLong_IA(long offsetBytes, long srcValue) {
     unsafe.putLong(memArray_, getAddress(offsetBytes), srcValue);
   }
-  
+
   //No Interface, No Asserts, Static
   public static long getLong_IAS(Object array, long rawAddress) {
     return unsafe.getLong(array, rawAddress);
   }
-  
+
   //No Interface, No Asserts, Static
   public static void putLong_IAS(Object array, long rawAddress, long value) {
     unsafe.putLong(array, rawAddress, value);
   }
-  
+
   //No Interface, No Asserts, Static, Final
   public static final long getLong_IASF(Object array, long rawAddress) {
     return unsafe.getLong(array, rawAddress);
   }
-  
+
   //No Interface, No Asserts, Static, Final
   public static final void putLong_IASF(Object array, long rawAddress, long value) {
     unsafe.putLong(array, rawAddress, value);
   }
-  
+
   //No Interface, No Asserts, Static, Final, no Object, For Direct Only
   public static final long getLong_IASFO(long rawAddress) {
     return unsafe.getLong(rawAddress);
   }
-  
+
   //No Interface, No Asserts, Static, Final, no Object, For Direct Only
   public static final void putLong_IASFO(long rawAddress, long value) {
     unsafe.putLong(rawAddress, value);
@@ -152,9 +165,9 @@ public class FastMemory {
     long add = mem.getAddress(offsetBytes);
     unsafe.putLong(mem.memArray_, add, srcValue);
   }
-  
+
   //NEW: No Interface, Static, Final, PASS All
-  public static final long getLong_ISF2(Object array, long objectBaseOffset, 
+  public static final long getLong_ISF2(Object array, long objectBaseOffset,
       long nativeRawStartAddress, long capacityBytes, long offsetBytes) {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes);
     assert (nativeRawStartAddress > 0) ^ (objectBaseOffset > 0); //only one must be zero
@@ -164,7 +177,7 @@ public class FastMemory {
   }
 
   //NEW: No Interface, Static, Final, PASS All
-  public static final void putLong_ISF2(Object array, long objectBaseOffset, 
+  public static final void putLong_ISF2(Object array, long objectBaseOffset,
       long nativeRawStartAddress, long capacityBytes, long offsetBytes, long srcValue) {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes);
     assert (nativeRawStartAddress > 0) ^ (objectBaseOffset > 0); //only one must be zero
@@ -172,7 +185,7 @@ public class FastMemory {
     long add = nativeRawStartAddress + objectBaseOffset + offsetBytes;
     unsafe.putLong(array, add, srcValue);
   }
-  
+
   //Non-data Memory interface methods
 
   public final long getAddress(final long offsetBytes) {
@@ -229,7 +242,7 @@ public class FastMemory {
   }
 
   /**
-   * Returns true if this NativeMemory is accessing native (off-heap) memory directly. 
+   * Returns true if this NativeMemory is accessing native (off-heap) memory directly.
    * This includes the case of a Direct ByteBuffer.
    * @return true if this NativeMemory is accessing native (off-heap) memory directly.
    */
@@ -239,14 +252,14 @@ public class FastMemory {
 
   /**
    * This frees this Memory only if it is required. This always sets the capacity to zero
-   * and the reference to MemoryRequest to null, which effectively disables this class. 
-   * However, 
-   * 
+   * and the reference to MemoryRequest to null, which effectively disables this class.
+   * However,
+   *
    * <p>It is always safe to call this method when you are done with this class.
    */
   public void freeMemory() {
     if (requiresFree()) {
-        unsafe.freeMemory(nativeRawStartAddress_); 
+        unsafe.freeMemory(nativeRawStartAddress_);
         nativeRawStartAddress_ = 0L;
     }
     capacityBytes_ = 0L;
@@ -280,8 +293,8 @@ public class FastMemory {
   //Restricted methods
 
   /**
-   * Returns a formatted hex string of an area of this Memory. 
-   * Used primarily for testing. 
+   * Returns a formatted hex string of an area of this Memory.
+   * Used primarily for testing.
    * @param header a descriptive header
    * @param offsetBytes offset bytes relative to the Memory start
    * @param lengthBytes number of bytes to convert to a hex string
@@ -314,7 +327,7 @@ public class FastMemory {
   }
 
   /**
-   * Returns true if the object requires being freed.  
+   * Returns true if the object requires being freed.
    * This method exists to standardize the check between freeMemory() and finalize()
    *
    * @return true if the object should be freed when it is no longer needed
@@ -323,5 +336,5 @@ public class FastMemory {
     return (nativeRawStartAddress_ != 0L) && (byteBuf_ == null);
   }
 
-  
+
 }

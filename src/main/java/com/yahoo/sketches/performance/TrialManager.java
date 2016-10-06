@@ -7,17 +7,17 @@ package com.yahoo.sketches.performance;
 import static java.lang.Math.log;
 import static java.lang.Math.pow;
 
+import com.yahoo.memory.Memory;
+import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.hll.HllSketchBuilder;
-import com.yahoo.sketches.memory.Memory;
-import com.yahoo.sketches.memory.NativeMemory;
 import com.yahoo.sketches.theta.Sketch;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
 
 /**
  * Manages the execution of every trial.  One of these for the entire process.
- * 
+ *
  * @author Lee Rhodes
  */
 public class TrialManager {
@@ -26,7 +26,7 @@ public class TrialManager {
   private HllSketchBuilder hllBuilder_ = null;
   private int lgK_;
   private double p_;
-  //Global counter that increments for every new unique value. 
+  //Global counter that increments for every new unique value.
   //Assures that all sketches are virtually independent.
   private long vIn_;
   private int lgBP_; //The break point
@@ -36,7 +36,7 @@ public class TrialManager {
   private int ppo_;
   private double slope_;
   private boolean rebuild_ = false;
-  
+
   /**
    * Sets the theta UpdateSketch builder used to create the theta UpdateSketches.
    * @param udBldr the theta UpdateSketchBuilder
@@ -61,7 +61,7 @@ public class TrialManager {
     udSketch_ = udBldr.initMemory(mem).build(k);
     rebuild_ = rebuild;
   }
-  
+
   /**
    * Sets the HLL builder used to create the HLL sketches.
    * @param hllBldr the HllSketchBuilder
@@ -72,16 +72,16 @@ public class TrialManager {
     udSketch_ = null;
     hllBuilder_ = hllBldr;
   }
-  
+
   /**
    * This sets the profile for how the number of trials vary with the number of uniques.
    * The number of trials is the maximum until the number of uniques exceeds k, whereby
    * the number of trials starts to decrease in a power-law fashion until the minimum
    * number of trials is reached at the maximum number of uniques to be tested.
-   * @param lgMinTrials The minimum number of trials in a trial set specified as the 
+   * @param lgMinTrials The minimum number of trials in a trial set specified as the
    * exponent of 2.  This will occur at the maximum uniques value.
-   * @param lgMaxTrials The maximum number of trials in a trial set specified as the 
-   * exponent of 2. 
+   * @param lgMaxTrials The maximum number of trials in a trial set specified as the
+   * exponent of 2.
    * @param lgMaxU The maximum number of uniques for this entire test specified as the
    * exponent of 2. The first trail set starts at uniques (u = 1).
    * @param ppo  The number of Points Per Octave along the unique value number line
@@ -95,7 +95,7 @@ public class TrialManager {
     ppo_ = ppo;
     slope_ = (double)(lgMaxTrials - lgMinTrials) / (lgBP_ - lgMaxU_);
   }
-  
+
   /**
    * Create (or reset) a sketch and perform uPerTrial updates then update the given Stats.
    * @param stats The given Stats object
@@ -107,7 +107,7 @@ public class TrialManager {
       long startUpdateTime_nS = System.nanoTime();
       for (int u=uPerTrial; u--> 0; ) { udSketch_.update(vIn_++); }
       long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
-      if (rebuild_) { udSketch_.rebuild(); } //Resizes down to k. Only useful with QuickSelectSketch 
+      if (rebuild_) { udSketch_.rebuild(); } //Resizes down to k. Only useful with QuickSelectSketch
       stats.update(udSketch_, uPerTrial, updateTime_nS);
     }
     else { //HllSketch
@@ -118,7 +118,7 @@ public class TrialManager {
       stats.update(hllSketch, uPerTrial, updateTime_nS);
     }
   }
-  
+
   /**
    * Computes the number of trials for a given current number of uniques for a trial set.
    * @param curU the given current number of uniques for a trial set.
@@ -132,7 +132,7 @@ public class TrialManager {
     double lgTrials = slope_ * (lgCurU - lgBP_) + lgMaxTrials_;
     return (int) pow(2.0, lgTrials);
   }
-  
+
   /**
    * Return the Log-base 2 of the configured nominal entries or k
    * @return the Log-base 2 of the configured nominal entries or k
@@ -140,7 +140,7 @@ public class TrialManager {
   public int getLgK() {
     return lgK_;
   }
-  
+
   /**
    * Return the probability sampling rate, <i>p</i>.
    * @return the probability sampling rate, <i>p</i>.
@@ -148,7 +148,7 @@ public class TrialManager {
   public double getP() {
     return p_;
   }
-  
+
   /**
    * Return the configured Points-Per-Octave.
    * @return the configured Points-Per-Octave.
@@ -156,7 +156,7 @@ public class TrialManager {
   public int getPPO() {
     return ppo_;
   }
-  
+
   /**
    * Return true if sketch rebuild is requested to bring sketch size down to k, if necessary.
    * Only relevant for QuickSelectSketch.
@@ -165,7 +165,7 @@ public class TrialManager {
   public boolean getRebuild() {
     return rebuild_;
   }
-  
+
   /**
    * Returns the maximum generating index (gi) from the log_base2 of the maximum number of uniques
    * for the entire test run.
@@ -174,7 +174,7 @@ public class TrialManager {
   public int getMaximumGeneratingIndex() {
     return ppo_*lgMaxU_;
   }
-  
+
   @Override
   public String toString() {
     return "Trials Profile: LgMinTrials: "+lgMinTrials_+", LgMaxTrials: "+lgMaxTrials_+

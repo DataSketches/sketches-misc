@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.memory;
+package com.yahoo.memory;
 
 public final class Shifters {
 

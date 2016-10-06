@@ -3,10 +3,10 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.memory;
+package com.yahoo.memory;
 
+import static com.yahoo.memory.UnsafeUtil.unsafe;
 import static com.yahoo.sketches.TestingUtil.milliSecToString;
-import static com.yahoo.sketches.memory.UnsafeUtil.unsafe;
 import static java.lang.Math.pow;
 
 //import static com.yahoo.sketches.memory.MemoryPerformance.*;

@@ -1,16 +1,16 @@
 package com.yahoo.sketches.benchmark;
 
-import com.yahoo.sketches.memory.Memory;
-import com.yahoo.sketches.memory.NativeMemory;
-import com.yahoo.sketches.theta.SetOperation;
-import com.yahoo.sketches.theta.Sketch;
-import com.yahoo.sketches.theta.Union;
-import com.yahoo.sketches.theta.UpdateSketch;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
+
+import com.yahoo.memory.Memory;
+import com.yahoo.memory.NativeMemory;
+import com.yahoo.sketches.theta.SetOperation;
+import com.yahoo.sketches.theta.Sketch;
+import com.yahoo.sketches.theta.Union;
+import com.yahoo.sketches.theta.UpdateSketch;
 
 /**
  */
