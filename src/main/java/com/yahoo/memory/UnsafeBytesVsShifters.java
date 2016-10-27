@@ -5,8 +5,11 @@
 
 package com.yahoo.memory;
 
+import com.yahoo.sketches.Util;
+
+import static com.yahoo.memory.MemoryPerformance.milliSecToString;
 import static com.yahoo.memory.UnsafeUtil.unsafe;
-import static com.yahoo.sketches.TestingUtil.milliSecToString;
+//import static com.yahoo.sketches.TestingUtil.milliSecToString;
 import static java.lang.Math.pow;
 
 //import static com.yahoo.sketches.memory.MemoryPerformance.*;
