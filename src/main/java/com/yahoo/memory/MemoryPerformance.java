@@ -1184,10 +1184,10 @@ public final class MemoryPerformance {
 
   // copied from com.yahoo.sketches.TestingUtil which is a test class not in the main jar
   public static String milliSecToString(long mS) {
-    long rem_mS = (long)((double)mS % 1000.0D);
-    long rem_sec = (long)((double)mS / 1000.0D % 60.0D);
-    long rem_min = (long)((double)mS / 60000.0D % 60.0D);
-    long hr = (long)((double)mS / 3600000.0D);
+    long rem_mS = (long)(mS % 1000.0D);
+    long rem_sec = (long)(mS / 1000.0D % 60.0D);
+    long rem_min = (long)(mS / 60000.0D % 60.0D);
+    long hr = (long)(mS / 3600000.0D);
     String mSstr = Util.zeroPad(Long.toString(rem_mS), 3);
     String secStr = Util.zeroPad(Long.toString(rem_sec), 2);
     String minStr = Util.zeroPad(Long.toString(rem_min), 2);
