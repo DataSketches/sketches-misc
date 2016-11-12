@@ -5,13 +5,8 @@
 
 package com.yahoo.sketches.hll;
 
-import static com.yahoo.sketches.hll.MapTestingUtil.bytesToString;
-import static com.yahoo.sketches.hll.MapTestingUtil.evenlyLgSpaced;
-import static com.yahoo.sketches.hll.MapTestingUtil.intToBytes;
-import static com.yahoo.sketches.hll.MapTestingUtil.longToBytes;
-import static com.yahoo.sketches.hll.MapTestingUtil.milliSecToString;
-
 import com.yahoo.sketches.ResizeFactor;
+import com.yahoo.sketches.Util;
 import com.yahoo.sketches.theta.Sketches;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
@@ -66,8 +61,8 @@ public class VariousMapRSETest {
     /***************************************/
 
     int points = ppo * lgUniques + 1;
-    int[] xPoints = evenlyLgSpaced(0, lgUniques, points);
-    int[] tPoints = evenlyLgSpaced(startLgTrials, endLgTrials, points);
+    int[] xPoints = Util.evenlyLgSpaced(0, lgUniques, points);
+    int[] tPoints = Util.evenlyLgSpaced(startLgTrials, endLgTrials, points);
 
     Map map = null;
     UniqueCountMap ucMap = null;
@@ -134,12 +129,12 @@ public class VariousMapRSETest {
         if (skEnum == SketchEnum.HLL_MAP) {
           ipv4++;  //different IP for each trial
           HllMap hllMap = (HllMap) map;
-          ipv4bytes = intToBytes(ipv4, ipv4bytes);
+          ipv4bytes = Util.intToBytes(ipv4, ipv4bytes);
           startnS = System.nanoTime();
           int index = hllMap.findOrInsertKey(ipv4bytes);
           for (long i=0; i< x; i++) { //x is the #uniques per trial
             v++;  //next unique
-            valBytes = longToBytes(v, valBytes);
+            valBytes = Util.longToBytes(v, valBytes);
             int coupon = Map.coupon16(valBytes);
             est = hllMap.findOrInsertCoupon(index, (short)coupon);
           }
@@ -149,13 +144,13 @@ public class VariousMapRSETest {
 
         else if (skEnum == SketchEnum.COUPON_HASH_MAP) {
           ipv4++;  //different IP for each trial
-          ipv4bytes = intToBytes(ipv4, ipv4bytes);
+          ipv4bytes = Util.intToBytes(ipv4, ipv4bytes);
           CouponMap cMap = (CouponMap) map;
           startnS = System.nanoTime();
           int index = cMap.findOrInsertKey(ipv4bytes);
           for (long i=0; i< x; i++) { //x is the #uniques per trial
             v++;  //next unique
-            valBytes = longToBytes(v, valBytes);
+            valBytes = Util.longToBytes(v, valBytes);
             int coupon = Map.coupon16(valBytes);
             est = cMap.findOrInsertCoupon(index, (short)coupon);
           }
@@ -165,11 +160,11 @@ public class VariousMapRSETest {
 
         else if (skEnum == SketchEnum.UNIQUE_COUNT_MAP) {
           ipv4++;  //different IP for each trial
-          ipv4bytes = intToBytes(ipv4, ipv4bytes);
+          ipv4bytes = Util.intToBytes(ipv4, ipv4bytes);
           startnS = System.nanoTime();
           for (long i=0; i< x; i++) { //x is the #uniques per trial
             v++;  //next unique
-            valBytes = longToBytes(v, valBytes);
+            valBytes = Util.longToBytes(v, valBytes);
             est = ucMap.update(ipv4bytes, valBytes);
           }
           endnS = System.nanoTime();
@@ -234,13 +229,13 @@ public class VariousMapRSETest {
     long deltamS = endMs - startMs;
     double updnS2 = ((double)totnS)/v;
     println(String.format(  "nS/Update        :\t%.1f", updnS2));
-    println(                "Total: H:M:S.mS  :\t"+milliSecToString(deltamS));
+    println(                "Total: H:M:S.mS  :\t"+Util.milliSecToString(deltamS));
   }
 
   @SuppressWarnings("unused")
   private static void printIPandValue(byte[] ip, byte[] value) {
-    println("IP:\t"+bytesToString(ip, false, false, ".")
-      + "\tVal:\t"+bytesToString(value, false, false, "."));
+    println("IP:\t"+Util.bytesToString(ip, false, false, ".")
+      + "\tVal:\t"+Util.bytesToString(value, false, false, "."));
   }
 
   public static void main(String[] args) {

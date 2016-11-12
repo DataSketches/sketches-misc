@@ -13,6 +13,9 @@ import static java.nio.charset.StandardCharsets.UTF_8;
 import java.io.BufferedReader;
 import java.io.InputStreamReader;
 
+import com.yahoo.sketches.Util;
+
+
 /**
  * Processes an input stream of pairs of integers from Standard-In into the UniqueCountMap.
  * The input stream defines a distribution whereby each pair defines the number of keys with the
@@ -31,9 +34,7 @@ import java.io.InputStreamReader;
  * A typical command line might be as follows:</p>
  *
  * <p><code>
- * cat NumIDsTabNumKeys.txt | java -cp sketches-core-test.jar:\
- * sketches-core-0.8.2-SNAPSHOT.jar:\
- * memory-0.8.2-SNAPSHOT.jar \
+ * cat NumIDsTabNumKeys.txt | java -cp sketches-misc.jar:sketches-core.jar:memory.jar \
  * com.yahoo.sketches.hll.ProcessDistributionStream
  * </code></p>
  */
@@ -76,11 +77,11 @@ public class ProcessDistributionStream {
 
         for (long nips = 0; nips < numIps; nips++) {
           ipCount++;
-          MapTestingUtil.intToBytes(ipCount, ipBytes);
+          Util.intToBytes(ipCount, ipBytes);
           for (long vals = 0; vals < numValues; vals++) {
             long start_nS = System.nanoTime();
             updateCount++; // never repeated for any ip
-            map.update(ipBytes, MapTestingUtil.longToBytes(updateCount, valBytes));
+            map.update(ipBytes, Util.longToBytes(updateCount, valBytes));
             long end_nS = System.nanoTime();
             updateTime_nS += end_nS - start_nS;
           }

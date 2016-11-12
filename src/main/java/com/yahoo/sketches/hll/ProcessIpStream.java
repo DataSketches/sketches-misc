@@ -5,7 +5,7 @@
 
 package com.yahoo.sketches.hll;
 
-import static com.yahoo.sketches.TestingUtil.milliSecToString;
+import static com.yahoo.sketches.Util.milliSecToString;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
@@ -27,9 +27,7 @@ import java.net.InetAddress;
  * <p>To run, create a jar of the test code for sketches-core.
  * A typical command line might be as follows:</p>
  *
- * <p><code>cat IPTabIdPairs.txt | java -cp sketches-core-test.jar:\
- * sketches-core-0.8.2-SNAPSHOT.jar: \
- * memory-0.8.2-SNAPSHOT.jar \
+ * <p><code>cat IpTabIdPairs.txt | java -cp sketches-misc.jar:sketches-core.jar:memory.jar \
  * com.yahoo.sketches.hll.ProcessIpStream</code></p>
  */
 public class ProcessIpStream {
