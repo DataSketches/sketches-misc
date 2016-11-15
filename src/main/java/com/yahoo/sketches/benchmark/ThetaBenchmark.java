@@ -1,15 +1,15 @@
 package com.yahoo.sketches.benchmark;
 
+import java.util.ArrayList;
+import java.util.Collections;
+import java.util.List;
+import java.util.Random;
+
 import com.yahoo.sketches.theta.CompactSketch;
 import com.yahoo.sketches.theta.SetOperation;
 import com.yahoo.sketches.theta.Sketch;
 import com.yahoo.sketches.theta.Union;
 import com.yahoo.sketches.theta.UpdateSketch;
-
-import java.util.ArrayList;
-import java.util.Collections;
-import java.util.List;
-import java.util.Random;
 
 /**
  */
@@ -52,7 +52,8 @@ public class ThetaBenchmark implements SketchBenchmark
     }
     System.out.printf(
         "%,d entries, %,d/sketch, %,d estimating (%.2f%%)%n",
-        numRetained, numRetained / sketches.size(), numEstimating, (100 * numEstimating) / (double) sketches.size()
+        numRetained, numRetained / sketches.size(), numEstimating,
+          (100 * numEstimating) / (double) sketches.size()
     );
   }
 

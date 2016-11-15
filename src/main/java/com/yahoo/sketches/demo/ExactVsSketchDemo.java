@@ -5,33 +5,31 @@
 
 package com.yahoo.sketches.demo;
 
-import com.yahoo.sketches.demo.DemoImpl;
-
 /**
- * <p>This demo computes a stream of values and feeds them first to
+ * This demo computes a stream of values and feeds them first to
  * an exact sort-based method of computing the number of unique values
  * in the stream and then feeds a similar stream to two different types of
  * sketches from the library.
- * 
- * <p>This demo becomes most significant in the case where the number of uniques in the 
+ *
+ * <p>This demo becomes most significant in the case where the number of uniques in the
  * stream exceeds what the computer/JVM can hold in memory.
- * 
+ *
  * <p>This demo utilizes the Unix/Linux/OS-X sort and wc commands for the brute force compuation.
  * So this needs to be run on a linux or mac machine. A windows machine with a suitable unix
  * library installed should also work, but it has not been tested.
- * 
- * <p>To configure this demo to run from the command line see the instructions 
+ *
+ * <p>To configure this demo to run from the command line see the instructions
  * at <a href="http://datasketches.github.io">DataSketches.GitHub.io</a> under "Command Line".</p>
  */
 public class ExactVsSketchDemo {
-  
+
   /**
    * Runs the demo.
-   * 
-   * @param args 
+   *
+   * @param args
    * <ul><li>arg[0]: (Optional) The stream length and can be expressed as a positive double value.
    * The default is 1E6.</li>
-   * <li>arg[1] (Optional) The approximate fraction of the stream length that will be unique, 
+   * <li>arg[1] (Optional) The approximate fraction of the stream length that will be unique,
    * the remainder will be duplicates. The default is 0.5.</li>
    * </ul>
    */
@@ -45,10 +43,10 @@ public class ExactVsSketchDemo {
       streamLen = (long)(Double.parseDouble(args[0]));
       uFrac = Double.parseDouble(args[1]);
     }
-    
+
     DemoImpl demo = new DemoImpl(streamLen, uFrac);
-    
+
     demo.runDemo();
   }
-  
+
 }

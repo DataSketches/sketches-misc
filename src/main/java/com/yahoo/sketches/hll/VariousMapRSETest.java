@@ -11,6 +11,8 @@ import com.yahoo.sketches.theta.Sketches;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
 
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 /**
  * Characterizes the RSE on the whole UniqueCountMap as the key internal maps.
  * For comparison, this can also characterize the internal HLL and Theta sketches.
@@ -20,10 +22,11 @@ import com.yahoo.sketches.theta.UpdateSketchBuilder;
  */
 public class VariousMapRSETest {
   private static final String LS = System.getProperty("line.separator");
-  enum SketchEnum { THETA, HLL, HLL_MAP, COUPON_HASH_MAP, UNIQUE_COUNT_MAP}
   private static final int LG_K = 10;
   private static final int K = 1 << LG_K;
   private static final int KEY_SIZE = 4;
+
+  enum SketchEnum { THETA, HLL, HLL_MAP, COUPON_HASH_MAP, UNIQUE_COUNT_MAP }
 
   public void testHllMap() {
     testRSE(SketchEnum.HLL_MAP);
@@ -102,8 +105,8 @@ public class VariousMapRSETest {
     long memUsage = 0;
     for (int pt = 0; pt < points ; pt++) {
       int x = xPoints[pt];
-      if (x == lastX) continue;
-      if ((skEnum == SketchEnum.COUPON_HASH_MAP) && (x > 192)) break;
+      if (x == lastX) { continue; }
+      if ((skEnum == SketchEnum.COUPON_HASH_MAP) && (x > 192)) { break; }
       lastX = x;
       sum = sumErr = sumErrSq = 0;
       int trials = tPoints[pt];
@@ -240,12 +243,13 @@ public class VariousMapRSETest {
   public static void main(String[] args) {
     VariousMapRSETest test = new VariousMapRSETest();
     test.testHllMap();
-//    test.testTheta();
-//    test.testHll();
-//    test.testCouponHashMap();
-//    test.testUniqueCountMap();
+  //    test.testTheta();
+  //    test.testHll();
+  //    test.testCouponHashMap();
+  //    test.testUniqueCountMap();
   }
 
   static void println(String s) { System.out.println(s); }
+
   static void print(String s) { System.out.print(s); }
 }

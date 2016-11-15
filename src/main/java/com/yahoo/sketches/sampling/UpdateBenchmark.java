@@ -1,5 +1,7 @@
 package com.yahoo.sketches.sampling;
 
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 public class UpdateBenchmark {
   private static final String LS = System.lineSeparator();
   private static final int ACCEPT_BREAKPOINT = 2;
@@ -37,15 +39,15 @@ public class UpdateBenchmark {
     for (int iter = 0; iter < numIters; iter++) {
       // initial reservoir fill
       long startUpdateTime_ns = System.nanoTime();
-      for (inputValue = 0; inputValue < k; ) rls.update(inputValue++);
+      for (inputValue = 0; inputValue < k; ) { rls.update(inputValue++); }
       long primingTime_ns = System.nanoTime();
 
       // p(accept) > 0.5
-      for (; inputValue < samplingBreakIdx; ) rls.update(inputValue++);
+      for (; inputValue < samplingBreakIdx; ) { rls.update(inputValue++); }
       long pAcceptHighTime_ns = System.nanoTime();
 
       // p(accept) < 0.5
-      for (; inputValue < n; ) rls.update(inputValue++);
+      for (; inputValue < n; ) { rls.update(inputValue++); }
       long pAcceptLowTime_ns = System.nanoTime();
 
       primingResults[iter] = primingTime_ns - startUpdateTime_ns;
@@ -75,15 +77,15 @@ public class UpdateBenchmark {
     for (int iter = 0; iter < numIters; iter++) {
       // initial reservoir fill
       long startUpdateTime_ns = System.nanoTime();
-      for (inputValue = 0; inputValue < k; ) ris.update(inputValue++);
+      for (inputValue = 0; inputValue < k; ) { ris.update(inputValue++); }
       long primingTime_ns = System.nanoTime();
 
       // p(accept) > 0.5
-      for (; inputValue < samplingBreakIdx; ) ris.update(inputValue++);
+      for (; inputValue < samplingBreakIdx; ) { ris.update(inputValue++); }
       long pAcceptHighTime_ns = System.nanoTime();
 
       // p(accept) < 0.5
-      for (; inputValue < n; ) ris.update(inputValue++);
+      for (; inputValue < n; ) { ris.update(inputValue++); }
       long pAcceptLowTime_ns = System.nanoTime();
 
       primingResults[iter] = primingTime_ns - startUpdateTime_ns;
@@ -119,8 +121,10 @@ public class UpdateBenchmark {
     sb.append("  low p(accept) update (ns) : ").append(meanAcceptLow).append(LS);
     sb.append("  total update (ns)         : ").append(meanTotal).append(LS);
     sb.append("  priming per update (ns)   : ").append(meanPriming / k).append(LS);
-    sb.append("  high p per update (ns)    : ").append(meanAcceptHigh / ((ACCEPT_BREAKPOINT - 1) * k)).append(LS);
-    sb.append("  low p per update (ns)     : ").append(meanAcceptLow / (n - ACCEPT_BREAKPOINT * k)).append(LS);
+    sb.append("  high p per update (ns)    : ")
+      .append(meanAcceptHigh / ((ACCEPT_BREAKPOINT - 1) * k)).append(LS);
+    sb.append("  low p per update (ns)     : ")
+      .append(meanAcceptLow / (n - ACCEPT_BREAKPOINT * k)).append(LS);
     sb.append("  total per update (ns)     : ").append(meanTotal / n).append(LS);
     return sb.toString();
   }

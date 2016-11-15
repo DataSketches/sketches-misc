@@ -3,8 +3,11 @@ package com.yahoo.sketches.sampling;
 import java.util.List;
 import java.util.Random;
 
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 public class UnionBenchmark {
-  //private static int TARGET_TOTAL_SKETCH_ITEMS = 1 << 24; // 64MB of data if ints, if not varying # of samples
+  //private static int TARGET_TOTAL_SKETCH_ITEMS = 1 << 24;
+  // 64MB of data if ints, if not varying # of samples
   private static Random rand = new Random();
 
   public static void main(String[] args) {

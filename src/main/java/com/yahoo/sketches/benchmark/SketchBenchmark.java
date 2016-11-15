@@ -7,7 +7,9 @@ import java.util.List;
 public interface SketchBenchmark
 {
   void setup(int numSketches, List<Spec> specs);
+
   void runNTimes(int n);
+
   void reset();
 
   class Spec {

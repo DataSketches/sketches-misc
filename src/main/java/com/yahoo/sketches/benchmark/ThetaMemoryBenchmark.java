@@ -12,10 +12,11 @@ import com.yahoo.sketches.theta.Sketch;
 import com.yahoo.sketches.theta.Union;
 import com.yahoo.sketches.theta.UpdateSketch;
 
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 /**
  */
-public class ThetaMemoryBenchmark implements SketchBenchmark
-{
+public class ThetaMemoryBenchmark implements SketchBenchmark {
   private final int nominalEntries;
   private final Random rand;
   private final byte[] bytes;
@@ -55,7 +56,8 @@ public class ThetaMemoryBenchmark implements SketchBenchmark
     }
     System.out.printf(
         "%,d entries, %,d/sketch, %,d estimating (%.2f%%)%n",
-        numRetained, numRetained / memories.size(), numEstimating, (100 * numEstimating) / (double) memories.size()
+        numRetained, numRetained / memories.size(), numEstimating,
+          (100 * numEstimating) / (double) memories.size()
     );
   }
 

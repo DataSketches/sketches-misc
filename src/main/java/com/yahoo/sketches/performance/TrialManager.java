@@ -1,7 +1,8 @@
 /*
- * Copyright 2015, Yahoo! Inc.
+ * Copyright 2016, Yahoo! Inc.
  * Licensed under the terms of the Apache License 2.0. See LICENSE file at the project root for terms.
  */
+
 package com.yahoo.sketches.performance;
 
 import static java.lang.Math.log;
@@ -105,7 +106,7 @@ public class TrialManager {
     if (udSketch_ != null) { //UpdateSketch
       udSketch_.reset(); //reuse the same sketch
       long startUpdateTime_nS = System.nanoTime();
-      for (int u=uPerTrial; u--> 0; ) { udSketch_.update(vIn_++); }
+      for (int u = uPerTrial; u-- > 0; ) { udSketch_.update(vIn_++); }
       long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
       if (rebuild_) { udSketch_.rebuild(); } //Resizes down to k. Only useful with QuickSelectSketch
       stats.update(udSketch_, uPerTrial, updateTime_nS);
@@ -113,7 +114,7 @@ public class TrialManager {
     else { //HllSketch
       HllSketch hllSketch = hllBuilder_.build();
       long startUpdateTime_nS = System.nanoTime();
-      for (int u=uPerTrial; u--> 0; ) hllSketch.update(new long[]{vIn_++});
+      for (int u = uPerTrial; u-- > 0; ) { hllSketch.update(new long[]{vIn_++}); }
       long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
       stats.update(hllSketch, uPerTrial, updateTime_nS);
     }
@@ -128,7 +129,7 @@ public class TrialManager {
     if ((lgMinTrials_ == lgMaxTrials_) || (curU <= (1 << lgBP_))) {
       return 1 << lgMaxTrials_;
     }
-    double lgCurU = log(curU)/LN2;
+    double lgCurU = log(curU) / LN2;
     double lgTrials = slope_ * (lgCurU - lgBP_) + lgMaxTrials_;
     return (int) pow(2.0, lgTrials);
   }
@@ -172,13 +173,13 @@ public class TrialManager {
    * @return the maximum generating index (gi)
    */
   public int getMaximumGeneratingIndex() {
-    return ppo_*lgMaxU_;
+    return ppo_ * lgMaxU_;
   }
 
   @Override
   public String toString() {
-    return "Trials Profile: LgMinTrials: "+lgMinTrials_+", LgMaxTrials: "+lgMaxTrials_+
-        ", lgMaxU: "+lgMaxU_+", PPO: "+ppo_+", Rebuild: "+rebuild_;
+    return "Trials Profile: LgMinTrials: " + lgMinTrials_ + ", LgMaxTrials: " + lgMaxTrials_
+        + ", lgMaxU: " + lgMaxU_ + ", PPO: " + ppo_ + ", Rebuild: " + rebuild_;
   }
 
 }

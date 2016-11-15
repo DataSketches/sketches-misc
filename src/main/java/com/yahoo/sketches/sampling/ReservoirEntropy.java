@@ -5,7 +5,10 @@ import java.util.List;
 
 import com.yahoo.sketches.Util;
 
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 public class ReservoirEntropy {
+
   public static void main(String[] args) {
     //largeSketchEntropy();
     sketchEntropy();

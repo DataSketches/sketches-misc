@@ -1,17 +1,18 @@
 package com.yahoo.sketches.benchmark;
 
-import com.yahoo.sketches.hll.HllSketch;
-import com.yahoo.sketches.hll.HllSketchBuilder;
-
 import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Random;
 
+import com.yahoo.sketches.hll.HllSketch;
+import com.yahoo.sketches.hll.HllSketchBuilder;
+
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 /**
  */
-public class HllSketchBenchmark implements SketchBenchmark
-{
+public class HllSketchBenchmark implements SketchBenchmark {
   private final String name;
   private final Random rand;
   private final HllSketchBuilder inputBob;

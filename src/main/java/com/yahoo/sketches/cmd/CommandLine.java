@@ -7,36 +7,39 @@ package com.yahoo.sketches.cmd;
 
 import static com.yahoo.sketches.Util.LS;
 import static com.yahoo.sketches.Util.TAB;
-import static java.lang.Math.*;
+import static java.lang.Math.log10;
+import static java.lang.Math.pow;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
-import java.io.IOException;
 import java.io.FileNotFoundException;
+import java.io.IOException;
 import java.io.InputStreamReader;
 
+import com.yahoo.sketches.frequencies.ErrorType;
+import com.yahoo.sketches.frequencies.ItemsSketch;
+import com.yahoo.sketches.frequencies.LongsSketch.Row;
+import com.yahoo.sketches.quantiles.DoublesSketch;
+import com.yahoo.sketches.quantiles.DoublesSketchBuilder;
 import com.yahoo.sketches.theta.Sketches;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
-import com.yahoo.sketches.quantiles.DoublesSketchBuilder;
-import com.yahoo.sketches.quantiles.DoublesSketch;
-import com.yahoo.sketches.frequencies.ItemsSketch;
-import com.yahoo.sketches.frequencies.LongsSketch.Row;
-import com.yahoo.sketches.frequencies.ErrorType;
 
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 /**
- * Command line access to the basic sketch functions.  This is intentionally a very simple parser 
- * with limited functionality that can be used for small experiments and for demos. 
- * Although the sketching library can be used on a single machine, the more typical use case is on 
- * large, highly distributed system architectures where a CLI is not of much use.  
+ * Command line access to the basic sketch functions.  This is intentionally a very simple parser
+ * with limited functionality that can be used for small experiments and for demos.
+ * Although the sketching library can be used on a single machine, the more typical use case is on
+ * large, highly distributed system architectures where a CLI is not of much use.
  */
 public class CommandLine {
   private static final String BOLD = "\033[1m";
   private static final String OFF = "\033[0m";
   private boolean disablePrint = false;
-  
+
   CommandLine() {}
-  
+
   /**
    * Used for testing
    * @param disablePrint if true, disables normal System.out messages, but not System.err messages.
@@ -46,12 +49,12 @@ public class CommandLine {
     this.disablePrint = disablePrint;
     this.parseType(args);
   }
-  
+
   public static void main(String[] args) {
     CommandLine cl = new CommandLine();
     cl.parseType(args);
   }
-  
+
   private void parseType(String[] args) {
     if ((args == null) || (args.length == 0) || (args[0].isEmpty())) {
       help();
@@ -71,7 +74,7 @@ public class CommandLine {
       }
     }
   }
-  
+
   private static int parseArgsCase(String[] args) { //we already know type, args[0] is valid
     int len = args.length;
     int ret = 0;
@@ -89,13 +92,13 @@ public class CommandLine {
         if (token2.equalsIgnoreCase("help")) { ret = 2; break; } //help
         if (!isNumeric(token2)) { ret = 3; break; } //2nd arg not numeric, must be a filename
         //2nd arg is numeric, 3rd arg must be filename
-        ret = 5; 
+        ret = 5;
         break;
       }
     }
     return ret;
   }
-  
+
   private void parseUniq(String[] args) {
     UpdateSketchBuilder bldr = Sketches.updateSketchBuilder();
     UpdateSketch sketch;
@@ -116,7 +119,7 @@ public class CommandLine {
         doUniq(getBR(args[2]), sketch);
     }
   }
-  
+
   private void doUniq(BufferedReader br, UpdateSketch sketch) {
     String itemStr = "";
     try {
@@ -129,7 +132,7 @@ public class CommandLine {
     }
     println(sketch.toString());
   }
-  
+
   private void parseRank(String[] args) {
     DoublesSketchBuilder bldr = new DoublesSketchBuilder();
     DoublesSketch sketch;
@@ -150,7 +153,7 @@ public class CommandLine {
         doRank(getBR(args[2]), sketch);
     }
   }
-  
+
   private void doRank(BufferedReader br, DoublesSketch sketch) {
     String itemStr = "";
     try {
@@ -170,7 +173,7 @@ public class CommandLine {
       println(r + TAB + valArr[i]);
     }
   }
-  
+
   private void parseHist(String[] args) {
     DoublesSketchBuilder bldr = new DoublesSketchBuilder();
     DoublesSketch sketch;
@@ -191,7 +194,7 @@ public class CommandLine {
         doHist(getBR(args[2]), sketch);
     }
   }
-  
+
   private void doHist(BufferedReader br, DoublesSketch sketch) {
     String itemStr = "";
     try {
@@ -219,7 +222,7 @@ public class CommandLine {
       println(splitVal+TAB+freqVal);
     }
   }
-  
+
   private void parseLogHist(String[] args) {
     DoublesSketchBuilder bldr = new DoublesSketchBuilder();
     DoublesSketch sketch;
@@ -240,13 +243,13 @@ public class CommandLine {
         doLogHist(getBR(args[2]), sketch);
     }
   }
-  
+
   private void doLogHist(BufferedReader br, DoublesSketch sketch) {
     String itemStr = "";
     try {
       while ((itemStr = br.readLine()) != null) {
         double item = Double.parseDouble(itemStr);
-        if (Double.isNaN(item) || (item <= 0.0)) continue;
+        if (Double.isNaN(item) || (item <= 0.0)) { continue; }
         sketch.update(item);
       }
     } catch (IOException | NumberFormatException e ) {
@@ -269,7 +272,7 @@ public class CommandLine {
       println(splitVal+TAB+freqVal);
     }
   }
-  
+
   private void parseFreq(String[] args) {
     ItemsSketch<String> sketch;
     int defaultSize = 1 << 17; //128K
@@ -292,7 +295,7 @@ public class CommandLine {
         doFreq(getBR(args[2]), sketch);
     }
   }
-  
+
   private void doFreq(BufferedReader br, ItemsSketch<String> sketch) {
     String itemStr = "";
     try {
@@ -312,13 +315,13 @@ public class CommandLine {
       println((i+1) + rowArr[i].toString());
     }
   }
-  
+
   private static double[] getEvenSplits(DoublesSketch sketch, int splitPoints) {
     double min = sketch.getMinValue();
     double max = sketch.getMaxValue();
     return getSplits(min, max, splitPoints);
   }
-  
+
   private static double[] getLogSplits(DoublesSketch sketch, int splitPoints) {
     double min = sketch.getMinValue();
     double max = sketch.getMaxValue();
@@ -331,7 +334,7 @@ public class CommandLine {
     }
     return expArr;
   }
-  
+
   private static double[] getSplits(double min, double max, int splitPoints) {
     double range = max - min;
     double delta = range/(splitPoints + 1);
@@ -341,14 +344,14 @@ public class CommandLine {
     }
     return splits;
   }
-  
+
   private static boolean isNumeric(String token) {
     for (char c : token.toCharArray()) {
-        if (!Character.isDigit(c)) return false;
+        if (!Character.isDigit(c)) { return false; }
     }
     return true;
   }
-  
+
   private static BufferedReader getBR(String token) {
     BufferedReader br = null;
     try {
@@ -363,7 +366,7 @@ public class CommandLine {
     }
     return br;
   }
-  
+
   private void uniqHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"UNIQ SYNOPSIS"+OFF).append(LS);
@@ -371,7 +374,7 @@ public class CommandLine {
     sb.append("    sketch uniq [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
-  
+
   private void rankHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"RANK SYNOPSIS"+OFF).append(LS);
@@ -379,7 +382,7 @@ public class CommandLine {
     sb.append("    sketch rank [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
-  
+
   private void histHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"HIST SYNOPSIS"+OFF).append(LS);
@@ -387,7 +390,7 @@ public class CommandLine {
     sb.append("    sketch hist [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
-  
+
   private void logHistHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"LOGHIST SYNOPSIS"+OFF).append(LS);
@@ -395,7 +398,7 @@ public class CommandLine {
     sb.append("    sketch loghist [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
-  
+
   private void freqHelp() {
     StringBuilder sb = new StringBuilder();
     sb.append(BOLD+"FREQ SYNOPSIS"+OFF).append(LS);
@@ -403,7 +406,7 @@ public class CommandLine {
     sb.append("    sketch freq [SIZE] [FILE]").append(LS);
     println(sb.toString());
   }
-  
+
   /**
    * Prints the help summaries.
    */
@@ -422,14 +425,14 @@ public class CommandLine {
     sb.append("    If FILE is omitted, Standard In is assumed.").append(LS);
     sb.append(BOLD+"TYPE DESCRIPTION"+OFF).append(LS);
     sb.append("    sketch uniq    : Sketch the unique string items of a stream.").append(LS);
-    sb.append("    sketch rank    : Sketch the rank-value distribution of a numeric value stream.").
-       append(LS);
-    sb.append("    sketch hist    : "+
-       "Sketch the linear-axis value-frequency distribution of numeric value stream.").append(LS);
-    sb.append("    sketch loghist : "+
-        "Sketch the log-axis value-frequency distribution of numeric value stream.").append(LS);
-    sb.append("    sketch freq    : "+
-        "Sketch the Heavy Hitters of a string item stream.").append(LS);
+    sb.append("    sketch rank    : Sketch the rank-value distribution of a numeric value stream.")
+      .append(LS);
+    sb.append("    sketch hist    : "
+       + "Sketch the linear-axis value-frequency distribution of numeric value stream.").append(LS);
+    sb.append("    sketch loghist : "
+       + "Sketch the log-axis value-frequency distribution of numeric value stream.").append(LS);
+    sb.append("    sketch freq    : "
+       + "Sketch the Heavy Hitters of a string item stream.").append(LS);
     println(sb.toString());
     uniqHelp();
     rankHelp();
@@ -437,13 +440,13 @@ public class CommandLine {
     logHistHelp();
     freqHelp();
   }
-  
-  private static void printlnErr(String s) { 
-    System.err.println(s); 
+
+  private static void printlnErr(String s) {
+    System.err.println(s);
   }
-  
-  private void println(String s) { 
-    if (disablePrint) return;
-    System.out. println(s); 
+
+  private void println(String s) {
+    if (disablePrint) { return; }
+    System.out. println(s);
   }
 }

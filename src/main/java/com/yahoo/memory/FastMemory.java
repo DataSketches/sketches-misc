@@ -15,8 +15,6 @@ import static com.yahoo.memory.UnsafeUtil.unsafe;
 
 import java.nio.ByteBuffer;
 
-import com.yahoo.memory.MemoryRequest;
-import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.SketchesArgumentException;
 
 //@SuppressWarnings({"unused", "restriction"})
@@ -36,6 +34,10 @@ public class FastMemory {
     byteBuf_ = byteBuf;
   }
 
+  /**
+   * Test for proposed new NativeMemory
+   * @param mem the given NativeMemory
+   */
   public FastMemory(NativeMemory mem) {
     this.memArray_ = mem.array();
     if (memArray_ == null) {
@@ -150,7 +152,12 @@ public class FastMemory {
     unsafe.putLong(rawAddress, value);
   }
 
-  //NEW: No Interface, Static, Final, PASS FastMemory
+  /**
+   * NEW: No Interface, Static, Final, PASS FastMemory
+   * @param mem the given FastMemory
+   * @param offsetBytes the offset
+   * @return a long
+   */
   public static final long getLong_ISF(FastMemory mem, long offsetBytes) {
     long capBytes = mem.capacityBytes_;
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capBytes);
@@ -158,7 +165,12 @@ public class FastMemory {
     return unsafe.getLong(mem.memArray_, add);
   }
 
-  //NEW: No Interface, Static, Final, PASS FastMemory
+  /**
+   * NEW: No Interface, Static, Final, PASS FastMemory
+   * @param mem the given FastMemory
+   * @param offsetBytes the offset
+   * @param srcValue the value to put
+   */
   public static final void putLong_ISF(FastMemory mem, long offsetBytes, long srcValue) {
     long capBytes = mem.capacityBytes_;
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capBytes);
@@ -166,7 +178,15 @@ public class FastMemory {
     unsafe.putLong(mem.memArray_, add, srcValue);
   }
 
-  //NEW: No Interface, Static, Final, PASS All
+  /**
+   * NEW: No Interface, Static, Final, PASS All
+   * @param array array object
+   * @param objectBaseOffset Base offset
+   * @param nativeRawStartAddress raw or relative offset
+   * @param capacityBytes memory capacity to check bounds
+   * @param offsetBytes the long offset
+   * @return the long
+   */
   public static final long getLong_ISF2(Object array, long objectBaseOffset,
       long nativeRawStartAddress, long capacityBytes, long offsetBytes) {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes);
@@ -176,7 +196,15 @@ public class FastMemory {
     return unsafe.getLong(array, add);
   }
 
-  //NEW: No Interface, Static, Final, PASS All
+  /**
+   * NEW: No Interface, Static, Final, PASS All
+   * @param array object array
+   * @param objectBaseOffset base offset
+   * @param nativeRawStartAddress raw or relative offset
+   * @param capacityBytes memory capacity to check bounds
+   * @param offsetBytes the long offset
+   * @param srcValue the value to put
+   */
   public static final void putLong_ISF2(Object array, long objectBaseOffset,
       long nativeRawStartAddress, long capacityBytes, long offsetBytes, long srcValue) {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes);
@@ -188,6 +216,11 @@ public class FastMemory {
 
   //Non-data Memory interface methods
 
+  /**
+   * Get the effective address
+   * @param offsetBytes the current offset
+   * @return the address
+   */
   public final long getAddress(final long offsetBytes) {
     assertBounds(offsetBytes, 0, capacityBytes_);
     assert (nativeRawStartAddress_ > 0) ^ (objectBaseOffset_ > 0); //only one must be zero
@@ -210,6 +243,13 @@ public class FastMemory {
     memReq_ = memReq;
   }
 
+  /**
+   * Get hex string
+   * @param header optional header
+   * @param offsetBytes the offset in bytes
+   * @param lengthBytes the length in bytes
+   * @return the hex string
+   */
   public String toHexString(String header, long offsetBytes, int lengthBytes) {
     StringBuilder sb = new StringBuilder();
     sb.append(header).append(LS);
@@ -219,7 +259,7 @@ public class FastMemory {
     sb.append("  MemoryRequest: ");
     if (memReq_ != null) {
       sb.append(memReq_.getClass().getSimpleName()).append(", hash: ").append(memReq_.hashCode());
-    } else sb.append("null");
+    } else { sb.append("null"); }
     return toHex(sb.toString(), offsetBytes, lengthBytes);
   }
 

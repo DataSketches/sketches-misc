@@ -12,7 +12,8 @@ import static java.lang.Math.pow;
 
 //import static com.yahoo.sketches.memory.MemoryPerformance.*;
 
-
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 public class UnsafeBytesVsShifters {
   private int arrLongs_;     //# entries in array
   private int lgMinTrials_;  //minimum # of trials
@@ -77,7 +78,7 @@ public class UnsafeBytesVsShifters {
     double logArrLongs;
     do {
       logArrLongs = (++p.gi)/ppo_;
-      if (p.gi > maxGI_) return null;
+      if (p.gi > maxGI_) { return null; }
       nextArrLongs = (int)pow(2.0, logArrLongs);
     } while (nextArrLongs <= lastArrLongs);
     p.arrLongs = lastArrLongs = nextArrLongs;
@@ -111,7 +112,7 @@ public class UnsafeBytesVsShifters {
     }
   }
 
-//Must do writes first
+  //Must do writes first
   private static final long trial_UnsafeByte(long address, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
     long startTime_nS, stopTime_nS;
@@ -180,7 +181,7 @@ public class UnsafeBytesVsShifters {
     }
   }
 
-//Must do writes first
+  //Must do writes first
   private static final long trial_BytesByShifters(long address, int arrLongs, boolean read) {
     long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
     long startTime_nS, stopTime_nS;

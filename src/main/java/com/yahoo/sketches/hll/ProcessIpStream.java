@@ -106,7 +106,9 @@ public class ProcessIpStream {
 
   static final void checkLen(String[] tokens) {
     int len = tokens.length;
-    if (len != 2) throw new IllegalArgumentException("Args.length must be 2: " + len);
+    if (len != 2) {
+      throw new IllegalArgumentException("Args.length must be 2: " + len);
+    }
   }
 
   static void println(String s) { System.out.println(s); }

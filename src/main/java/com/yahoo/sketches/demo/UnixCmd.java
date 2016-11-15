@@ -1,11 +1,11 @@
 /*
- * Copyright 2016, Yahoo! Inc. Licensed under the terms of the 
+ * Copyright 2016, Yahoo! Inc. Licensed under the terms of the
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
 package com.yahoo.sketches.demo;
 
-import static com.yahoo.sketches.demo.Util.*;
+import static com.yahoo.sketches.demo.Util.println;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -13,7 +13,7 @@ import java.io.InputStreamReader;
 
 public class UnixCmd {
   private static final String LS = System.getProperty("line.separator");
-  
+
   /**
    * @param name the name of the command
    * @param cmd the actual command-line string
@@ -37,7 +37,7 @@ public class UnixCmd {
       boolean outFlag = true;
       while ((out = stdInput.readLine()) != null) {
         if (outFlag) {
-          sbOut.append("Output from "+name+" command:").append(LS);
+          sbOut.append("Output from " + name + " command:").append(LS);
           outFlag = false;
         }
         sbOut.append(out).append(LS);
@@ -47,7 +47,7 @@ public class UnixCmd {
       boolean headerFlag = true;
       while ((err = stdError.readLine()) != null) {
         if (headerFlag) {
-          sbErr.append("\nError from "+name+" command:").append(LS);
+          sbErr.append("\nError from " + name + " command:").append(LS);
           headerFlag = false;
         }
         sbErr.append(err).append(LS);
@@ -62,11 +62,11 @@ public class UnixCmd {
       p.destroy();
     }
     long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
-    println("Unix cmd: "+cmd);
+    println("Unix cmd: " + cmd);
     println(Util.getMinSecFromMilli(testTime_mS));
     if (sbOut.length() > 0) { println(sbOut.toString()); }
     if (sbErr.length() > 0) { println(sbErr.toString()); }
     return testTime_mS;
   }
-  
+
 }

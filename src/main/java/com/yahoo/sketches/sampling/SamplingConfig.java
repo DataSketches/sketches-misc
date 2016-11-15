@@ -1,5 +1,7 @@
 package com.yahoo.sketches.sampling;
 
+//CHECKSTYLE.OFF: JavadocMethod
+//CHECKSTYLE.OFF: WhitespaceAround
 public class SamplingConfig {
   private final int numIters_;
   private final int numSketches_;
@@ -17,10 +19,12 @@ public class SamplingConfig {
 
   public SamplingConfig(final int numIters, final int numSketches, final int[] k, final int[] rangeSize) {
     if (k.length != numSketches) {
-      throw new IllegalArgumentException("Number of sketches to generate must equal length of array of k values");
+      throw new IllegalArgumentException(
+          "Number of sketches to generate must equal length of array of k values");
     }
     if (rangeSize.length != numSketches) {
-      throw new IllegalArgumentException("Number of sketches to generate must equal length of array of ranges");
+      throw new IllegalArgumentException(
+          "Number of sketches to generate must equal length of array of ranges");
     }
 
     numIters_ = numIters;
