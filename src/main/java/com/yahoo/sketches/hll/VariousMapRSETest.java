@@ -136,7 +136,7 @@ public class VariousMapRSETest {
             v++;  //next unique
             valBytes = Util.longToBytes(v, valBytes);
             int coupon = Map.coupon16(valBytes);
-            est = hllMap.findOrInsertCoupon(index, (short)coupon);
+            est = hllMap.update(index, (short)coupon);
           }
           endnS = System.nanoTime();
           memUsage = hllMap.getMemoryUsageBytes();
@@ -145,14 +145,13 @@ public class VariousMapRSETest {
         else if (skEnum == SketchEnum.COUPON_HASH_MAP) {
           ipv4++;  //different IP for each trial
           ipv4bytes = Util.intToBytes(ipv4, ipv4bytes);
-          CouponMap cMap = (CouponMap) map;
           startnS = System.nanoTime();
-          int index = cMap.findOrInsertKey(ipv4bytes);
+          int index = map.findOrInsertKey(ipv4bytes);
           for (long i=0; i< x; i++) { //x is the #uniques per trial
             v++;  //next unique
             valBytes = Util.longToBytes(v, valBytes);
             int coupon = Map.coupon16(valBytes);
-            est = cMap.findOrInsertCoupon(index, (short)coupon);
+            est = map.update(index, (short)coupon);
           }
           endnS = System.nanoTime();
           memUsage = map.getMemoryUsageBytes();
