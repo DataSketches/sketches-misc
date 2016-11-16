@@ -29,8 +29,8 @@ public class SamplingConfig {
 
     numIters_ = numIters;
     numSketches_ = numSketches;
-    rangeSize_ = rangeSize;
-    k_ = k;
+    rangeSize_ = rangeSize.clone();
+    k_ = k.clone();
   }
 
   public int getNumIters() {
@@ -50,7 +50,7 @@ public class SamplingConfig {
   }
 
   public int[] getRangeSizeArray() {
-    return rangeSize_;
+    return rangeSize_.clone();
   }
 
   public int getK() {
@@ -62,7 +62,7 @@ public class SamplingConfig {
   }
 
   public int[] getKArray() {
-    return k_;
+    return k_.clone();
   }
 
   public boolean hasMultipleK() {

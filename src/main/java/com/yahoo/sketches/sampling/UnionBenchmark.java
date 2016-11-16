@@ -9,6 +9,7 @@ public class UnionBenchmark {
   //private static int TARGET_TOTAL_SKETCH_ITEMS = 1 << 24;
   // 64MB of data if ints, if not varying # of samples
   private static Random rand = new Random();
+  private static final String LS = System.getProperty("line.separator");
 
   public static void main(String[] args) {
     int[] kSet = {100, 1000, 10000, 100000, 1000000};
@@ -41,7 +42,8 @@ public class UnionBenchmark {
         }
 
         updateStats(times, mean, stdev);
-        System.out.printf("k = %-7d:\t%f +- %f\t(%d sketches)\n", k, mean[0], stdev[0], sc.getNumSketches());
+        System.out.printf("k = %-7d:\t%f +- %f\t(%d sketches)" + LS,
+            k, mean[0], stdev[0], sc.getNumSketches());
       }
     }
   }

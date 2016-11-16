@@ -81,7 +81,7 @@ public class UnsafeBytesVsShifters {
       if (p.gi > maxGI_) { return null; }
       nextArrLongs = (int)pow(2.0, logArrLongs);
     } while (nextArrLongs <= lastArrLongs);
-    p.arrLongs = lastArrLongs = nextArrLongs;
+    p.arrLongs = nextArrLongs;
     //compute trials
     double logTrials = Math.min(lgMaxOps_- logArrLongs, lgMaxTrials_);
     p.trials = (int)pow(2.0, logTrials);

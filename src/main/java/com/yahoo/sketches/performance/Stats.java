@@ -58,6 +58,18 @@ public class Stats implements Comparable<Stats> {
 
   @Override
   public int compareTo(Stats that) {
-      return (this.re < that.re)? -1 : (this.re > that.re)? 1 : 0;
+    if (this.equals(that)) { return 0; }
+    return Double.compare(this.re, that.re);
+  }
+
+  @Override
+  public boolean equals(Object that) {
+    return this == that;
+  }
+
+  @Override
+  public int hashCode() {
+    return (int) ( estimate + re + lb2est + lb1est + ub1est + ub2est + updateTimePerU_nS );
   }
 }
+

@@ -90,7 +90,7 @@ public final class MemoryPerformance {
       if (p.gi > maxGI_) { return null; }
       nextArrLongs = (int)pow(2.0, logArrLongs);
     } while (nextArrLongs <= lastArrLongs);
-    p.arrLongs = lastArrLongs = nextArrLongs;
+    p.arrLongs = nextArrLongs;
     //compute trials
     double logTrials = Math.min(lgMaxOps_ - logArrLongs, lgMaxTrials_);
     p.trials = (int)pow(2.0, logTrials);
@@ -632,7 +632,7 @@ public final class MemoryPerformance {
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       long[] array = new long[p.arrLongs];
-      FastMemory mem = new FastMemory(array);
+      //FastMemory mem = new FastMemory(array);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
       for (int t=0; t<p.trials; t++) { //do writes first
@@ -721,7 +721,7 @@ public final class MemoryPerformance {
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       long[] array = new long[p.arrLongs];
-      FastMemory mem = new FastMemory(array);
+      //FastMemory mem = new FastMemory(array);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
       for (int t=0; t<p.trials; t++) { //do writes first
@@ -920,7 +920,7 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_ISF(FastMemory mem, int arrLongs, boolean read) {
     final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    final long rawBaseAdd = mem.getAddress(0L);
+    //final long rawBaseAdd = mem.getAddress(0L);
     long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
@@ -1023,7 +1023,7 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_ISF2(FastMemory mem, int arrLongs, boolean read) {
     final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
-    final long rawBaseAdd = mem.getAddress(0L);
+    //final long rawBaseAdd = mem.getAddress(0L);
     long startTime_nS, stopTime_nS;
     Object array = mem.memArray_;
     long objectBaseOffset = mem.objectBaseOffset_;

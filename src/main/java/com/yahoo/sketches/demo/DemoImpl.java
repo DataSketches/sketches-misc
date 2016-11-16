@@ -10,6 +10,7 @@ import static com.yahoo.sketches.demo.Util.nextLong;
 import static com.yahoo.sketches.demo.Util.println;
 import static com.yahoo.sketches.hash.MurmurHash3.hash;
 import static java.lang.Math.sqrt;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.File;
 import java.io.IOException;
@@ -47,7 +48,7 @@ import com.yahoo.sketches.theta.UpdateSketch;
 public class DemoImpl {
   //Static constants
   private static final String LS = System.getProperty("line.separator");
-  private static final byte LS_BYTE = LS.getBytes()[0];
+  private static final byte LS_BYTE = LS.getBytes(UTF_8)[0];
   private static Random rand = new Random(9001);
   private static StandardOpenOption C = StandardOpenOption.CREATE;
   private static StandardOpenOption W = StandardOpenOption.WRITE;
@@ -156,7 +157,7 @@ public class DemoImpl {
           fileBytes_ += sbc.write(byteBuf);
           byteBuf.clear();
         }
-        byteBuf.put(s.getBytes()).put(LS_BYTE);
+        byteBuf.put(s.getBytes(UTF_8)).put(LS_BYTE);
       }
       if (byteBuf.position() > 0) { //write remainder
         byteBuf.flip();
@@ -249,7 +250,7 @@ public class DemoImpl {
           fileBytes_ += sbc.write(byteBuf);
           byteBuf.clear();
         }
-        byteBuf.put(s.getBytes()).put(LS_BYTE);
+        byteBuf.put(s.getBytes(UTF_8)).put(LS_BYTE);
       }
       else { //HLL Sketch
         long v = nextValue();
@@ -262,7 +263,7 @@ public class DemoImpl {
           fileBytes_ += sbc.write(byteBuf);
           byteBuf.clear();
         }
-        byteBuf.put(s.getBytes()).put(LS_BYTE);
+        byteBuf.put(s.getBytes(UTF_8)).put(LS_BYTE);
       }
 
       if (byteBuf.position() > 0) {

@@ -6,6 +6,7 @@
 package com.yahoo.sketches.demo;
 
 import static com.yahoo.sketches.demo.Util.println;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -24,15 +25,20 @@ public class UnixCmd {
     StringBuilder sbErr = new StringBuilder();
     String out = null;
     String err = null;
-    Process p = null;
     String[] envp = {"LC_ALL=C"}; //https://bugs.launchpad.net/ubuntu/+source/coreutils/+bug/846628
-    long testStartTime_mS = System.currentTimeMillis();
+    Process p = null;
     try {
-      // run the Unix cmd using the Runtime exec method:
       p = Runtime.getRuntime().exec(cmd, envp);
-      BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream()));
-      BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream()));
+    } catch (IOException e) {
+      throw new RuntimeException(e);
+    }
+    long testStartTime_mS = System.currentTimeMillis();
 
+    try (
+        BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream(), UTF_8));
+        BufferedReader stdError = new BufferedReader(new InputStreamReader(p.getErrorStream(), UTF_8));
+    ) {
+      // run the Unix cmd using the Runtime exec method:
       // read the output from the command
       boolean outFlag = true;
       while ((out = stdInput.readLine()) != null) {
@@ -54,11 +60,11 @@ public class UnixCmd {
       }
     }
     catch (IOException e) {
-      System.out.println("Exception: ");
+      System.out.println("IOException: ");
       e.printStackTrace();
-      System.exit( -1);
+      throw new RuntimeException(e);
     }
-    if ((p != null) && (p.isAlive())) {
+    if (p.isAlive()) {
       p.destroy();
     }
     long testTime_mS = System.currentTimeMillis() - testStartTime_mS;

@@ -79,7 +79,7 @@ public class SketchPerformance {
    */
   private static  Stats[] processTrialSet(TrialManager trialMgr, int uPerTrial, int trials) {
     Stats[] statsArr = new Stats[trials];
-    System.gc();
+    //System.gc();
     for (int t=0; t < trials; t++) {
       if (statsArr[t] == null) { statsArr[t] = new Stats(); }
       trialMgr.doTrial(statsArr[t], uPerTrial);

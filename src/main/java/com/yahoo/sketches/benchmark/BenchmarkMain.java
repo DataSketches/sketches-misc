@@ -101,7 +101,8 @@ public class BenchmarkMain {
 
 
   @SuppressWarnings("serial")
-  public static List<SketchBenchmark.Spec> powerLawDistribution = new ArrayList<SketchBenchmark.Spec>(){{
+  static final List<SketchBenchmark.Spec> powerLawDistribution =
+      new ArrayList<SketchBenchmark.Spec>(){{
     this.add(new SketchBenchmark.Spec(0, 44129));
     this.add(new SketchBenchmark.Spec(1, 431561));
     this.add(new SketchBenchmark.Spec(2, 129063));

@@ -9,6 +9,7 @@ import static com.yahoo.sketches.Util.LS;
 import static com.yahoo.sketches.Util.TAB;
 import static java.lang.Math.log10;
 import static java.lang.Math.pow;
+import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
 import java.io.FileInputStream;
@@ -128,7 +129,7 @@ public class CommandLine {
       }
     } catch (IOException e) {
       printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
-      System.exit(1);
+      throw new RuntimeException(e);
     }
     println(sketch.toString());
   }
@@ -163,7 +164,7 @@ public class CommandLine {
       }
     } catch (IOException | NumberFormatException e ) {
       printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
-      System.exit(1);
+      throw new RuntimeException(e);
     }
     int ranks = 101;
     double[] valArr = sketch.getQuantiles(ranks);
@@ -204,7 +205,7 @@ public class CommandLine {
       }
     } catch (IOException | NumberFormatException e ) {
       printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
-      System.exit(1);
+      throw new RuntimeException(e);
     }
     int splitPoints = 30;
     long n = sketch.getN();
@@ -254,7 +255,7 @@ public class CommandLine {
       }
     } catch (IOException | NumberFormatException e ) {
       printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
-      System.exit(1);
+      throw new RuntimeException(e);
     }
     int splitPoints = 30;
     long n = sketch.getN();
@@ -304,7 +305,7 @@ public class CommandLine {
       }
     } catch (IOException e ) {
       printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
-      System.exit(1);
+      throw new RuntimeException(e);
     }
     //NFP is a subset of NFN
     ItemsSketch.Row<String>[] rowArr = sketch.getFrequentItems(ErrorType.NO_FALSE_POSITIVES);
@@ -356,9 +357,9 @@ public class CommandLine {
     BufferedReader br = null;
     try {
       if ((token == null) || (token.length() == 0)) {
-        br = new BufferedReader(new InputStreamReader(System.in));
+        br = new BufferedReader(new InputStreamReader(System.in, UTF_8));
       } else {
-        br = new BufferedReader(new InputStreamReader(new FileInputStream(token)));
+        br = new BufferedReader(new InputStreamReader(new FileInputStream(token), UTF_8));
       }
     } catch (FileNotFoundException e) {
       printlnErr("File Not Found: "+token);
