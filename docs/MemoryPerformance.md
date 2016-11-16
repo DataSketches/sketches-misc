@@ -20,6 +20,8 @@ The inner timing loop for reading from that array:
 
 The trialSum is used as a simple checksum and to make sure the compiler optimizers didn't eliminate the loop.
 
+---
+
 <img style="max-width:50%;" src="img/Read_C_Java_Unsafe.png" alt="img/Read_C_Java_Unsafe.png"></img>
 
 <img style="max-width:50%;" src="img/Write_C_Java_Unsafe.png" alt="img/Write_C_Java_Unsafe.png"></img>
@@ -40,6 +42,8 @@ Now look at what the potential is from C. Using just O2 optimization.
 The Java code is 3X slower for reads of small arrays and 65% slower for writes.
 Oddly, the C code is slower for the larger arrays, but I'm sure there are tuning options to fix that.
 
+---
+
 <img style="max-width:50%;" src="img/BB_LB.png" alt="img/BB_LB.png"></img>
 
 Next I looked at the ByteBuffer and LongBuffer to see how well they would do.
@@ -52,6 +56,8 @@ I consider this a java performance bug.
 What is really good is that the LongBuffer Heap Reads are very comparable to the Java array reads,
 but slower on the writes.
 For direct access the Unsafe reads and writes are faster than the LongBuffer direct.
+
+---
 
 <img style="max-width:50%;" src="img/MemoryHeap.png" alt="img/MemoryHeap.png"></img>
 
@@ -68,15 +74,12 @@ The second cluster is the same code, but with the Interface logic removed.
 This means the compiler does not have to decide between two subclasses of the interface.
 This resulted in about a 10% improvement in speed.
 
-The biggest change is making the internal methods static, which achieved an additional 50% improvement in performance.
-At this point the performance is comparable to the direct calls to unsafe.  
+The biggest change is making the internal methods static (IAS), which achieved an additional 50% improvement in performance.
+At this point the performance is comparable to the direct calls to unsafe.
 So the JIT compiler is effectively removing the method calls and the assert statements. 
 (I proved this with additional tests not shown.)
 
-The challenge now is to figure out how to modify the Memory package to take advantage of this when speed is really important, 
-and not sacrifice the nice features that the package provides.
-
-
+Because of this, the Memory package, as of 0.8.0 has been updated to allow users to take advantage of static direct access to the Unsafe methods.
 
 ## Running the Code
 
