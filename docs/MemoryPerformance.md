@@ -3,7 +3,7 @@
 ## Results Summary
 
 The performance tests were very simple: the write test stores longs of 0 to k-1 into arrays of size k where k varied from 2^5 to 2^26.
-The read test then read those longs from those arrays. A trial consisted of the tight loop that filled or read the entire array.
+The read test then reads those longs from those arrays. A trial consisted of the tight loop that filled or read the entire array.
 Each test of size k was repeated up to millions of times to reduce noise in the measurements.
 
 The inner timing loop for writing into a java array:
