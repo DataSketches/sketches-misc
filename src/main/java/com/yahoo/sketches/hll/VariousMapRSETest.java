@@ -243,10 +243,10 @@ public class VariousMapRSETest {
   public static void main(String[] args) {
     VariousMapRSETest test = new VariousMapRSETest();
     test.testHllMap();
-  //    test.testTheta();
-  //    test.testHll();
-  //    test.testCouponHashMap();
-  //    test.testUniqueCountMap();
+    //    test.testTheta();
+    //    test.testHll();
+    //    test.testCouponHashMap();
+    //    test.testUniqueCountMap();
   }
 
   static void println(String s) { System.out.println(s); }
