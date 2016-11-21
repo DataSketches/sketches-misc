@@ -28,7 +28,7 @@ public class FastMemory {
   protected MemoryRequest memReq_ = null; //set via AllocMemory
 
   //only sets the finals
-  protected FastMemory(long objectBaseOffset, Object memArray, ByteBuffer byteBuf) {
+  protected FastMemory(final long objectBaseOffset, final Object memArray, final ByteBuffer byteBuf) {
     objectBaseOffset_ = objectBaseOffset;
     memArray_ = memArray;
     byteBuf_ = byteBuf;
@@ -38,7 +38,7 @@ public class FastMemory {
    * Test for proposed new NativeMemory
    * @param mem the given NativeMemory
    */
-  public FastMemory(NativeMemory mem) {
+  public FastMemory(final NativeMemory mem) {
     this.memArray_ = mem.array();
     if (memArray_ == null) {
       this.objectBaseOffset_ = 0L;
@@ -56,7 +56,7 @@ public class FastMemory {
    * Provides access to the given byteArray using Memory interface
    * @param byteArray an on-heap byte array
    */
-  public FastMemory(byte[] byteArray) {
+  public FastMemory(final byte[] byteArray) {
     this(ARRAY_BYTE_BASE_OFFSET, byteArray, null);
     if ((byteArray == null) || (byteArray.length == 0)) {
       throw new SketchesArgumentException(
@@ -70,7 +70,7 @@ public class FastMemory {
    * Provides access to the given longArray using Memory interface
    * @param longArray an on-heap long array
    */
-  public FastMemory(long[] longArray) {
+  public FastMemory(final long[] longArray) {
     this(ARRAY_LONG_BASE_OFFSET, longArray, null);
     if ((longArray == null) || (longArray.length == 0)) {
       throw new SketchesArgumentException(
@@ -84,7 +84,7 @@ public class FastMemory {
    * Provides access to the backing store of the given ByteBuffer using Memory interface
    * @param byteBuf the given ByteBuffer
    */
-  public FastMemory(ByteBuffer byteBuf) {
+  public FastMemory(final ByteBuffer byteBuf) {
     if (byteBuf.isDirect()) {
       objectBaseOffset_ = 0L;
       memArray_ = null;
@@ -101,54 +101,54 @@ public class FastMemory {
   }
 
   //No Interface
-  public long getLong_I(long offsetBytes) {
+  public long getLong_I(final long offsetBytes) {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes_); //
     return unsafe.getLong(memArray_, getAddress(offsetBytes));
   }
 
   //No Interface
-  public void putLong_I(long offsetBytes, long srcValue) {
+  public void putLong_I(final long offsetBytes, final long srcValue) {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes_);
     unsafe.putLong(memArray_, getAddress(offsetBytes), srcValue);
   }
 
   //No Interface, No Asserts
-  public long getLong_IA(long offsetBytes) {
+  public long getLong_IA(final long offsetBytes) {
     return unsafe.getLong(memArray_, getAddress(offsetBytes));
   }
 
   //No Interface, No Asserts
-  public void putLong_IA(long offsetBytes, long srcValue) {
+  public void putLong_IA(final long offsetBytes, final long srcValue) {
     unsafe.putLong(memArray_, getAddress(offsetBytes), srcValue);
   }
 
   //No Interface, No Asserts, Static
-  public static long getLong_IAS(Object array, long rawAddress) {
+  public static long getLong_IAS(final Object array, final long rawAddress) {
     return unsafe.getLong(array, rawAddress);
   }
 
   //No Interface, No Asserts, Static
-  public static void putLong_IAS(Object array, long rawAddress, long value) {
+  public static void putLong_IAS(final Object array, final long rawAddress, final long value) {
     unsafe.putLong(array, rawAddress, value);
   }
 
   //No Interface, No Asserts, Static, Final
-  public static final long getLong_IASF(Object array, long rawAddress) {
+  public static final long getLong_IASF(final Object array, final long rawAddress) {
     return unsafe.getLong(array, rawAddress);
   }
 
   //No Interface, No Asserts, Static, Final
-  public static final void putLong_IASF(Object array, long rawAddress, long value) {
+  public static final void putLong_IASF(final Object array, final long rawAddress, final long value) {
     unsafe.putLong(array, rawAddress, value);
   }
 
   //No Interface, No Asserts, Static, Final, no Object, For Direct Only
-  public static final long getLong_IASFO(long rawAddress) {
+  public static final long getLong_IASFO(final long rawAddress) {
     return unsafe.getLong(rawAddress);
   }
 
   //No Interface, No Asserts, Static, Final, no Object, For Direct Only
-  public static final void putLong_IASFO(long rawAddress, long value) {
+  public static final void putLong_IASFO(final long rawAddress, final long value) {
     unsafe.putLong(rawAddress, value);
   }
 
@@ -158,10 +158,10 @@ public class FastMemory {
    * @param offsetBytes the offset
    * @return a long
    */
-  public static final long getLong_ISF(FastMemory mem, long offsetBytes) {
-    long capBytes = mem.capacityBytes_;
+  public static final long getLong_ISF(final FastMemory mem, final long offsetBytes) {
+    final long capBytes = mem.capacityBytes_;
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capBytes);
-    long add = mem.getAddress(offsetBytes);
+    final long add = mem.getAddress(offsetBytes);
     return unsafe.getLong(mem.memArray_, add);
   }
 
@@ -171,10 +171,11 @@ public class FastMemory {
    * @param offsetBytes the offset
    * @param srcValue the value to put
    */
-  public static final void putLong_ISF(FastMemory mem, long offsetBytes, long srcValue) {
-    long capBytes = mem.capacityBytes_;
+  public static final void putLong_ISF(final FastMemory mem, final long offsetBytes,
+      final long srcValue) {
+    final long capBytes = mem.capacityBytes_;
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capBytes);
-    long add = mem.getAddress(offsetBytes);
+    final long add = mem.getAddress(offsetBytes);
     unsafe.putLong(mem.memArray_, add, srcValue);
   }
 
@@ -187,12 +188,12 @@ public class FastMemory {
    * @param offsetBytes the long offset
    * @return the long
    */
-  public static final long getLong_ISF2(Object array, long objectBaseOffset,
-      long nativeRawStartAddress, long capacityBytes, long offsetBytes) {
+  public static final long getLong_ISF2(final Object array, final long objectBaseOffset,
+      final long nativeRawStartAddress, final long capacityBytes, final long offsetBytes) {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes);
     assert (nativeRawStartAddress > 0) ^ (objectBaseOffset > 0); //only one must be zero
     assert (nativeRawStartAddress > 0) ^ (array != null); //only one must exist
-    long add = nativeRawStartAddress + objectBaseOffset + offsetBytes;
+    final long add = nativeRawStartAddress + objectBaseOffset + offsetBytes;
     return unsafe.getLong(array, add);
   }
 
@@ -205,12 +206,13 @@ public class FastMemory {
    * @param offsetBytes the long offset
    * @param srcValue the value to put
    */
-  public static final void putLong_ISF2(Object array, long objectBaseOffset,
-      long nativeRawStartAddress, long capacityBytes, long offsetBytes, long srcValue) {
+  public static final void putLong_ISF2(final Object array, final long objectBaseOffset,
+      final long nativeRawStartAddress, final long capacityBytes, final long offsetBytes,
+      final long srcValue) {
     assertBounds(offsetBytes, ARRAY_LONG_INDEX_SCALE, capacityBytes);
     assert (nativeRawStartAddress > 0) ^ (objectBaseOffset > 0); //only one must be zero
     assert (nativeRawStartAddress > 0) ^ (array != null); //only one must exist
-    long add = nativeRawStartAddress + objectBaseOffset + offsetBytes;
+    final long add = nativeRawStartAddress + objectBaseOffset + offsetBytes;
     unsafe.putLong(array, add, srcValue);
   }
 
@@ -239,7 +241,7 @@ public class FastMemory {
     return memArray_;
   }
 
-  public void setMemoryRequest(MemoryRequest memReq) {
+  public void setMemoryRequest(final MemoryRequest memReq) {
     memReq_ = memReq;
   }
 
@@ -250,10 +252,10 @@ public class FastMemory {
    * @param lengthBytes the length in bytes
    * @return the hex string
    */
-  public String toHexString(String header, long offsetBytes, int lengthBytes) {
-    StringBuilder sb = new StringBuilder();
+  public String toHexString(final String header, final long offsetBytes, final int lengthBytes) {
+    final StringBuilder sb = new StringBuilder();
     sb.append(header).append(LS);
-    String s1 = String.format("(..., %d, %d)", offsetBytes, lengthBytes);
+    final String s1 = String.format("(..., %d, %d)", offsetBytes, lengthBytes);
     sb.append(this.getClass().getSimpleName()).append(".toHexString")
       .append(s1).append(", hash: ").append(this.hashCode()).append(LS);
     sb.append("  MemoryRequest: ");
@@ -340,10 +342,10 @@ public class FastMemory {
    * @param lengthBytes number of bytes to convert to a hex string
    * @return a formatted hex string in a human readable array
    */
-  private String toHex(String header, long offsetBytes, int lengthBytes) {
+  private String toHex(final String header, final long offsetBytes, final int lengthBytes) {
     assertBounds(offsetBytes, lengthBytes, capacityBytes_);
-    long unsafeRawAddress = getAddress(offsetBytes);
-    StringBuilder sb = new StringBuilder();
+    final long unsafeRawAddress = getAddress(offsetBytes);
+    final StringBuilder sb = new StringBuilder();
     sb.append(header).append(LS);
     sb.append("Raw Address         : ").append(nativeRawStartAddress_).append(LS);
     sb.append("Object Offset       : ").append(objectBaseOffset_).append(": ");
@@ -352,9 +354,9 @@ public class FastMemory {
     sb.append("Total Offset        : ").append(unsafeRawAddress).append(LS);
     sb.append("Native Region       :  0  1  2  3  4  5  6  7");
     long j = offsetBytes;
-    StringBuilder sb2 = new StringBuilder();
+    final StringBuilder sb2 = new StringBuilder();
     for (long i = 0; i < lengthBytes; i++) {
-      int b = unsafe.getByte(memArray_, unsafeRawAddress + i) & 0XFF;
+      final int b = unsafe.getByte(memArray_, unsafeRawAddress + i) & 0XFF;
       if ((i != 0) && ((i % 8) == 0)) {
         sb.append(String.format("%n%20s: ", j)).append(sb2);
         j += 8;

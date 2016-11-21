@@ -16,7 +16,7 @@ public class AllocFastMemory extends FastMemory {
    * leveraging the Memory interface.  The MemoryRequest callback is set to null.
    * @param capacityBytes the size in bytes of the native memory
    */
-  public AllocFastMemory(long capacityBytes) {
+  public AllocFastMemory(final long capacityBytes) {
     super(0L, null, null);
     super.nativeRawStartAddress_ = unsafe.allocateMemory(capacityBytes);
     super.capacityBytes_ = capacityBytes;
@@ -38,7 +38,7 @@ public class AllocFastMemory extends FastMemory {
           System.err.println(
                   "ERROR: freeMemory() has not been called: Address: " + nativeRawStartAddress_
                   + ", capacity: " + capacityBytes_);
-          java.lang.StackTraceElement[] arr = Thread.currentThread().getStackTrace();
+          final java.lang.StackTraceElement[] arr = Thread.currentThread().getStackTrace();
           for (int i = 0; i < arr.length; i++) {
               System.err.println(arr[i].toString());
           }
