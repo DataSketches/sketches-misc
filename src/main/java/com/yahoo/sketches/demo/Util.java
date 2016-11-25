@@ -10,25 +10,23 @@ package com.yahoo.sketches.demo;
 
 import java.util.Random;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 public class Util {
   private static Random rand = new Random();
 
-  public static String getMinSecFromNano(final long nanoSec) {
-    final long totSec = nanoSec/1000000000L;
-    final long min = totSec/60; //whole min
-    final long sec = totSec%60; //remainder whole sec
+  static String getMinSecFromNano(final long nanoSec) {
+    final long totSec = nanoSec / 1000000000L;
+    final long min = totSec / 60; //whole min
+    final long sec = totSec % 60; //remainder whole sec
     final long ns  = nanoSec - totSec * 1000000000L; //remainder ns
     final long ms  = ns / 1000000L; //remainder whole ms
     final String t = String.format("Time Min:Sec.mSec = %d:%02d.%03d", min, sec, ms);
     return t;
   }
 
-  public static String getMinSecFromMilli(final long milliSec) {
-    final long totSec = milliSec/1000L;
-    final long min = totSec/60; //whole min
-    final long sec = totSec%60; //remainder whole sec
+  static String getMinSecFromMilli(final long milliSec) {
+    final long totSec = milliSec / 1000L;
+    final long min = totSec / 60; //whole min
+    final long sec = totSec % 60; //remainder whole sec
     final long ms  = milliSec - totSec * 1000L; //remainder whole ms
     final String t = String.format("Time Min:Sec.mSec = %d:%02d.%03d", min, sec, ms);
     return t;

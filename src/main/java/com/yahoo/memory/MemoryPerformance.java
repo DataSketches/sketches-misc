@@ -7,7 +7,6 @@ package com.yahoo.memory;
 
 import static com.yahoo.memory.UnsafeUtil.ARRAY_LONG_BASE_OFFSET;
 import static com.yahoo.memory.UnsafeUtil.unsafe;
-//import static com.yahoo.sketches.TestingUtil.milliSecToString;
 import static java.lang.Math.pow;
 
 import java.nio.ByteBuffer;
@@ -15,8 +14,6 @@ import java.nio.ByteOrder;
 import java.nio.LongBuffer;
 
 import com.yahoo.sketches.Util;
-
-//CHECKSTYLE.OFF: WhitespaceAround
 
 @SuppressWarnings("unused")
 public final class MemoryPerformance {
@@ -415,7 +412,7 @@ public final class MemoryPerformance {
   }
 
   private void testMemoryDirect() {
-    Point p = new Point(ppo_, minGI_- 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final NativeMemory mem = new AllocMemory(p.arrLongs << 3);
@@ -437,20 +434,20 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_MemoryDirect(final NativeMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { trialSum += mem.getLong(i << 3); }
+      for (int i = 0; i < arrLongs; i++) { trialSum += mem.getLong(i << 3); }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { mem.putLong(i << 3, i); }
+      for (int i = 0; i < arrLongs; i++) { mem.putLong(i << 3, i); }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -461,19 +458,19 @@ public final class MemoryPerformance {
   /*************************************/
 
   private void testFastMemoryHeap_I() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final byte[] array = new byte[p.arrLongs << 3];
       final FastMemory mem = new FastMemory(array);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryHeap_I(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryHeap_I(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -483,20 +480,20 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryHeap_I(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { trialSum += mem.getLong_I(i << 3); }
+      for (int i = 0; i < arrLongs; i++) { trialSum += mem.getLong_I(i << 3); }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { mem.putLong_I(i << 3, i); }
+      for (int i = 0; i < arrLongs; i++) { mem.putLong_I(i << 3, i); }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -504,18 +501,18 @@ public final class MemoryPerformance {
 
 
   private void testFastMemoryDirect_I() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final FastMemory mem = new AllocFastMemory(p.arrLongs << 3);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryDirect_I(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryDirect_I(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -526,20 +523,20 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_I(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { trialSum += mem.getLong_I(i << 3); }
+      for (int i = 0; i < arrLongs; i++) { trialSum += mem.getLong_I(i << 3); }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { mem.putLong_I(i << 3, i); }
+      for (int i = 0; i < arrLongs; i++) { mem.putLong_I(i << 3, i); }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -550,19 +547,19 @@ public final class MemoryPerformance {
   /*************************************/
 
   private void testFastMemoryHeap_IA() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final byte[] array = new byte[p.arrLongs << 3];
       final FastMemory mem = new FastMemory(array);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int  t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryHeap_IA(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryHeap_IA(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -572,20 +569,20 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryHeap_IA(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { trialSum += mem.getLong_IA(i << 3); }
+      for (int i = 0; i < arrLongs; i++) { trialSum += mem.getLong_IA(i << 3); }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { mem.putLong_IA(i << 3, i); }
+      for (int i = 0; i < arrLongs; i++) { mem.putLong_IA(i << 3, i); }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -593,18 +590,18 @@ public final class MemoryPerformance {
 
 
   private void testFastMemoryDirect_IA() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final FastMemory mem = new AllocFastMemory(p.arrLongs << 3);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryDirect_IA(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryDirect_IA(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -615,20 +612,20 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_IA(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { trialSum += mem.getLong_IA(i << 3); }
+      for (int i = 0; i < arrLongs; i++) { trialSum += mem.getLong_IA(i << 3); }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { mem.putLong_IA(i << 3, i); }
+      for (int i = 0; i < arrLongs; i++) { mem.putLong_IA(i << 3, i); }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -640,19 +637,19 @@ public final class MemoryPerformance {
   /*************************************/
 
   private void testFastMemoryHeap_IAS() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final long[] array = new long[p.arrLongs];
       //FastMemory mem = new FastMemory(array);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryHeap_IAS(array, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryHeap_IAS(array, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -662,21 +659,23 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryHeap_IAS(final long[] array, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
-        trialSum += FastMemory.getLong_IAS(array, (i << 3)+ARRAY_LONG_BASE_OFFSET); }
+      for (int i = 0; i < arrLongs; i++) {
+        trialSum += FastMemory.getLong_IAS(array, (i << 3) + ARRAY_LONG_BASE_OFFSET); }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { FastMemory.putLong_IAS(array, (i << 3)+ARRAY_LONG_BASE_OFFSET, i); }
+      for (int i = 0; i < arrLongs; i++) {
+        FastMemory.putLong_IAS(array, (i << 3) + ARRAY_LONG_BASE_OFFSET, i);
+      }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -684,18 +683,18 @@ public final class MemoryPerformance {
 
 
   private void testFastMemoryDirect_IAS() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final FastMemory mem = new AllocFastMemory(p.arrLongs << 3); //AllocDirect
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryDirect_IAS(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryDirect_IAS(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -706,21 +705,25 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_IAS(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long rawBaseAdd = mem.getAddress(0L);
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { trialSum += FastMemory.getLong_IAS(null, (i << 3) + rawBaseAdd); }
+      for (int i = 0; i < arrLongs; i++) {
+        trialSum += FastMemory.getLong_IAS(null, (i << 3) + rawBaseAdd);
+      }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { FastMemory.putLong_IAS(null, (i << 3) + rawBaseAdd, i); }
+      for (int i = 0; i < arrLongs; i++) {
+        FastMemory.putLong_IAS(null, (i << 3) + rawBaseAdd, i);
+      }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -731,19 +734,19 @@ public final class MemoryPerformance {
   /*************************************/
 
   private void testFastMemoryHeap_IASF() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final long[] array = new long[p.arrLongs];
       //FastMemory mem = new FastMemory(array);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryHeap_IASF(array, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryHeap_IASF(array, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -753,21 +756,23 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryHeap_IASF(final long[] array, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
-        trialSum += FastMemory.getLong_IASF(array, (i << 3)+ARRAY_LONG_BASE_OFFSET); }
+      for (int i = 0; i < arrLongs; i++) {
+        trialSum += FastMemory.getLong_IASF(array, (i << 3) + ARRAY_LONG_BASE_OFFSET); }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { FastMemory.putLong_IASF(array, (i << 3)+ARRAY_LONG_BASE_OFFSET, i); }
+      for (int i = 0; i < arrLongs; i++) {
+        FastMemory.putLong_IASF(array, (i << 3) + ARRAY_LONG_BASE_OFFSET, i);
+      }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -775,18 +780,18 @@ public final class MemoryPerformance {
 
 
   private void testFastMemoryDirect_IASF() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final FastMemory mem = new AllocFastMemory(p.arrLongs << 3); //AllocDirect
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryDirect_IASF(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryDirect_IASF(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -797,21 +802,23 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_IASF(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long rawBaseAdd = mem.getAddress(0L);
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { trialSum += FastMemory.getLong_IASF(null, (i << 3)+rawBaseAdd); }
+      for (int i = 0; i < arrLongs; i++) {
+        trialSum += FastMemory.getLong_IASF(null, (i << 3) + rawBaseAdd);
+      }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { FastMemory.putLong_IASF(null, (i << 3)+rawBaseAdd, i); }
+      for (int i = 0; i < arrLongs; i++) { FastMemory.putLong_IASF(null, (i << 3) + rawBaseAdd, i); }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -822,18 +829,18 @@ public final class MemoryPerformance {
   /*************************************/
 
   private void testFastMemoryDirect_IASFO() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final FastMemory mem = new AllocFastMemory(p.arrLongs << 3); //AllocDirect
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryDirect_IASF(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryDirect_IASF(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -844,21 +851,23 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_IASFO(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long rawBaseAdd = mem.getAddress(0L);
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { trialSum += FastMemory.getLong_IASFO((i << 3) + rawBaseAdd); }
+      for (int i = 0; i < arrLongs; i++) {
+        trialSum += FastMemory.getLong_IASFO((i << 3) + rawBaseAdd);
+      }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) { FastMemory.putLong_IASFO((i << 3) + rawBaseAdd, i); }
+      for (int i = 0; i < arrLongs; i++) { FastMemory.putLong_IASFO((i << 3) + rawBaseAdd, i); }
       stopTime_nS = System.nanoTime();
     }
     return stopTime_nS - startTime_nS;
@@ -869,19 +878,19 @@ public final class MemoryPerformance {
   /*************************************/
 
   private void testFastMemoryHeap_ISF() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final long[] array = new long[p.arrLongs];
       final FastMemory mem = new FastMemory(array);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryHeap_ISF(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryHeap_ISF(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -891,22 +900,22 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryHeap_ISF(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         trialSum += FastMemory.getLong_ISF(mem, (i << 3));
       }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         FastMemory.putLong_ISF(mem, (i << 3), i);
       }
       stopTime_nS = System.nanoTime();
@@ -916,18 +925,18 @@ public final class MemoryPerformance {
 
 
   private void testFastMemoryDirect_ISF() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final FastMemory mem = new AllocFastMemory(p.arrLongs << 3); //AllocDirect
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryDirect_ISF(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryDirect_ISF(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -938,23 +947,23 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_ISF(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     //final long rawBaseAdd = mem.getAddress(0L);
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         trialSum += FastMemory.getLong_ISF(mem, (i << 3));
       }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         FastMemory.putLong_ISF(mem, (i << 3), i);
       }
       stopTime_nS = System.nanoTime();
@@ -967,19 +976,19 @@ public final class MemoryPerformance {
   /*************************************/
 
   private void testFastMemoryHeap_ISF2() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final long[] array = new long[p.arrLongs];
       final FastMemory mem = new FastMemory(array);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryHeap_ISF2(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryHeap_ISF2(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -989,7 +998,7 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryHeap_ISF2(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     final Object array = mem.memArray_;
     final long objectBaseOffset = mem.objectBaseOffset_;
@@ -1000,17 +1009,17 @@ public final class MemoryPerformance {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (long i=0; i<arrLongs; i++) {
+      for (long i = 0; i < arrLongs; i++) {
         trialSum += FastMemory.getLong_ISF2(
             array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3));
       }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (long i=0; i<arrLongs; i++) {
+      for (long i = 0; i < arrLongs; i++) {
         FastMemory.putLong_ISF2(
             array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3), i);
       }
@@ -1021,18 +1030,18 @@ public final class MemoryPerformance {
 
 
   private void testFastMemoryDirect_ISF2() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       final FastMemory mem = new AllocFastMemory(p.arrLongs << 3); //AllocDirect
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_FastMemoryDirect_ISF2(mem, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_FastMemoryDirect_ISF2(mem, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -1043,7 +1052,7 @@ public final class MemoryPerformance {
   //Must do writes first
   private static final long trial_FastMemoryDirect_ISF2(final FastMemory mem, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     //final long rawBaseAdd = mem.getAddress(0L);
     final long startTime_nS, stopTime_nS;
     final Object array = mem.memArray_;
@@ -1055,17 +1064,17 @@ public final class MemoryPerformance {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         trialSum += FastMemory.getLong_ISF2(
             array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3));
       }
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         FastMemory.putLong_ISF2(
             array, objectBaseOffset, nativeRawStartAddress, capacityBytes, (i << 3), i);
       }

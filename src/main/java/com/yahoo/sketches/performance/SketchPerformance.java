@@ -15,8 +15,6 @@ import com.yahoo.sketches.hll.HllSketchBuilder;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 /**
  * Used to generate data for plotting the error distribution or speed performance of a sketch.
  * The X-axis is assumed to be the number of uniques fed to the sketch and varies from 1 to whatever
@@ -52,8 +50,8 @@ public class SketchPerformance {
     //Each generating index (gi) will generate a new row of data
     // representing N trials at a specific number of unique values.
     for (int gi = 0; gi <= lastGI; gi++) {
-      final int u = (int)floor(pow(2.0, (double)gi/ppo));
-      if (u == lastU) { continue; }//at the low end skips over duplicate values of u
+      final int u = (int)floor(pow(2.0, (double)gi / ppo));
+      if (u == lastU) { continue; } //at the low end skips over duplicate values of u
       lastU = u;
       final int trials = trialMgr.getTrials(u);
       final int lgK = trialMgr.getLgK();
@@ -62,10 +60,10 @@ public class SketchPerformance {
       ProcessStats.process(statsArr, u, lgK, p, dataStr);
       println(dataStr.toString());
     }
-    final int testTime_S = (int)((System.currentTimeMillis() - testStartTime_mS)/1000.0);
-    final int min = testTime_S/60;
-    final int sec = testTime_S%60;
-    println("TestTime: "+min+":"+sec);
+    final int testTime_S = (int)((System.currentTimeMillis() - testStartTime_mS) / 1000.0);
+    final int min = testTime_S / 60;
+    final int sec = testTime_S % 60;
+    println("TestTime: " + min + ":" + sec);
   }
 
   /**
@@ -81,7 +79,7 @@ public class SketchPerformance {
       final int trials) {
     final Stats[] statsArr = new Stats[trials];
     //System.gc();
-    for (int t=0; t < trials; t++) {
+    for (int t = 0; t < trials; t++) {
       if (statsArr[t] == null) { statsArr[t] = new Stats(); }
       trialMgr.doTrial(statsArr[t], uPerTrial);
     }

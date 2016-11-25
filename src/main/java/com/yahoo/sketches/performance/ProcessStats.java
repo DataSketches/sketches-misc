@@ -10,8 +10,6 @@ import static java.lang.Math.sqrt;
 
 import java.util.Arrays;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 /**
  * Processes the statistics collected from an array of Stats objects from a trial set
  * and creates an output row
@@ -47,14 +45,14 @@ public class ProcessStats {
     final double q50 = statsArr[quantileIndex(.5,trials)].re;
     final double qP1SD = statsArr[quantileIndex(P1SD,trials)].re;
     final double qP2SD = statsArr[quantileIndex(P2SD,trials)].re;
-    final double max = statsArr[trials-1].re;
+    final double max = statsArr[trials - 1].re;
 
     int cntLB2 = 0, cntLB1 = 0, cntUB1 = 0, cntUB2 = 0;
     //    double sumLB2 = 0, sumLB1 = 0, sumUB1 = 0, sumUB2 = 0;
     double sumEst = 0, sumEstErr = 0, sumSqEstErr = 0;
     double sumUpdateTimePerU_nS = 0;
     //Scan the sorted statsArr
-    for (int i=0; i<trials; i++) {
+    for (int i = 0; i < trials; i++) {
       final Stats stats = statsArr[i];
       if (uPerTrial > stats.ub2est) { cntUB2++; } //should be <  2.275%; under estimate
       if (uPerTrial > stats.ub1est) { cntUB1++; } //should be < 15.866%; under estimate
@@ -69,30 +67,30 @@ public class ProcessStats {
       sumEst += statsArr[i].estimate;
       final double estErr = statsArr[i].re;
       sumEstErr += estErr;
-      sumSqEstErr += estErr*estErr;
+      sumSqEstErr += estErr * estErr;
 
       sumUpdateTimePerU_nS += statsArr[i].updateTimePerU_nS;
     }
     //normalize counts
-    final double fracTgtUB2 = (double)cntUB2/trials;
-    final double fracTgtUB1 = (double)cntUB1/trials;
-    final double fracTltLB1  = (double)cntLB1/trials;
-    final double fracTltLB2  = (double)cntLB2/trials;
+    final double fracTgtUB2 = (double)cntUB2 / trials;
+    final double fracTgtUB1 = (double)cntUB1 / trials;
+    final double fracTltLB1  = (double)cntLB1 / trials;
+    final double fracTltLB2  = (double)cntLB2 / trials;
 
     //Compute the average results over the trial set
-    final double meanEst = sumEst/trials;
-    final double meanEstErr = sumEstErr/trials;
-    final double deltaSqEstErr = abs(sumSqEstErr - (sumEstErr*sumEstErr)/trials);
-    final double varEstErr = (trials == 1)? deltaSqEstErr/trials : deltaSqEstErr/(trials-1);
+    final double meanEst = sumEst / trials;
+    final double meanEstErr = sumEstErr / trials;
+    final double deltaSqEstErr = abs(sumSqEstErr - (sumEstErr * sumEstErr) / trials);
+    final double varEstErr = (trials == 1) ? deltaSqEstErr / trials : deltaSqEstErr / (trials - 1);
     final double rse = sqrt(varEstErr);
     //compute theoretical sketch RSE
-    final double invKm1 = 1.0/(k-1);
-    final double oneMinusKoverN = 1.0 - (double)k/uPerTrial;
-    final double thrse = (sumEstErr == 0.0)? 0.0 : sqrt(invKm1 * oneMinusKoverN);
+    final double invKm1 = 1.0 / (k - 1);
+    final double oneMinusKoverN = 1.0 - (double)k / uPerTrial;
+    final double thrse = (sumEstErr == 0.0) ? 0.0 : sqrt(invKm1 * oneMinusKoverN);
     //compute Bernoulli RSE
-    final double invUperTrial = 1.0/uPerTrial;
-    final double varOverN = (p == 1.0)? 0.0 : 1.0/p - 1.0;
-    final double prse = (p == 1.0)? 0.0 : sqrt(invUperTrial * varOverN);
+    final double invUperTrial = 1.0 / uPerTrial;
+    final double varOverN = (p == 1.0) ? 0.0 : 1.0 / p - 1.0;
+    final double prse = (p == 1.0) ? 0.0 : sqrt(invUperTrial * varOverN);
 
     //Compute average of each of the bounds estimates
     //    double meanLB2est = sumLB2/(uPerTrial*trials) -1;
@@ -101,7 +99,7 @@ public class ProcessStats {
     //    double meanUB2est = sumUB2/(uPerTrial*trials) -1;
 
     //Speed
-    final double meanUpdateTimePerU_nS = sumUpdateTimePerU_nS/trials;
+    final double meanUpdateTimePerU_nS = sumUpdateTimePerU_nS / trials;
 
     //OUTPUT
     dataStr.setLength(0);
@@ -186,7 +184,7 @@ public class ProcessStats {
    * @return the trial index
    */
   private static int quantileIndex(final double frac, final int trials) {
-    final int idx1 = (int) Math.floor(frac*trials);
-    return (idx1 >= trials)? trials-1: idx1;
+    final int idx1 = (int) Math.floor(frac * trials);
+    return (idx1 >= trials) ? trials - 1 : idx1;
   }
 }

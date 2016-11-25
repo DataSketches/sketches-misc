@@ -8,43 +8,48 @@ import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.hll.HllSketchBuilder;
 import com.yahoo.sketches.hll.Preamble;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 /**
  */
 public class BenchmarkMain {
-  @SuppressWarnings("serial")
-  public static void main(final String[] args)
-  {
+
+  /**
+   *
+   * @param args not used
+   */
+  public static void main(final String[] args) {
     final int lgK = 12;
 
-    final List<SketchBenchmark> benchmarks = new ArrayList<SketchBenchmark>(){{
-      this.add(new ThetaMemoryBenchmark(lgK));
-      this.add(new ThetaBenchmark(lgK));
+    final List<SketchBenchmark> benchmarks = new ArrayList<SketchBenchmark>() {
+      private static final long serialVersionUID = 1L;
 
-      final HllSketchBuilder sparseBob = HllSketch.builder().setPreamble(Preamble.fromLogK(lgK));
-      final HllSketchBuilder denseBob = sparseBob.copy().setDenseMode(true);
-      this.add(new HllSketchBenchmark("HLL Sketch", new Random(lgK), sparseBob, denseBob));
-      this.add(
-          new HllSketchBenchmark(
-              "HLL Non-Compressed to Compressed",
-              new Random(lgK), sparseBob, denseBob.copy().setCompressedDense(true)
-          )
-      );
-      this.add(
-          new HllSketchBenchmark(
-              "HLL Compressed to Non-Compressed",
-              new Random(lgK), sparseBob.copy().setCompressedDense(true), denseBob
-          )
-      );
-      this.add(
-          new HllSketchBenchmark(
-              "HLL All Compressed",
-              new Random(lgK), denseBob.copy().setCompressedDense(true),
-              denseBob.copy().setCompressedDense(true)
-          )
-      );
-    }};
+      {
+        this.add(new ThetaMemoryBenchmark(lgK));
+        this.add(new ThetaBenchmark(lgK));
+
+        final HllSketchBuilder sparseBob = HllSketch.builder().setPreamble(Preamble.fromLogK(lgK));
+        final HllSketchBuilder denseBob = sparseBob.copy().setDenseMode(true);
+        this.add(new HllSketchBenchmark("HLL Sketch", new Random(lgK), sparseBob, denseBob));
+        this.add(
+            new HllSketchBenchmark(
+                "HLL Non-Compressed to Compressed",
+                new Random(lgK), sparseBob, denseBob.copy().setCompressedDense(true)
+            )
+        );
+        this.add(
+            new HllSketchBenchmark(
+                "HLL Compressed to Non-Compressed",
+                new Random(lgK), sparseBob.copy().setCompressedDense(true), denseBob
+            )
+        );
+        this.add(
+            new HllSketchBenchmark(
+                "HLL All Compressed",
+                new Random(lgK), denseBob.copy().setCompressedDense(true),
+                denseBob.copy().setCompressedDense(true)
+            )
+        );
+      }
+    };
 
     runBenchmarks(benchmarks, 20, 100, powerLawDistribution);
   }
@@ -74,7 +79,7 @@ public class BenchmarkMain {
       doGC();
 
 
-      for (int i = 0; i < numTimes; i+=increment) {
+      for (int i = 0; i < numTimes; i += increment) {
         start = System.currentTimeMillis();
         benchmark.runNTimes(increment);
         final long time = System.currentTimeMillis() - start;
@@ -102,7 +107,7 @@ public class BenchmarkMain {
 
   @SuppressWarnings("serial")
   static final List<SketchBenchmark.Spec> powerLawDistribution =
-      new ArrayList<SketchBenchmark.Spec>(){{
+      new ArrayList<SketchBenchmark.Spec>() { {
     this.add(new SketchBenchmark.Spec(0, 44129));
     this.add(new SketchBenchmark.Spec(1, 431561));
     this.add(new SketchBenchmark.Spec(2, 129063));
@@ -160,6 +165,6 @@ public class BenchmarkMain {
     this.add(new SketchBenchmark.Spec(546015, 1));
     this.add(new SketchBenchmark.Spec(1106004, 2));
     this.add(new SketchBenchmark.Spec(1766259, 2));
-  }};
+  } };
 
 }

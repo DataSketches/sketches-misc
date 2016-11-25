@@ -26,8 +26,6 @@ import com.yahoo.sketches.theta.Sketches;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 /**
  * Command line access to the basic sketch functions.  This is intentionally a very simple parser
  * with limited functionality that can be used for small experiments and for demos.
@@ -70,7 +68,7 @@ public class CommandLine {
       case "freq": parseFreq(args); break;
       case "help": help(); break;
       default: {
-        printlnErr("Unrecognized TYPE: "+token1);
+        printlnErr("Unrecognized TYPE: " + token1);
         help();
       }
     }
@@ -128,7 +126,7 @@ public class CommandLine {
         sketch.update(itemStr);
       }
     } catch (final IOException e) {
-      printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
+      printlnErr("Read Error: Item: " + itemStr + ", " + br.toString());
       throw new RuntimeException(e);
     }
     println(sketch.toString());
@@ -163,14 +161,14 @@ public class CommandLine {
         sketch.update(item);
       }
     } catch (final IOException | NumberFormatException e ) {
-      printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
+      printlnErr("Read Error: Item: " + itemStr + ", " + br.toString());
       throw new RuntimeException(e);
     }
     final int ranks = 101;
     final double[] valArr = sketch.getQuantiles(ranks);
-    println("Rank"+TAB+ "Value");
-    for (int i=0; i<ranks; i++) {
-      final String r = String.format("%.2f",(double)i/ranks);
+    println("Rank" + TAB + "Value");
+    for (int i = 0; i < ranks; i++) {
+      final String r = String.format("%.2f",(double)i / ranks);
       println(r + TAB + valArr[i]);
     }
   }
@@ -204,23 +202,23 @@ public class CommandLine {
         sketch.update(item);
       }
     } catch (final IOException | NumberFormatException e ) {
-      printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
+      printlnErr("Read Error: Item: " + itemStr + ", " + br.toString());
       throw new RuntimeException(e);
     }
     final int splitPoints = 30;
     final long n = sketch.getN();
     final double[] splitsArr = getEvenSplits(sketch, splitPoints);
     final double[] histArr = sketch.getPMF(splitsArr);
-    println("Value"+TAB+ "Freq");
+    println("Value" + TAB + "Freq");
     //int histArrLen = histArr.length; //one larger than splitsArr
     final double min = sketch.getMinValue();
     String splitVal = String.format("%,f", min);
     String freqVal = String.format("%,d", (long)(histArr[0] * n));
-    println(splitVal+TAB+freqVal);
-    for (int i=0; i<splitsArr.length; i++) {
+    println(splitVal + TAB + freqVal);
+    for (int i = 0; i < splitsArr.length; i++) {
       splitVal = String.format("%,f", splitsArr[i] * n);
-      freqVal = String.format("%,d", (long)(histArr[i+1] * n));
-      println(splitVal+TAB+freqVal);
+      freqVal = String.format("%,d", (long)(histArr[i + 1] * n));
+      println(splitVal + TAB + freqVal);
     }
   }
 
@@ -254,23 +252,23 @@ public class CommandLine {
         sketch.update(item);
       }
     } catch (final IOException | NumberFormatException e ) {
-      printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
+      printlnErr("Read Error: Item: " + itemStr + ", " + br.toString());
       throw new RuntimeException(e);
     }
     final int splitPoints = 30;
     final long n = sketch.getN();
     final double[] splitsArr = getLogSplits(sketch, splitPoints);
     final double[] histArr = sketch.getPMF(splitsArr);
-    println("Value"+TAB+ "Freq");
+    println("Value" + TAB + "Freq");
     //int histArrLen = histArr.length; //one larger than splitsArr
     final double min = sketch.getMinValue();
     String splitVal = String.format("%,f", min);
     String freqVal = String.format("%,d", (long)(histArr[0] * n));
-    println(splitVal+TAB+freqVal);
-    for (int i=0; i<splitsArr.length; i++) {
+    println(splitVal + TAB + freqVal);
+    for (int i = 0; i < splitsArr.length; i++) {
       splitVal = String.format("%,f", splitsArr[i] * n);
-      freqVal = String.format("%,d", (long)(histArr[i+1] * n));
-      println(splitVal+TAB+freqVal);
+      freqVal = String.format("%,d", (long)(histArr[i + 1] * n));
+      println(splitVal + TAB + freqVal);
     }
   }
 
@@ -304,16 +302,16 @@ public class CommandLine {
         sketch.update(itemStr);
       }
     } catch (final IOException e ) {
-      printlnErr("Read Error: Item: "+itemStr +", "+br.toString());
+      printlnErr("Read Error: Item: " + itemStr + ", " + br.toString());
       throw new RuntimeException(e);
     }
     //NFP is a subset of NFN
     final ItemsSketch.Row<String>[] rowArr = sketch.getFrequentItems(ErrorType.NO_FALSE_POSITIVES);
     final int len = rowArr.length;
-    println("Qualifying Rows: "+len);
+    println("Qualifying Rows: " + len);
     println(Row.getRowHeader());
-    for (int i=0; i<len; i++) {
-      println((i+1) + rowArr[i].toString());
+    for (int i = 0; i < len; i++) {
+      println((i + 1) + rowArr[i].toString());
     }
   }
 
@@ -330,7 +328,7 @@ public class CommandLine {
     final double logMax = log10(max);
     final double[] logArr = getSplits(logMin, logMax, splitPoints);
     final double[] expArr = new double[logArr.length];
-    for (int i= 0; i<logArr.length; i++) {
+    for (int i = 0; i < logArr.length; i++) {
       expArr[i] = pow(10.0, logArr[i]);
     }
     return expArr;
@@ -338,10 +336,10 @@ public class CommandLine {
 
   private static double[] getSplits(final double min, final double max, final int splitPoints) {
     final double range = max - min;
-    final double delta = range/(splitPoints + 1);
+    final double delta = range / (splitPoints + 1);
     final double[] splits = new double[splitPoints];
     for (int i = 0; i < splitPoints; i++) {
-      splits[i] = delta * (i+1);
+      splits[i] = delta * (i + 1);
     }
     return splits;
   }
@@ -362,7 +360,7 @@ public class CommandLine {
         br = new BufferedReader(new InputStreamReader(new FileInputStream(token), UTF_8));
       }
     } catch (final FileNotFoundException e) {
-      printlnErr("File Not Found: "+token);
+      printlnErr("File Not Found: " + token);
       System.exit(1);
     }
     return br;
@@ -370,7 +368,7 @@ public class CommandLine {
 
   private void uniqHelp() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(BOLD+"UNIQ SYNOPSIS"+OFF).append(LS);
+    sb.append(BOLD + "UNIQ SYNOPSIS" + OFF).append(LS);
     sb.append("    sketch uniq help").append(LS);
     sb.append("    sketch uniq [SIZE] [FILE]").append(LS);
     println(sb.toString());
@@ -378,7 +376,7 @@ public class CommandLine {
 
   private void rankHelp() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(BOLD+"RANK SYNOPSIS"+OFF).append(LS);
+    sb.append(BOLD + "RANK SYNOPSIS" + OFF).append(LS);
     sb.append("    sketch rank help").append(LS);
     sb.append("    sketch rank [SIZE] [FILE]").append(LS);
     println(sb.toString());
@@ -386,7 +384,7 @@ public class CommandLine {
 
   private void histHelp() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(BOLD+"HIST SYNOPSIS"+OFF).append(LS);
+    sb.append(BOLD + "HIST SYNOPSIS" + OFF).append(LS);
     sb.append("    sketch hist help").append(LS);
     sb.append("    sketch hist [SIZE] [FILE]").append(LS);
     println(sb.toString());
@@ -394,7 +392,7 @@ public class CommandLine {
 
   private void logHistHelp() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(BOLD+"LOGHIST SYNOPSIS"+OFF).append(LS);
+    sb.append(BOLD + "LOGHIST SYNOPSIS" + OFF).append(LS);
     sb.append("    sketch loghist help").append(LS);
     sb.append("    sketch loghist [SIZE] [FILE]").append(LS);
     println(sb.toString());
@@ -402,7 +400,7 @@ public class CommandLine {
 
   private void freqHelp() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(BOLD+"FREQ SYNOPSIS"+OFF).append(LS);
+    sb.append(BOLD + "FREQ SYNOPSIS" + OFF).append(LS);
     sb.append("    sketch freq help").append(LS);
     sb.append("    sketch freq [SIZE] [FILE]").append(LS);
     println(sb.toString());
@@ -413,18 +411,18 @@ public class CommandLine {
    */
   public void help() {
     final StringBuilder sb = new StringBuilder();
-    sb.append(BOLD+"NAME"+OFF).append(LS);
+    sb.append(BOLD + "NAME" + OFF).append(LS);
     sb.append("    sketch - sketch Uniques, Quantiles, Histograms, or Frequent Items.").append(LS);
-    sb.append(BOLD+"SYNOPSIS"+OFF).append(LS);
+    sb.append(BOLD + "SYNOPSIS" + OFF).append(LS);
     sb.append("    sketch (this help)").append(LS);
     sb.append("    sketch TYPE help").append(LS);
     sb.append("    sketch TYPE [SIZE] [FILE]").append(LS);
-    sb.append(BOLD+"DESCRIPTION"+OFF).append(LS);
+    sb.append(BOLD + "DESCRIPTION" + OFF).append(LS);
     sb.append("    Write a sketch(TYPE, SIZE) of FILE to standard output.").append(LS);
     sb.append("    TYPE is required.").append(LS);
     sb.append("    If SIZE is omitted, internal defaults are used.").append(LS);
     sb.append("    If FILE is omitted, Standard In is assumed.").append(LS);
-    sb.append(BOLD+"TYPE DESCRIPTION"+OFF).append(LS);
+    sb.append(BOLD + "TYPE DESCRIPTION" + OFF).append(LS);
     sb.append("    sketch uniq    : Sketch the unique string items of a stream.").append(LS);
     sb.append("    sketch rank    : Sketch the rank-value distribution of a numeric value stream.")
       .append(LS);

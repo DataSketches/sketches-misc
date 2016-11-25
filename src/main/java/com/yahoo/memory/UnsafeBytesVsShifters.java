@@ -10,10 +10,6 @@ import static com.yahoo.memory.UnsafeUtil.unsafe;
 //import static com.yahoo.sketches.TestingUtil.milliSecToString;
 import static java.lang.Math.pow;
 
-//import static com.yahoo.sketches.memory.MemoryPerformance.*;
-
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 public class UnsafeBytesVsShifters {
   private int arrLongs_;     //# entries in array
   private int lgMinTrials_;  //minimum # of trials
@@ -26,6 +22,9 @@ public class UnsafeBytesVsShifters {
   private int lgMaxOps_;     //lgMaxLongs_ + lgMinTrials_
   private long address_ = 0; //used for unsafe
 
+  /**
+   * Instantiate from main
+   */
   public UnsafeBytesVsShifters() {
     //Configure
     lgMinTrials_ = 10;  //was 6
@@ -60,11 +59,11 @@ public class UnsafeBytesVsShifters {
 
     public void printRow() {
       final long numOps = (long)((double)trials * arrLongs);
-      final double logArrLongs = gi/ppo;
-      final double rTrial_nS = (double)sumReadTrials_nS/trials;
-      final double wTrial_nS = (double)sumWriteTrials_nS/trials;
-      final double rOp_nS = rTrial_nS/arrLongs;
-      final double wOp_nS = wTrial_nS/arrLongs;
+      final double logArrLongs = gi / ppo;
+      final double rTrial_nS = (double)sumReadTrials_nS / trials;
+      final double wTrial_nS = (double)sumWriteTrials_nS / trials;
+      final double rOp_nS = rTrial_nS / arrLongs;
+      final double wOp_nS = wTrial_nS / arrLongs;
       //Print
       final String out = String.format("%6.2f\t%d\t%d\t%d\t%.1f\t%8.3f\t%.1f\t%8.3f",
           logArrLongs, arrLongs, trials, numOps, rTrial_nS, rOp_nS, wTrial_nS, wOp_nS);
@@ -73,17 +72,17 @@ public class UnsafeBytesVsShifters {
   }
 
   private Point getNextPoint(final Point p) {
-    final int lastArrLongs = (int)pow(2.0, p.gi/ppo_);
+    final int lastArrLongs = (int)pow(2.0, p.gi / ppo_);
     int nextArrLongs;
     double logArrLongs;
     do {
-      logArrLongs = (++p.gi)/ppo_;
+      logArrLongs = (++p.gi) / ppo_;
       if (p.gi > maxGI_) { return null; }
       nextArrLongs = (int)pow(2.0, logArrLongs);
     } while (nextArrLongs <= lastArrLongs);
     p.arrLongs = nextArrLongs;
     //compute trials
-    final double logTrials = Math.min(lgMaxOps_- logArrLongs, lgMaxTrials_);
+    final double logTrials = Math.min(lgMaxOps_ - logArrLongs, lgMaxTrials_);
     p.trials = (int)pow(2.0, logTrials);
     return p;
   }
@@ -93,18 +92,18 @@ public class UnsafeBytesVsShifters {
   /*************************************/
 
   private void testUnsafeByte() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       address_ = unsafe.allocateMemory(p.arrLongs << 3);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_UnsafeByte(address_, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_UnsafeByte(address_, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -115,13 +114,13 @@ public class UnsafeBytesVsShifters {
   //Must do writes first
   private static final long trial_UnsafeByte(final long address, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         final int j = i << 3;
         long k = 0;
         k |= (unsafe.getByte(address + j) & 0XFFL);
@@ -137,11 +136,11 @@ public class UnsafeBytesVsShifters {
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
         if (address != 0) { unsafe.freeMemory(address); }
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         final long j = i << 3;
         long k = i;
         unsafe.putByte(address + j, (byte) k);
@@ -163,18 +162,18 @@ public class UnsafeBytesVsShifters {
   /*************************************/
 
   private void testBytesByShifters() {
-    Point p = new Point(ppo_, minGI_-1, 1<<lgMinLongs_, 1<<lgMaxTrials_); //just below the start
+    Point p = new Point(ppo_, minGI_ - 1, 1 << lgMinLongs_, 1 << lgMaxTrials_); //just below the start
     Point.printHeader();
     while ((p = getNextPoint(p)) != null) { //an array size point
       address_ = unsafe.allocateMemory(p.arrLongs << 3);
       //Do all write trials first
       p.sumWriteTrials_nS = 0;
-      for (int t=0; t<p.trials; t++) { //do writes first
+      for (int t = 0; t < p.trials; t++) { //do writes first
         p.sumWriteTrials_nS += trial_BytesByShifters(address_, p.arrLongs, false); //a single trial write
       }
       //Do all read trials
       p.sumReadTrials_nS  = 0;
-      for (int t=0; t<p.trials; t++) {
+      for (int t = 0; t < p.trials; t++) {
         p.sumReadTrials_nS += trial_BytesByShifters(address_, p.arrLongs, true); //a single trial read
       }
       p.printRow();
@@ -185,14 +184,14 @@ public class UnsafeBytesVsShifters {
   //Must do writes first
   private static final long trial_BytesByShifters(final long address, final int arrLongs,
       final boolean read) {
-    final long checkSum = (arrLongs * (arrLongs - 1L)) /2L;
+    final long checkSum = (arrLongs * (arrLongs - 1L)) / 2L;
     final long startTime_nS, stopTime_nS;
     if (read) {
       //Timing interval for a single trial
       long trialSum = 0;
 
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         long k = 0;
         final long long0 = unsafe.getLong(address + (i << 3));
         k |= (Shifters.getByte0(long0) & 0XFFL);
@@ -208,11 +207,11 @@ public class UnsafeBytesVsShifters {
       stopTime_nS = System.nanoTime();
       if (trialSum != checkSum) {
         if (address != 0) { unsafe.freeMemory(address); }
-        throw new IllegalStateException("Bad checksum: "+trialSum+" != "+checkSum);
+        throw new IllegalStateException("Bad checksum: " + trialSum + " != " + checkSum);
       }
     } else { //write
       startTime_nS = System.nanoTime();
-      for (int i=0; i<arrLongs; i++) {
+      for (int i = 0; i < arrLongs; i++) {
         //int j = i << 3;
         long long0 = 0L;
         long k = i;
@@ -258,14 +257,14 @@ public class UnsafeBytesVsShifters {
     }
   }
 
-  public void go() {
+  void go() {
     final long startMillis = System.currentTimeMillis();
     println("Test Unsafe Byte");
     testUnsafeByte();
     println("\nTest Bytes By Shifters");
     testBytesByShifters();
     final long testMillis = System.currentTimeMillis() - startMillis;
-    println("Total Time: "+ milliSecToString(testMillis));
+    println("Total Time: " + milliSecToString(testMillis));
   }
 
   //MAIN
@@ -274,5 +273,5 @@ public class UnsafeBytesVsShifters {
     test.go();
   }
 
-  public static void println(final String s) {System.out.println(s); }
+  public static void println(final String s) { System.out.println(s); }
 }

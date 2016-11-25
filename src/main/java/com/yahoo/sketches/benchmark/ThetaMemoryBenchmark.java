@@ -12,8 +12,6 @@ import com.yahoo.sketches.theta.Sketch;
 import com.yahoo.sketches.theta.Union;
 import com.yahoo.sketches.theta.UpdateSketch;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 /**
  */
 public class ThetaMemoryBenchmark implements SketchBenchmark {
@@ -23,7 +21,7 @@ public class ThetaMemoryBenchmark implements SketchBenchmark {
 
   private List<Memory> memories;
 
-  public ThetaMemoryBenchmark(final int lgK) {
+  ThetaMemoryBenchmark(final int lgK) {
     this.nominalEntries = 1 << lgK;
     this.rand = new Random(lgK);
     this.bytes = new byte[Sketch.getMaxUpdateSketchBytes(nominalEntries) + 8];

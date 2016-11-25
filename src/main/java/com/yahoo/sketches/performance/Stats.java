@@ -8,8 +8,6 @@ package com.yahoo.sketches.performance;
 import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.theta.UpdateSketch;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 /**
  * Holds key metrics from a single trial
  *
@@ -32,7 +30,7 @@ public class Stats implements Comparable<Stats> {
    */
   public void update(final UpdateSketch sketch, final int uPerTrial, final long updateTime_nS) {
     estimate = sketch.getEstimate();
-    re = estimate/uPerTrial - 1.0;
+    re = estimate / uPerTrial - 1.0;
     lb2est = sketch.getLowerBound(2);
     lb1est = sketch.getLowerBound(1);
     ub1est = sketch.getUpperBound(1);
@@ -48,7 +46,7 @@ public class Stats implements Comparable<Stats> {
    */
   public void update(final HllSketch sketch, final int uPerTrial, final long updateTime_nS) {
     estimate = sketch.getEstimate();
-    re = estimate/uPerTrial - 1.0;
+    re = estimate / uPerTrial - 1.0;
     lb2est = sketch.getLowerBound(2);
     lb1est = sketch.getLowerBound(1);
     ub1est = sketch.getUpperBound(1);

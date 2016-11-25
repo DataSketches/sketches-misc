@@ -8,8 +8,6 @@ import java.util.Random;
 import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.hll.HllSketchBuilder;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 /**
  */
 public class HllSketchBenchmark implements SketchBenchmark {
@@ -20,7 +18,7 @@ public class HllSketchBenchmark implements SketchBenchmark {
 
   private List<HllSketch> sketches;
 
-  public HllSketchBenchmark(final String name, final Random rand, final HllSketchBuilder inputBob,
+  HllSketchBenchmark(final String name, final Random rand, final HllSketchBuilder inputBob,
       final HllSketchBuilder unionBob)
   {
     this.name = name;

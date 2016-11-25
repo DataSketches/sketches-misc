@@ -11,8 +11,6 @@ import com.yahoo.sketches.theta.Sketches;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 /**
  * Characterizes the RSE on the whole UniqueCountMap as the key internal maps.
  * For comparison, this can also characterize the internal HLL and Theta sketches.
@@ -53,6 +51,11 @@ public class VariousMapRSETest {
     println(LS);
   }
 
+
+  /**
+   * Instantiate from main
+   * @param skEnum the sketch to test.
+   */
   @SuppressWarnings("null")
   public void testRSE(final SketchEnum skEnum) {
 
@@ -85,7 +88,7 @@ public class VariousMapRSETest {
       thSketch = thBldr.build();       //set here because we can reset it
       println("Theta Sketch: k:\t" + K);
     }
-    else if (skEnum == SketchEnum.HLL){
+    else if (skEnum == SketchEnum.HLL) {
       println("HLL Sketch: k:\t" + K);
     }
     else if (skEnum == SketchEnum.COUPON_HASH_MAP) {
@@ -96,7 +99,7 @@ public class VariousMapRSETest {
     }
 
     println("U\tTrials\tMean\tBias\tRSE\tMemUsage");
-    double sum=0, sumErr=0,sumErrSq=0;
+    double sum = 0, sumErr = 0,sumErrSq = 0;
 
     //at each point do multiple trials.
     final long startMs = System.currentTimeMillis(); //start the overall process timing
@@ -135,7 +138,7 @@ public class VariousMapRSETest {
           ipv4bytes = Util.intToBytes(ipv4, ipv4bytes);
           startnS = System.nanoTime();
           final int index = hllMap.findOrInsertKey(ipv4bytes);
-          for (long i=0; i< x; i++) { //x is the #uniques per trial
+          for (long i = 0; i < x; i++) { //x is the #uniques per trial
             v++;  //next unique
             valBytes = Util.longToBytes(v, valBytes);
             final int coupon = Map.coupon16(valBytes);
@@ -150,7 +153,7 @@ public class VariousMapRSETest {
           ipv4bytes = Util.intToBytes(ipv4, ipv4bytes);
           startnS = System.nanoTime();
           final int index = map.findOrInsertKey(ipv4bytes);
-          for (long i=0; i< x; i++) { //x is the #uniques per trial
+          for (long i = 0; i < x; i++) { //x is the #uniques per trial
             v++;  //next unique
             valBytes = Util.longToBytes(v, valBytes);
             final int coupon = Map.coupon16(valBytes);
@@ -164,7 +167,7 @@ public class VariousMapRSETest {
           ipv4++;  //different IP for each trial
           ipv4bytes = Util.intToBytes(ipv4, ipv4bytes);
           startnS = System.nanoTime();
-          for (long i=0; i< x; i++) { //x is the #uniques per trial
+          for (long i = 0; i < x; i++) { //x is the #uniques per trial
             v++;  //next unique
             valBytes = Util.longToBytes(v, valBytes);
             est = ucMap.update(ipv4bytes, valBytes);
@@ -176,7 +179,7 @@ public class VariousMapRSETest {
         else if (skEnum == SketchEnum.THETA) {
           thSketch.reset();
           startnS = System.nanoTime();
-          for (long i=0; i< x; i++) { //x is the #uniques per trial
+          for (long i = 0; i < x; i++) { //x is the #uniques per trial
             v++;  //next unique
             thSketch.update(v);
           }
@@ -187,7 +190,7 @@ public class VariousMapRSETest {
         else { // if (skEnum == SketchEnum.HLL) {
           hllSk = hllBldr.build(); //no reset on HLL !
           startnS = System.nanoTime();
-          for (long i=0; i< x; i++) { //x is the #uniques per trial
+          for (long i = 0; i < x; i++) { //x is the #uniques per trial
             v++;  //next unique
             hllSk.update(v);
           }
@@ -211,14 +214,14 @@ public class VariousMapRSETest {
         sumErr += err;
         sumErrSq += err * err;
       }
-      final double mean = sum /trials;
-      final double meanErr = sumErr/trials;
-      final double varErr = (sumErrSq - meanErr * sumErr/trials)/(trials -1);
-      final double relErr = Math.sqrt(varErr)/x;
-      final double bias = mean/x - 1.0;
+      final double mean = sum / trials;
+      final double meanErr = sumErr / trials;
+      final double varErr = (sumErrSq - meanErr * sumErr / trials) / (trials - 1);
+      final double relErr = Math.sqrt(varErr) / x;
+      final double bias = mean / x - 1.0;
 
       final String line = String.format("%d\t%d\t%.2f\t%.2f%%\t%.2f%%\t%,d",
-          x, trials, mean, bias*100, relErr*100, memUsage);
+          x, trials, mean, bias * 100, relErr * 100, memUsage);
       println(line);
     }
     println("");
@@ -229,17 +232,21 @@ public class VariousMapRSETest {
 
     final long endMs = System.currentTimeMillis();
     final long deltamS = endMs - startMs;
-    final double updnS2 = ((double)totnS)/v;
+    final double updnS2 = ((double)totnS) / v;
     println(String.format(  "nS/Update        :\t%.1f", updnS2));
-    println(                "Total: H:M:S.mS  :\t"+Util.milliSecToString(deltamS));
+    println(                "Total: H:M:S.mS  :\t" + Util.milliSecToString(deltamS));
   }
 
   @SuppressWarnings("unused")
   private static void printIPandValue(final byte[] ip, final byte[] value) {
-    println("IP:\t"+Util.bytesToString(ip, false, false, ".")
-      + "\tVal:\t"+Util.bytesToString(value, false, false, "."));
+    println("IP:\t" + Util.bytesToString(ip, false, false, ".")
+      + "\tVal:\t" + Util.bytesToString(value, false, false, "."));
   }
 
+  /**
+   *
+   * @param args not away
+   */
   public static void main(final String[] args) {
     final VariousMapRSETest test = new VariousMapRSETest();
     test.testHllMap();
