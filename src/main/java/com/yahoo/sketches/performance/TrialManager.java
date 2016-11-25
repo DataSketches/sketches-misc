@@ -47,15 +47,16 @@ public class TrialManager {
    * purpose of this test.
    * @param rebuild set true if rebuild is desired
    */
-  public void setUpdateSketchBuilder(UpdateSketchBuilder udBldr,  boolean direct, boolean rebuild) {
+  public void setUpdateSketchBuilder(final UpdateSketchBuilder udBldr,  final boolean direct,
+      final boolean rebuild) {
     lgK_ = udBldr.getLgNominalEntries();
     p_ = udBldr.getP();
-    int k = 1 << lgK_;
+    final int k = 1 << lgK_;
     lgBP_ = lgK_ + 1; //set the break point where the #trials starts to decrease.
     Memory mem = null;
     if (direct) {
-      int bytes = Sketch.getMaxUpdateSketchBytes(k);
-      byte[] memArr = new byte[bytes];
+      final int bytes = Sketch.getMaxUpdateSketchBytes(k);
+      final byte[] memArr = new byte[bytes];
       mem = new NativeMemory(memArr);
       udBldr.initMemory(mem);
     }
@@ -67,7 +68,7 @@ public class TrialManager {
    * Sets the HLL builder used to create the HLL sketches.
    * @param hllBldr the HllSketchBuilder
    */
-  public void setHllSketchBuilder(HllSketchBuilder hllBldr) {
+  public void setHllSketchBuilder(final HllSketchBuilder hllBldr) {
     lgK_ = hllBldr.getLogBuckets();
     p_ = 1.0;
     udSketch_ = null;
@@ -89,7 +90,8 @@ public class TrialManager {
    * that will be used for generating trial sets. Recommended values are one point per octave
    * to 16 points per octave.
    */
-  public void setTrialsProfile(int lgMinTrials, int lgMaxTrials, int lgMaxU, int ppo) {
+  public void setTrialsProfile(final int lgMinTrials, final int lgMaxTrials, final int lgMaxU,
+      final int ppo) {
     lgMinTrials_ = lgMinTrials;
     lgMaxTrials_ = lgMaxTrials;
     lgMaxU_ = lgMaxU;
@@ -102,20 +104,20 @@ public class TrialManager {
    * @param stats The given Stats object
    * @param uPerTrial the number of updates for this trial.
    */
-  public void doTrial(Stats stats, int uPerTrial) {
+  public void doTrial(final Stats stats, final int uPerTrial) {
     if (udSketch_ != null) { //UpdateSketch
       udSketch_.reset(); //reuse the same sketch
-      long startUpdateTime_nS = System.nanoTime();
+      final long startUpdateTime_nS = System.nanoTime();
       for (int u = uPerTrial; u-- > 0; ) { udSketch_.update(vIn_++); }
-      long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
+      final long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
       if (rebuild_) { udSketch_.rebuild(); } //Resizes down to k. Only useful with QuickSelectSketch
       stats.update(udSketch_, uPerTrial, updateTime_nS);
     }
     else { //HllSketch
-      HllSketch hllSketch = hllBuilder_.build();
-      long startUpdateTime_nS = System.nanoTime();
+      final HllSketch hllSketch = hllBuilder_.build();
+      final long startUpdateTime_nS = System.nanoTime();
       for (int u = uPerTrial; u-- > 0; ) { hllSketch.update(new long[]{vIn_++}); }
-      long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
+      final long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
       stats.update(hllSketch, uPerTrial, updateTime_nS);
     }
   }
@@ -125,12 +127,12 @@ public class TrialManager {
    * @param curU the given current number of uniques for a trial set.
    * @return the number of trials for a given current number of uniques for a trial set.
    */
-  public int getTrials(int curU) {
+  public int getTrials(final int curU) {
     if ((lgMinTrials_ == lgMaxTrials_) || (curU <= (1 << lgBP_))) {
       return 1 << lgMaxTrials_;
     }
-    double lgCurU = log(curU) / LN2;
-    double lgTrials = slope_ * (lgCurU - lgBP_) + lgMaxTrials_;
+    final double lgCurU = log(curU) / LN2;
+    final double lgTrials = slope_ * (lgCurU - lgBP_) + lgMaxTrials_;
     return (int) pow(2.0, lgTrials);
   }
 

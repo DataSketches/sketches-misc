@@ -33,8 +33,8 @@ public class ExactVsSketchDemo {
    * the remainder will be duplicates. The default is 0.5.</li>
    * </ul>
    */
-  public static void main(String[] args) {
-    int argsLen = args.length;
+  public static void main(final String[] args) {
+    final int argsLen = args.length;
     long streamLen = (long)1E8;   //The default stream length
     double uFrac = .50;          //The default fraction that are unique
     if (argsLen == 1) {
@@ -44,7 +44,7 @@ public class ExactVsSketchDemo {
       uFrac = Double.parseDouble(args[1]);
     }
 
-    DemoImpl demo = new DemoImpl(streamLen, uFrac);
+    final DemoImpl demo = new DemoImpl(streamLen, uFrac);
 
     demo.runDemo();
   }

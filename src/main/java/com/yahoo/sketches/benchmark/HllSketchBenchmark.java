@@ -20,7 +20,8 @@ public class HllSketchBenchmark implements SketchBenchmark {
 
   private List<HllSketch> sketches;
 
-  public HllSketchBenchmark(String name, Random rand, HllSketchBuilder inputBob, HllSketchBuilder unionBob)
+  public HllSketchBenchmark(final String name, final Random rand, final HllSketchBuilder inputBob,
+      final HllSketchBuilder unionBob)
   {
     this.name = name;
     this.rand = rand;
@@ -29,13 +30,13 @@ public class HllSketchBenchmark implements SketchBenchmark {
   }
 
   @Override
-  public void setup(int numSketches, List<Spec> specs)
+  public void setup(final int numSketches, final List<Spec> specs)
   {
     sketches = new ArrayList<>(numSketches);
 
     for (Spec spec : specs) {
       for (int i = 0; i < spec.getNumSketches(); ++i) {
-        HllSketch sketch = inputBob.build();
+        final HllSketch sketch = inputBob.build();
         for (int j = 0; j < spec.getNumEntries(); ++j) {
           sketch.update(new long[]{rand.nextLong()});
         }
@@ -46,10 +47,10 @@ public class HllSketchBenchmark implements SketchBenchmark {
   }
 
   @Override
-  public void runNTimes(int n)
+  public void runNTimes(final int n)
   {
     for (int i = 0; i < n; ++i) {
-      HllSketch combined = unionBob.build();
+      final HllSketch combined = unionBob.build();
       for (HllSketch toUnion : sketches) {
         combined.union(toUnion);
       }

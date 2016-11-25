@@ -5,11 +5,13 @@ import java.util.List;
 
 import com.yahoo.sketches.Util;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 public class ReservoirEntropy {
 
-  public static void main(String[] args) {
+  /**
+   *
+   * @param args not used
+   */
+  public static void main(final String[] args) {
     //largeSketchEntropy();
     sketchEntropy();
     unionEntropy();
@@ -23,8 +25,8 @@ public class ReservoirEntropy {
     final int numIter = 100000;
     final int k = 64;
     final int valueRange = k * k;
-    SamplingConfig sc = new SamplingConfig(numIter, 1, k, valueRange);
-    int[] histogram = runExperiment(sc);
+    final SamplingConfig sc = new SamplingConfig(numIter, 1, k, valueRange);
+    final int[] histogram = runExperiment(sc);
 
     System.out.println("sketch entropy result:");
     System.out.println(printStats(histogram, sc));
@@ -37,8 +39,8 @@ public class ReservoirEntropy {
     final int numIter = 20000;
     final int k = 1 << 20;
     final int valueRange = k << 3;
-    SamplingConfig sc = new SamplingConfig(numIter, 1, k, valueRange);
-    int[] histogram = runExperiment(sc);
+    final SamplingConfig sc = new SamplingConfig(numIter, 1, k, valueRange);
+    final int[] histogram = runExperiment(sc);
 
     System.out.println("large sketch entropy result:");
     System.out.println(printStats(histogram, sc));
@@ -53,8 +55,8 @@ public class ReservoirEntropy {
     final int numIter = 100000;
     final int numSketches = 13;
     final int k = 100;
-    SamplingConfig sc = new SamplingConfig(numIter, numSketches, k, k);
-    int[] histogram = runExperiment(sc);
+    final SamplingConfig sc = new SamplingConfig(numIter, numSketches, k, k);
+    final int[] histogram = runExperiment(sc);
 
     System.out.println("union entropy result:");
     System.out.println(printStats(histogram, sc));
@@ -65,21 +67,21 @@ public class ReservoirEntropy {
     final int numSketches = 2;
     final int[] k = {128, 1024};
     final int[] valueRange = {8192, 1024};
-    SamplingConfig sc = new SamplingConfig(numIter, numSketches, k, valueRange);
-    int[] histogram = runExperiment(sc);
+    final SamplingConfig sc = new SamplingConfig(numIter, numSketches, k, valueRange);
+    final int[] histogram = runExperiment(sc);
 
     System.out.println("mismatched k entropy result:");
     System.out.println(printStats(histogram, sc));
   }
 
-  static int[] runExperiment(SamplingConfig sc) {
-    int[] hist = new int[sc.getCumulativeRange()];
+  static int[] runExperiment(final SamplingConfig sc) {
+    final int[] hist = new int[sc.getCumulativeRange()];
 
     for (int i = 0; i < sc.getNumIters(); ++i) {
       //if (i > 0 && i % 100 == 0) { System.err.println("Iter " + i); }
-      List<ReservoirItemsSketch<Integer>> sketchList = generateSketches(sc);
+      final List<ReservoirItemsSketch<Integer>> sketchList = generateSketches(sc);
 
-      Integer[] out = unionSketchList(sketchList, i, sc);
+      final Integer[] out = unionSketchList(sketchList, i, sc);
 
       for (int key : out) {
         ++hist[key];
@@ -91,14 +93,14 @@ public class ReservoirEntropy {
 
   // Creates a list of sketches with non-overlapping value ranges.
   static List<ReservoirItemsSketch<Integer>> generateSketches(final SamplingConfig sc) {
-    List<ReservoirItemsSketch<Integer>> sketchList = new ArrayList<>(sc.getNumSketches());
+    final List<ReservoirItemsSketch<Integer>> sketchList = new ArrayList<>(sc.getNumSketches());
 
     int idx = 0;
     for (int i = 0; i < sc.getNumSketches(); ++i) {
-      int k = sc.hasMultipleK() ? sc.getKArray()[i] : sc.getK();
-      int rangeMax = sc.getRangeSize(sc.hasMultipleK() ? i : 0);
+      final int k = sc.hasMultipleK() ? sc.getKArray()[i] : sc.getK();
+      final int rangeMax = sc.getRangeSize(sc.hasMultipleK() ? i : 0);
 
-      ReservoirItemsSketch<Integer> ris = ReservoirItemsSketch.getInstance(k);
+      final ReservoirItemsSketch<Integer> ris = ReservoirItemsSketch.getInstance(k);
       for (int j = 0; j < rangeMax; ++j) {
         ris.update(idx++);
       }
@@ -115,7 +117,7 @@ public class ReservoirEntropy {
     long outputCount = 0;
 
     for (int i = 0; i < histogram.length; ++i) {
-      int val = histogram[i];
+      final int val = histogram[i];
       //System.out.printf("[%d]: %d\n", i, histogram[i]);
       if (val < min) {
         min = val;
@@ -138,7 +140,7 @@ public class ReservoirEntropy {
     final double INV_LN_2 = 1.0 / Math.log(2.0);
 
     for (int count : data) {
-      double p = count * scaleFactor;
+      final double p = count * scaleFactor;
       H -= p * Math.log(p) * INV_LN_2;
     }
 
@@ -158,10 +160,10 @@ public class ReservoirEntropy {
   static <T> T[] unionSketchList(final List<ReservoirItemsSketch<T>> sketches,
                                  final int stIdx,
                                  final SamplingConfig sc) {
-    ReservoirItemsUnion<T> riu = ReservoirItemsUnion.getInstance(sc.getMaxK());
+    final ReservoirItemsUnion<T> riu = ReservoirItemsUnion.getInstance(sc.getMaxK());
 
     for (int i = 0; i < sketches.size(); ++i) {
-      int sketchIdx = (stIdx + i) % sc.getNumSketches();
+      final int sketchIdx = (stIdx + i) % sc.getNumSketches();
       riu.update(sketches.get(sketchIdx));
     }
 
@@ -182,15 +184,15 @@ public class ReservoirEntropy {
   }
 
   static Integer[] simpleUnion(final int k) {
-    ReservoirItemsSketch<Integer> rls1 = ReservoirItemsSketch.getInstance(k);
-    ReservoirItemsSketch<Integer> rls2 = ReservoirItemsSketch.getInstance(k);
+    final ReservoirItemsSketch<Integer> rls1 = ReservoirItemsSketch.getInstance(k);
+    final ReservoirItemsSketch<Integer> rls2 = ReservoirItemsSketch.getInstance(k);
 
     for (int i = 0; i < 10 * k; ++i) {
       rls1.update(i);
       rls2.update(k * k + i);
     }
 
-    ReservoirItemsUnion<Integer> rlu = ReservoirItemsUnion.getInstance(k);
+    final ReservoirItemsUnion<Integer> rlu = ReservoirItemsUnion.getInstance(k);
     rlu.update(rls1);
     rlu.update(rls2);
 

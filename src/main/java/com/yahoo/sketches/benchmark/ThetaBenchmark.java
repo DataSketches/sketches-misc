@@ -20,19 +20,19 @@ public class ThetaBenchmark implements SketchBenchmark
 
   private List<CompactSketch> sketches;
 
-  public ThetaBenchmark(int lgK) {
+  public ThetaBenchmark(final int lgK) {
     this.nominalEntries = 1 << lgK;
     this.rand = new Random(lgK);
   }
 
   @Override
-  public void setup(int numSketches, List<Spec> specs)
+  public void setup(final int numSketches, final List<Spec> specs)
   {
     sketches = new ArrayList<>(numSketches);
 
     for (Spec spec : specs) {
       for (int i = 0; i < spec.getNumSketches(); ++i) {
-        UpdateSketch sketch = UpdateSketch.builder().build(nominalEntries);
+        final UpdateSketch sketch = UpdateSketch.builder().build(nominalEntries);
         for (int j = 0; j < spec.getNumEntries(); ++j) {
           sketch.update(rand.nextLong());
         }
@@ -58,10 +58,10 @@ public class ThetaBenchmark implements SketchBenchmark
   }
 
   @Override
-  public void runNTimes(int n)
+  public void runNTimes(final int n)
   {
     for (int i = 0; i < n; ++i) {
-      Union combined = SetOperation.builder().buildUnion(nominalEntries);
+      final Union combined = SetOperation.builder().buildUnion(nominalEntries);
       for (Object toUnion : sketches) {
         combined.update((Sketch) toUnion);
       }

@@ -23,20 +23,20 @@ public class ThetaMemoryBenchmark implements SketchBenchmark {
 
   private List<Memory> memories;
 
-  public ThetaMemoryBenchmark(int lgK) {
+  public ThetaMemoryBenchmark(final int lgK) {
     this.nominalEntries = 1 << lgK;
     this.rand = new Random(lgK);
     this.bytes = new byte[Sketch.getMaxUpdateSketchBytes(nominalEntries) + 8];
   }
 
   @Override
-  public void setup(int numSketches, List<Spec> specs)
+  public void setup(final int numSketches, final List<Spec> specs)
   {
     memories = new ArrayList<>(numSketches);
 
     for (Spec spec : specs) {
       for (int i = 0; i < spec.getNumSketches(); ++i) {
-        UpdateSketch sketch = UpdateSketch.builder().build(nominalEntries);
+        final UpdateSketch sketch = UpdateSketch.builder().build(nominalEntries);
         for (int j = 0; j < spec.getNumEntries(); ++j) {
           sketch.update(rand.nextLong());
         }
@@ -48,7 +48,7 @@ public class ThetaMemoryBenchmark implements SketchBenchmark {
     int numRetained = 0;
     int numEstimating = 0;
     for (Memory mem : memories) {
-      Sketch sketch = Sketch.wrap(mem);
+      final Sketch sketch = Sketch.wrap(mem);
       numRetained += sketch.getRetainedEntries(true);
       if (sketch.isEstimationMode()) {
         ++numEstimating;
@@ -62,10 +62,11 @@ public class ThetaMemoryBenchmark implements SketchBenchmark {
   }
 
   @Override
-  public void runNTimes(int n)
+  public void runNTimes(final int n)
   {
     for (int i = 0; i < n; ++i) {
-      Union combined = SetOperation.builder().initMemory(new NativeMemory(bytes)).buildUnion(nominalEntries);
+      final Union combined =
+          SetOperation.builder().initMemory(new NativeMemory(bytes)).buildUnion(nominalEntries);
       for (Memory toUnion : memories) {
         combined.update(toUnion);
       }

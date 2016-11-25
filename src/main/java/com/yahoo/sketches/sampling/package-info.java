@@ -4,6 +4,6 @@
  */
 
 /**
- *
+ * Characterization tests for Reservior Sampling
  */
 package com.yahoo.sketches.sampling;

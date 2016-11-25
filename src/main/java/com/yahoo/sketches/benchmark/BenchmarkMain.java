@@ -14,16 +14,16 @@ import com.yahoo.sketches.hll.Preamble;
  */
 public class BenchmarkMain {
   @SuppressWarnings("serial")
-  public static void main(String[] args)
+  public static void main(final String[] args)
   {
     final int lgK = 12;
 
-    List<SketchBenchmark> benchmarks = new ArrayList<SketchBenchmark>(){{
+    final List<SketchBenchmark> benchmarks = new ArrayList<SketchBenchmark>(){{
       this.add(new ThetaMemoryBenchmark(lgK));
       this.add(new ThetaBenchmark(lgK));
 
-      HllSketchBuilder sparseBob = HllSketch.builder().setPreamble(Preamble.fromLogK(lgK));
-      HllSketchBuilder denseBob = sparseBob.copy().setDenseMode(true);
+      final HllSketchBuilder sparseBob = HllSketch.builder().setPreamble(Preamble.fromLogK(lgK));
+      final HllSketchBuilder denseBob = sparseBob.copy().setDenseMode(true);
       this.add(new HllSketchBenchmark("HLL Sketch", new Random(lgK), sparseBob, denseBob));
       this.add(
           new HllSketchBenchmark(
@@ -50,10 +50,10 @@ public class BenchmarkMain {
   }
 
   private static void runBenchmarks(
-      List<SketchBenchmark> benchmarks,
-      int increment,
-      int numTimes,
-      List<SketchBenchmark.Spec> distribution
+      final List<SketchBenchmark> benchmarks,
+      final int increment,
+      final int numTimes,
+      final List<SketchBenchmark.Spec> distribution
   )
   {
     int numSketches = 0;
@@ -77,7 +77,7 @@ public class BenchmarkMain {
       for (int i = 0; i < numTimes; i+=increment) {
         start = System.currentTimeMillis();
         benchmark.runNTimes(increment);
-        long time = System.currentTimeMillis() - start;
+        final long time = System.currentTimeMillis() - start;
         System.out.printf(
             "Benchmark[%s], %,d runs => %,d millis (%,d ms/run), %,d/sec%n",
             benchmark,

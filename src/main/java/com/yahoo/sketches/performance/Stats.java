@@ -30,7 +30,7 @@ public class Stats implements Comparable<Stats> {
    * @param uPerTrial the number of uniques fed to the sketch in this trial
    * @param updateTime_nS the update time requred for all the updates in nanoSeconds.
    */
-  public void update(UpdateSketch sketch, int uPerTrial, long updateTime_nS) {
+  public void update(final UpdateSketch sketch, final int uPerTrial, final long updateTime_nS) {
     estimate = sketch.getEstimate();
     re = estimate/uPerTrial - 1.0;
     lb2est = sketch.getLowerBound(2);
@@ -46,7 +46,7 @@ public class Stats implements Comparable<Stats> {
    * @param uPerTrial the number of uniques fed to the sketch in this trial
    * @param updateTime_nS the update time requred for all the updates in nanoSeconds.
    */
-  public void update(HllSketch sketch, int uPerTrial, long updateTime_nS) {
+  public void update(final HllSketch sketch, final int uPerTrial, final long updateTime_nS) {
     estimate = sketch.getEstimate();
     re = estimate/uPerTrial - 1.0;
     lb2est = sketch.getLowerBound(2);
@@ -57,13 +57,13 @@ public class Stats implements Comparable<Stats> {
   }
 
   @Override
-  public int compareTo(Stats that) {
+  public int compareTo(final Stats that) {
     if (this.equals(that)) { return 0; }
     return Double.compare(this.re, that.re);
   }
 
   @Override
-  public boolean equals(Object that) {
+  public boolean equals(final Object that) {
     return this == that;
   }
 

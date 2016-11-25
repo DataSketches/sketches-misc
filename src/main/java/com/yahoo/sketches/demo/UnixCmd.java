@@ -20,19 +20,19 @@ public class UnixCmd {
    * @param cmd the actual command-line string
    * @return total test time in milliseconds
    */
-  public static long run(String name, String cmd) {
-    StringBuilder sbOut = new StringBuilder();
-    StringBuilder sbErr = new StringBuilder();
+  public static long run(final String name, final String cmd) {
+    final StringBuilder sbOut = new StringBuilder();
+    final StringBuilder sbErr = new StringBuilder();
     String out = null;
     String err = null;
-    String[] envp = {"LC_ALL=C"}; //https://bugs.launchpad.net/ubuntu/+source/coreutils/+bug/846628
+    final String[] envp = {"LC_ALL=C"}; //https://bugs.launchpad.net/ubuntu/+source/coreutils/+bug/846628
     Process p = null;
     try {
       p = Runtime.getRuntime().exec(cmd, envp);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
-    long testStartTime_mS = System.currentTimeMillis();
+    final long testStartTime_mS = System.currentTimeMillis();
 
     try (
         BufferedReader stdInput = new BufferedReader(new InputStreamReader(p.getInputStream(), UTF_8));
@@ -59,7 +59,7 @@ public class UnixCmd {
         sbErr.append(err).append(LS);
       }
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       System.out.println("IOException: ");
       e.printStackTrace();
       throw new RuntimeException(e);
@@ -67,7 +67,7 @@ public class UnixCmd {
     if (p.isAlive()) {
       p.destroy();
     }
-    long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
+    final long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
     println("Unix cmd: " + cmd);
     println(Util.getMinSecFromMilli(testTime_mS));
     if (sbOut.length() > 0) { println(sbOut.toString()); }

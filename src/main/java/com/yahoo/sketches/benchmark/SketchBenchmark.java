@@ -16,7 +16,7 @@ public interface SketchBenchmark
     private final int numSketches;
     private final long numEntries;
 
-    public Spec(long numEntries, int numSketches) {
+    public Spec(final long numEntries, final int numSketches) {
 
       this.numSketches = numSketches;
       this.numEntries = numEntries;

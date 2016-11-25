@@ -15,22 +15,22 @@ import java.util.Random;
 public class Util {
   private static Random rand = new Random();
 
-  public static String getMinSecFromNano(long nanoSec) {
-    long totSec = nanoSec/1000000000L;
-    long min = totSec/60; //whole min
-    long sec = totSec%60; //remainder whole sec
-    long ns  = nanoSec - totSec * 1000000000L; //remainder ns
-    long ms  = ns / 1000000L; //remainder whole ms
-    String t = String.format("Time Min:Sec.mSec = %d:%02d.%03d", min, sec, ms);
+  public static String getMinSecFromNano(final long nanoSec) {
+    final long totSec = nanoSec/1000000000L;
+    final long min = totSec/60; //whole min
+    final long sec = totSec%60; //remainder whole sec
+    final long ns  = nanoSec - totSec * 1000000000L; //remainder ns
+    final long ms  = ns / 1000000L; //remainder whole ms
+    final String t = String.format("Time Min:Sec.mSec = %d:%02d.%03d", min, sec, ms);
     return t;
   }
 
-  public static String getMinSecFromMilli(long milliSec) {
-    long totSec = milliSec/1000L;
-    long min = totSec/60; //whole min
-    long sec = totSec%60; //remainder whole sec
-    long ms  = milliSec - totSec * 1000L; //remainder whole ms
-    String t = String.format("Time Min:Sec.mSec = %d:%02d.%03d", min, sec, ms);
+  public static String getMinSecFromMilli(final long milliSec) {
+    final long totSec = milliSec/1000L;
+    final long min = totSec/60; //whole min
+    final long sec = totSec%60; //remainder whole sec
+    final long ms  = milliSec - totSec * 1000L; //remainder whole ms
+    final String t = String.format("Time Min:Sec.mSec = %d:%02d.%03d", min, sec, ms);
     return t;
   }
 
@@ -43,10 +43,10 @@ public class Util {
    * @param bound the upper bound (exclusive), must not equal origin
    * @return a pseudorandom value
    */
-  public static final long nextLong(long origin, long bound) {
+  public static final long nextLong(final long origin, final long bound) {
       long r = rand.nextLong();
       if (origin < bound) {
-          long n = bound - origin, m = n - 1;
+        final long n = bound - origin, m = n - 1;
           if ((n & m) == 0L) { // power of two
             r = (r & m) + origin;
           }
@@ -64,6 +64,6 @@ public class Util {
       return r;
   }
 
-  public static void println(String s) { System.out.println(s); }
+  public static void println(final String s) { System.out.println(s); }
 
 }

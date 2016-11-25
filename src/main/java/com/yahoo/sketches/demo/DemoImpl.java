@@ -1,5 +1,5 @@
 /*
- * Copyright 2015, Yahoo! Inc.
+ * Copyright 2016, Yahoo! Inc.
  * Licensed under the terms of the Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
@@ -82,24 +82,24 @@ public class DemoImpl {
    * @param uniquesFraction the fraction of streamLen values less than 1.0, that will be unique.
    * The actual # of uniques will vary around this value, because it is computed statistically.
    */
-  public DemoImpl(long streamLen, double uniquesFraction) {
+  public DemoImpl(final long streamLen, final double uniquesFraction) {
     if ((uniquesFraction <= 0.0) || (uniquesFraction > 1.0)) {
       throw new IllegalArgumentException(
           "uniquesFraction must be > 0.0 and <= 1.0: "+uniquesFraction);
     }
     uniquesFrac_ = uniquesFraction;
-    long m = streamLen/1000;
+    final long m = streamLen/1000;
     if (m *1000 == streamLen) {
       n_ = streamLen;
     } else {
       n_ = (m+1)*1000;
     }
     lgK_ = 14; //Log-base 2 of the configured sketch size = 16K
-    File dir = new File("tmp"); //new directory tmp
+    final File dir = new File("tmp"); //new directory tmp
     if (!dir.exists()) {
       try {
         dir.mkdir();
-      } catch(SecurityException e) {
+      } catch(final SecurityException e) {
         throw new SecurityException(e);
       }
     }
@@ -116,11 +116,11 @@ public class DemoImpl {
     //exactTimeMS = buildFileAndSketch(); //used instead only for testing
 
     println("## SORT & REMOVE DUPLICATES");
-    String sortCmd = "sort -u -o tmp/sorted.txt tmp/test.txt";
+    final String sortCmd = "sort -u -o tmp/sorted.txt tmp/test.txt";
     exactTimeMS += UnixCmd.run("sort", sortCmd);
 
     println("\n## LINE COUNT");
-    String wcCmd = "wc -l tmp/sorted.txt";
+    final String wcCmd = "wc -l tmp/sorted.txt";
     exactTimeMS += UnixCmd.run("wc", wcCmd);
 
     println("Total Exact "+getMinSecFromMilli(exactTimeMS) +LS+LS);
@@ -144,14 +144,14 @@ public class DemoImpl {
   private long buildFile() {
     println("## BUILD FILE:");
     rand = new Random(9001);
-    ByteBuffer byteBuf = ByteBuffer.allocate(byteBufCap_);
+    final ByteBuffer byteBuf = ByteBuffer.allocate(byteBufCap_);
     u_ = 1; //reset global unique counter
     fileBytes_ = 0;
-    long testStartTime_mS = System.currentTimeMillis();
+    final long testStartTime_mS = System.currentTimeMillis();
     try (SeekableByteChannel sbc = Files.newByteChannel(path, C, W, TE)) {
       for (long i=0; i<n_; i++) {
-        long v = nextValue();
-        String s = Long.toHexString(v);
+        final long v = nextValue();
+        final String s = Long.toHexString(v);
         if (byteBuf.remaining() < 25) {
           byteBuf.flip();
           fileBytes_ += sbc.write(byteBuf);
@@ -165,10 +165,10 @@ public class DemoImpl {
         byteBuf.clear();
       }
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       e.printStackTrace();
     }
-    long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
+    final long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
     //Print common results
     printCommon(testTime_mS, n_, u_);
     //Print file results
@@ -183,7 +183,7 @@ public class DemoImpl {
     rand = new Random(9001);
     u_ = 1; //reset global unique counter
     long stLen = 0;
-    long[] vArr = new long[batchSz_];
+    final long[] vArr = new long[batchSz_];
     long testTime_nS = 0;
 
     while (stLen < n_) {
@@ -195,9 +195,9 @@ public class DemoImpl {
         testTime_nS += timeHllSketch(hllSketch_, vArr);
       }
     }
-    long testTime_mS = testTime_nS/1000000;
+    final long testTime_mS = testTime_nS/1000000;
     //Print sketch name
-    String sk = (tSketch_ != null)? "THETA" : "HLL";
+    final String sk = (tSketch_ != null)? "THETA" : "HLL";
     println("## USING "+sk+" SKETCH");
     //Print common results
     printCommon(testTime_mS, n_, u_);
@@ -208,9 +208,9 @@ public class DemoImpl {
   }
 
   //return nanoseconds
-  private static long timeThetaSketch(UpdateSketch tSketch, long[] batchArr) {
-    int batLen = batchArr.length;
-    long testBatchStart_nS = System.nanoTime();
+  private static long timeThetaSketch(final UpdateSketch tSketch, final long[] batchArr) {
+    final int batLen = batchArr.length;
+    final long testBatchStart_nS = System.nanoTime();
     for (int i = 0; i<batLen; i++) {
       tSketch.update(batchArr[i]);
     }
@@ -218,9 +218,9 @@ public class DemoImpl {
   }
 
   //return nanoseconds
-  private static long timeHllSketch(HllSketch hSketch, long[] batchArr) {
-    int batLen = batchArr.length;
-    long testBatchStart_nS = System.nanoTime();
+  private static long timeHllSketch(final HllSketch hSketch, final long[] batchArr) {
+    final int batLen = batchArr.length;
+    final long testBatchStart_nS = System.nanoTime();
     for (int i = 0; i<batLen; i++) {
       hSketch.update(batchArr[i]);
     }
@@ -234,17 +234,17 @@ public class DemoImpl {
   @SuppressWarnings("unused")
   private long buildFileAndSketch() {
     println("## BUILD FILE AND SKETCH:");
-    ByteBuffer byteBuf = ByteBuffer.allocate(byteBufCap_);
+    final ByteBuffer byteBuf = ByteBuffer.allocate(byteBufCap_);
     u_ = 1;
     fileBytes_ = 0;
-    long testStartTime_mS = System.currentTimeMillis();
+    final long testStartTime_mS = System.currentTimeMillis();
     try (SeekableByteChannel sbc = Files.newByteChannel(path, C, W, TE)) {
       if (tSketch_ != null) {
-        long v = nextValue();
+        final long v = nextValue();
         tSketch_.update(v);
 
         //build file
-        String s = Long.toHexString(v);
+        final String s = Long.toHexString(v);
         if (byteBuf.remaining() < 25) {
           byteBuf.flip();
           fileBytes_ += sbc.write(byteBuf);
@@ -253,11 +253,11 @@ public class DemoImpl {
         byteBuf.put(s.getBytes(UTF_8)).put(LS_BYTE);
       }
       else { //HLL Sketch
-        long v = nextValue();
+        final long v = nextValue();
         hllSketch_.update(v);
 
         //build file
-        String s = Long.toHexString(v);
+        final String s = Long.toHexString(v);
         if (byteBuf.remaining() < 25) {
           byteBuf.flip();
           fileBytes_ += sbc.write(byteBuf);
@@ -272,10 +272,10 @@ public class DemoImpl {
         byteBuf.clear();
       }
     }
-    catch (IOException e) {
+    catch (final IOException e) {
       e.printStackTrace();
     }
-    long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
+    final long testTime_mS = System.currentTimeMillis() - testStartTime_mS;
 
     //Print common results
     printCommon(testTime_mS, n_, u_);
@@ -291,7 +291,7 @@ public class DemoImpl {
    * @return next hashed long value with (1.0 - uniqueFrac_) as duplicates
    */
   private long nextValue() {
-    long out;
+    final long out;
     if ( (rand.nextDouble() < uniquesFrac_) || (u_ <= 1)) {
       out = u_++; //unique
     } else {
@@ -303,7 +303,7 @@ public class DemoImpl {
   }
 
   private final void configureThetaSketch() {
-    int k = 1 << lgK_; //14
+    final int k = 1 << lgK_; //14
     hllSketch_ = null;
     maxMemSkBytes_ = k *16; //includes full hash table
     rse2_ = 2.0/sqrt(k);    //Error for 95% confidence
@@ -313,10 +313,10 @@ public class DemoImpl {
   }
 
   private final void configureHLLSketch() {
-    int k = 1 << lgK_; //14
-    boolean compressed = true;
-    boolean hipEstimator = true;
-    boolean denseMode = true;
+    final int k = 1 << lgK_; //14
+    final boolean compressed = true;
+    final boolean hipEstimator = true;
+    final boolean denseMode = true;
     tSketch_ = null;
     maxMemSkBytes_ = (compressed)? k/2 : k;
     rse2_ = 2.0 * ((hipEstimator)? 0.836/sqrt(k) : 1.04/sqrt(k)); //for 95% confidence
@@ -327,19 +327,20 @@ public class DemoImpl {
         .build();
   }
 
-  private static void printCommon(long testTimeMilli, long n, long u) {
+  private static void printCommon(final long testTimeMilli, final long n, final long u) {
     println(getMinSecFromMilli(testTimeMilli));
     println("Total Values: "+String.format("%,d",n));
-    int nSecRate = (int) (testTimeMilli *1000000.0/n);
+    final int nSecRate = (int) (testTimeMilli *1000000.0/n);
     println("Build Rate: "+ String.format("%d nSec/Value", nSecRate));
     println("Exact Uniques: "+String.format("%,d", u));
   }
 
-  private void printSketchResults(long u, int maxMemSkBytes, double rse2) {
+  private void printSketchResults(final long u, final int maxMemSkBytes, final double rse2) {
     println("## SKETCH STATS");
-    double rounded = Math.round((tSketch_ != null)? tSketch_.getEstimate() : hllSketch_.getEstimate());
+    final double rounded = Math.round((tSketch_ != null)
+        ? tSketch_.getEstimate() : hllSketch_.getEstimate());
     println("Sketch Estimate of Uniques: "+ String.format("%,d", (long)rounded));
-    double err = (u == 0)? 0 : (rounded/u - 1.0);
+    final double err = (u == 0)? 0 : (rounded/u - 1.0);
     println("Sketch Actual Relative Error: "+String.format("%.3f%%", err*100));
     println("Sketch 95%ile Error Bounds  : "+String.format("+/- %.3f%%", rse2*100));
     println("Max Sketch Size Bytes: "+ String.format("%,d", maxMemSkBytes));

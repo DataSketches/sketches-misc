@@ -38,7 +38,7 @@ import com.yahoo.sketches.Util;
  * com.yahoo.sketches.hll.ProcessDistributionStream
  * </code></p>
  */
-public class ProcessDistributionStream {
+public final class ProcessDistributionStream {
   private static final int IP_BYTES = 4;
   private static final int INIT_ENTRIES = 1000;
 
@@ -49,51 +49,51 @@ public class ProcessDistributionStream {
    * @param args Not used.
    * @throws RuntimeException Generally an IOException.
    */
-  public static void main(String[] args) throws RuntimeException {
-    ProcessDistributionStream pds = new ProcessDistributionStream();
+  public static void main(final String[] args) throws RuntimeException {
+    final ProcessDistributionStream pds = new ProcessDistributionStream();
     pds.processDistributionModel();
   }
 
   private void processDistributionModel() {
-    StringBuilder sb = new StringBuilder();
-    long start_mS = System.currentTimeMillis();
+    final StringBuilder sb = new StringBuilder();
+    final long start_mS = System.currentTimeMillis();
     String line = "";
     long lineCount = 0;
     long updateCount = 0;
     int ipCount = 0;
-    byte[] ipBytes = new byte[IP_BYTES];
-    byte[] valBytes = new byte[Long.BYTES];
+    final byte[] ipBytes = new byte[IP_BYTES];
+    final byte[] valBytes = new byte[Long.BYTES];
 
-    UniqueCountMap map = new UniqueCountMap(INIT_ENTRIES, IP_BYTES);
+    final UniqueCountMap map = new UniqueCountMap(INIT_ENTRIES, IP_BYTES);
     long updateTime_nS = 0;
     try (BufferedReader br = new BufferedReader(new InputStreamReader(System.in, UTF_8))) {
 
       while ((line = br.readLine()) != null) {
-        String[] tokens = line.split("\t");
+        final String[] tokens = line.split("\t");
         checkLen(tokens);
         lineCount++;
-        long numValues = Long.parseLong(tokens[0]); //Verify the token order!
-        long numIps = Long.parseLong(tokens[1]);
+        final long numValues = Long.parseLong(tokens[0]); //Verify the token order!
+        final long numIps = Long.parseLong(tokens[1]);
 
         for (long nips = 0; nips < numIps; nips++) {
           ipCount++;
           Util.intToBytes(ipCount, ipBytes);
           for (long vals = 0; vals < numValues; vals++) {
-            long start_nS = System.nanoTime();
+            final long start_nS = System.nanoTime();
             updateCount++; // never repeated for any ip
             map.update(ipBytes, Util.longToBytes(updateCount, valBytes));
-            long end_nS = System.nanoTime();
+            final long end_nS = System.nanoTime();
             updateTime_nS += end_nS - start_nS;
           }
         }
       }
 
-      String className = this.getClass().getSimpleName();
+      final String className = this.getClass().getSimpleName();
       printStats(sb, className, map, lineCount, ipCount, updateCount, updateTime_nS);
-    } catch (Exception e) {
+    } catch (final Exception e) {
       throw new RuntimeException(e);
     }
-    long total_mS = System.currentTimeMillis() - start_mS;
+    final long total_mS = System.currentTimeMillis() - start_mS;
     printTaskTime(sb, total_mS, updateCount);
   }
 

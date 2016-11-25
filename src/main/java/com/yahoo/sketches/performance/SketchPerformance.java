@@ -41,30 +41,30 @@ public class SketchPerformance {
    *
    * @param trialMgr TrialManager to be used
    */
-  public static void start(TrialManager trialMgr) {
-    long testStartTime_mS = System.currentTimeMillis();
-    int lastGI = trialMgr.getMaximumGeneratingIndex();
-    int ppo = trialMgr.getPPO();
+  public static void start(final TrialManager trialMgr) {
+    final long testStartTime_mS = System.currentTimeMillis();
+    final  int lastGI = trialMgr.getMaximumGeneratingIndex();
+    final int ppo = trialMgr.getPPO();
     int lastU = 0;
     println(ProcessStats.getHeader());
-    StringBuilder dataStr = new StringBuilder();
+    final StringBuilder dataStr = new StringBuilder();
 
     //Each generating index (gi) will generate a new row of data
     // representing N trials at a specific number of unique values.
     for (int gi = 0; gi <= lastGI; gi++) {
-      int u = (int)floor(pow(2.0, (double)gi/ppo));
+      final int u = (int)floor(pow(2.0, (double)gi/ppo));
       if (u == lastU) { continue; }//at the low end skips over duplicate values of u
       lastU = u;
-      int trials = trialMgr.getTrials(u);
-      int lgK = trialMgr.getLgK();
-      double p = trialMgr.getP();
-      Stats[] statsArr = processTrialSet(trialMgr, u, trials);
+      final int trials = trialMgr.getTrials(u);
+      final int lgK = trialMgr.getLgK();
+      final double p = trialMgr.getP();
+      final Stats[] statsArr = processTrialSet(trialMgr, u, trials);
       ProcessStats.process(statsArr, u, lgK, p, dataStr);
       println(dataStr.toString());
     }
-    int testTime_S = (int)((System.currentTimeMillis() - testStartTime_mS)/1000.0);
-    int min = testTime_S/60;
-    int sec = testTime_S%60;
+    final int testTime_S = (int)((System.currentTimeMillis() - testStartTime_mS)/1000.0);
+    final int min = testTime_S/60;
+    final int sec = testTime_S%60;
     println("TestTime: "+min+":"+sec);
   }
 
@@ -77,8 +77,9 @@ public class SketchPerformance {
    * @param trials number of trials per trial set
    * @return the Stats array contains measurements for each trial of the trial set
    */
-  private static  Stats[] processTrialSet(TrialManager trialMgr, int uPerTrial, int trials) {
-    Stats[] statsArr = new Stats[trials];
+  private static  Stats[] processTrialSet(final TrialManager trialMgr, final int uPerTrial,
+      final int trials) {
+    final Stats[] statsArr = new Stats[trials];
     //System.gc();
     for (int t=0; t < trials; t++) {
       if (statsArr[t] == null) { statsArr[t] = new Stats(); }
@@ -87,7 +88,7 @@ public class SketchPerformance {
     return statsArr;
   }
 
-  private static void println(String s) { System.out.println(s); }
+  private static void println(final String s) { System.out.println(s); }
 
 
   /**
@@ -95,32 +96,33 @@ public class SketchPerformance {
    * runs the test.
    * @param args not used.
    */
-  public static void main(String[] args) {
+  @SuppressWarnings({"null", "unused"})
+  public static void main(final String[] args) {
     //Common parameters
-    int lgK = 12; //4K
-    boolean udSketch = true;  //set true if you want to use a theta UpdateSketch, false for HLL
+    final int lgK = 12; //4K
+    final boolean udSketch = true;  //set true if you want to use a theta UpdateSketch, false for HLL
 
     //Theta UpdateSketch parameters
-    Family family = Family.QUICKSELECT;
-    ResizeFactor rf = ResizeFactor.X1;// See javadocs.
-    boolean direct = false; //See javadocs and the setSketchProfile code
-    float p = 1.0F;
-    boolean rebuild = false;  //set true if rebuild is desired to reduce size down to k.
+    final Family family = Family.QUICKSELECT;
+    final ResizeFactor rf = ResizeFactor.X1;// See javadocs.
+    final boolean direct = false; //See javadocs and the setSketchProfile code
+    final float p = 1.0F;
+    final boolean rebuild = false;  //set true if rebuild is desired to reduce size down to k.
 
     //HLL Parameters
-    boolean hip = true;
-    boolean dense = false;
+    final boolean hip = true;
+    final boolean dense = false;
 
     //Trials Profile Parameters
     //  For speed trials use min=4,5, max= 13,14,15,16
     //  For accuracy trials use min=max= 10 or more
-    int lgMinTrials = 4;
-    int lgMaxTrials = 13;
-    int lgMaxU = 20;
-    int ppo = 16;
+    final int lgMinTrials = 4;
+    final int lgMaxTrials = 13;
+    final int lgMaxU = 20;
+    final int ppo = 16;
 
     //INITIALIZE
-    TrialManager trialMgr = new TrialManager();
+    final TrialManager trialMgr = new TrialManager();
     trialMgr.setTrialsProfile(lgMinTrials, lgMaxTrials, lgMaxU, ppo);
     UpdateSketchBuilder udBldr = null;
     HllSketchBuilder hllBldr = null;

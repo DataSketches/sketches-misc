@@ -1,12 +1,14 @@
 package com.yahoo.sketches.sampling;
 
-//CHECKSTYLE.OFF: JavadocMethod
-//CHECKSTYLE.OFF: WhitespaceAround
 public class UpdateBenchmark {
   private static final String LS = System.lineSeparator();
   private static final int ACCEPT_BREAKPOINT = 2;
 
-  public static void main(String[] args) {
+  /**
+   * Usage: UpdateBenchmark [numIters] [log2(k)]
+   * @param args 2 parameters: numIters followed by log2(k)
+   */
+  public static void main(final String[] args) {
     if (args.length < 2) {
       System.err.println("Usage: UpdateBenchmark [numIters] [log2(k)]");
     }
@@ -22,15 +24,15 @@ public class UpdateBenchmark {
     println(measureReservoirItemsSketch(numIters, k));
   }
 
-  static String measureReservoirLongsSketch(final int numIters, final int k) {
+  private static String measureReservoirLongsSketch(final int numIters, final int k) {
     final int n = k << 4;
 
-    long[] primingResults = new long[numIters];
-    long[] pAcceptHighResults = new long[numIters];
-    long[] pAcceptLowResults = new long[numIters];
-    long[] totalResults = new long[numIters];
+    final long[] primingResults = new long[numIters];
+    final long[] pAcceptHighResults = new long[numIters];
+    final long[] pAcceptLowResults = new long[numIters];
+    final long[] totalResults = new long[numIters];
 
-    ReservoirLongsSketch rls = ReservoirLongsSketch.getInstance(k);
+    final ReservoirLongsSketch rls = ReservoirLongsSketch.getInstance(k);
 
     final int samplingBreakIdx = ACCEPT_BREAKPOINT * k; // p(accept) == 0.5, so measure update
     // before/after here
@@ -38,17 +40,17 @@ public class UpdateBenchmark {
 
     for (int iter = 0; iter < numIters; iter++) {
       // initial reservoir fill
-      long startUpdateTime_ns = System.nanoTime();
+      final long startUpdateTime_ns = System.nanoTime();
       for (inputValue = 0; inputValue < k; ) { rls.update(inputValue++); }
-      long primingTime_ns = System.nanoTime();
+      final long primingTime_ns = System.nanoTime();
 
       // p(accept) > 0.5
       for (; inputValue < samplingBreakIdx; ) { rls.update(inputValue++); }
-      long pAcceptHighTime_ns = System.nanoTime();
+      final long pAcceptHighTime_ns = System.nanoTime();
 
       // p(accept) < 0.5
       for (; inputValue < n; ) { rls.update(inputValue++); }
-      long pAcceptLowTime_ns = System.nanoTime();
+      final long pAcceptLowTime_ns = System.nanoTime();
 
       primingResults[iter] = primingTime_ns - startUpdateTime_ns;
       pAcceptHighResults[iter] = pAcceptHighTime_ns - primingTime_ns;
@@ -60,15 +62,15 @@ public class UpdateBenchmark {
             primingResults, pAcceptHighResults, pAcceptLowResults, totalResults);
   }
 
-  static String measureReservoirItemsSketch(final int numIters, final int k) {
+  private static String measureReservoirItemsSketch(final int numIters, final int k) {
     final int n = k << 4;
 
-    long[] primingResults = new long[numIters];
-    long[] pAcceptHighResults = new long[numIters];
-    long[] pAcceptLowResults = new long[numIters];
-    long[] totalResults = new long[numIters];
+    final long[] primingResults = new long[numIters];
+    final long[] pAcceptHighResults = new long[numIters];
+    final long[] pAcceptLowResults = new long[numIters];
+    final long[] totalResults = new long[numIters];
 
-    ReservoirItemsSketch<Long> ris = ReservoirItemsSketch.getInstance(k);
+    final ReservoirItemsSketch<Long> ris = ReservoirItemsSketch.getInstance(k);
 
     final int samplingBreakIdx = ACCEPT_BREAKPOINT * k; // p(accept) == 0.5, so measure update
     // before/after here
@@ -76,17 +78,17 @@ public class UpdateBenchmark {
 
     for (int iter = 0; iter < numIters; iter++) {
       // initial reservoir fill
-      long startUpdateTime_ns = System.nanoTime();
+      final long startUpdateTime_ns = System.nanoTime();
       for (inputValue = 0; inputValue < k; ) { ris.update(inputValue++); }
-      long primingTime_ns = System.nanoTime();
+      final long primingTime_ns = System.nanoTime();
 
       // p(accept) > 0.5
       for (; inputValue < samplingBreakIdx; ) { ris.update(inputValue++); }
-      long pAcceptHighTime_ns = System.nanoTime();
+      final long pAcceptHighTime_ns = System.nanoTime();
 
       // p(accept) < 0.5
       for (; inputValue < n; ) { ris.update(inputValue++); }
-      long pAcceptLowTime_ns = System.nanoTime();
+      final long pAcceptLowTime_ns = System.nanoTime();
 
       primingResults[iter] = primingTime_ns - startUpdateTime_ns;
       pAcceptHighResults[iter] = pAcceptHighTime_ns - primingTime_ns;
@@ -98,20 +100,19 @@ public class UpdateBenchmark {
             primingResults, pAcceptHighResults, pAcceptLowResults, totalResults);
   }
 
-
-  static String getStatsString(final String simpleName,
+  private static String getStatsString(final String simpleName,
                                final int k,
                                final int n,
                                final long[] priming,
                                final long[] pAcceptHigh,
                                final long[] pAcceptLow,
                                final long[] total) {
-    double meanPriming = computeMean(priming);
-    double meanAcceptHigh = computeMean(pAcceptHigh);
-    double meanAcceptLow = computeMean(pAcceptLow);
-    double meanTotal = computeMean(total);
+    final double meanPriming = computeMean(priming);
+    final double meanAcceptHigh = computeMean(pAcceptHigh);
+    final double meanAcceptLow = computeMean(pAcceptLow);
+    final double meanTotal = computeMean(total);
 
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     sb.append("### Results for ").append(simpleName).append(LS);
     sb.append("  iterations: ").append(priming.length).append(LS);
     sb.append("  k         : ").append(k).append(LS);
@@ -130,7 +131,7 @@ public class UpdateBenchmark {
   }
 
   // being inefficient since squaring ns times seems likely to overflow
-  static double computeMean(long[] data) {
+  private static double computeMean(final long[] data) {
     long sum = 0;
     for (long item : data) {
       sum += item;
@@ -138,7 +139,8 @@ public class UpdateBenchmark {
     return (double) sum / data.length;
   }
 
-  static double computeStDev(long[] data, double mean) {
+  @SuppressWarnings("unused")
+  private static double computeStDev(final long[] data, final double mean) {
     double diff = 0;
     for (long item : data) {
       diff += Math.pow(item - mean, 2);
@@ -146,7 +148,7 @@ public class UpdateBenchmark {
     return Math.sqrt(diff / data.length);
   }
 
-  static void println(String msg) {
+  private static void println(final String msg) {
     System.out.println(msg);
   }
 }
