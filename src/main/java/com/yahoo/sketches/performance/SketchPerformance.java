@@ -8,10 +8,13 @@ package com.yahoo.sketches.performance;
 import static java.lang.Math.floor;
 import static java.lang.Math.pow;
 
+import com.yahoo.memory.AllocMemory;
+import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.ResizeFactor;
 import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.hll.HllSketchBuilder;
+import com.yahoo.sketches.theta.Sketch;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
 
@@ -103,9 +106,10 @@ public class SketchPerformance {
     //Theta UpdateSketch parameters
     final Family family = Family.QUICKSELECT;
     final ResizeFactor rf = ResizeFactor.X1;// See javadocs.
-    final boolean direct = false; //See javadocs and the setSketchProfile code
+    final boolean direct = true; //See javadocs and the setSketchProfile code
     final float p = 1.0F;
     final boolean rebuild = false;  //set true if rebuild is desired to reduce size down to k.
+    NativeMemory mem = null;
 
     //HLL Parameters
     final boolean hip = true;
@@ -115,7 +119,7 @@ public class SketchPerformance {
     //  For speed trials use min=4,5, max= 13,14,15,16
     //  For accuracy trials use min=max= 10 or more
     final int lgMinTrials = 4;
-    final int lgMaxTrials = 13;
+    final int lgMaxTrials = 15;
     final int lgMaxU = 20;
     final int ppo = 16;
 
@@ -126,9 +130,18 @@ public class SketchPerformance {
     HllSketchBuilder hllBldr = null;
 
     if (udSketch) { //UpdateSketch Builder
-      udBldr = UpdateSketch.builder().setNominalEntries(1 << lgK).setFamily(family).setP(p)
+      final int k = 1 << lgK;
+      udBldr = UpdateSketch.builder()
+          .setNominalEntries(k)
+          .setFamily(family)
+          .setP(p)
           .setResizeFactor(rf);
-      trialMgr.setUpdateSketchBuilder(udBldr, direct, rebuild);
+      if (direct) {
+        final int maxBytes = Sketch.getMaxUpdateSketchBytes(k);
+        mem = new AllocMemory(maxBytes);
+        udBldr.initMemory(mem);
+      }
+      trialMgr.setUpdateSketchBuilder(udBldr, rebuild);
     }
     else { //HLL Builder
       hllBldr = HllSketch.builder().setLogBuckets(lgK).setHipEstimator(hip).setDenseMode(dense);
@@ -137,6 +150,9 @@ public class SketchPerformance {
 
     //START THE TESTS
     SketchPerformance.start(trialMgr);
+    if (mem != null) {
+      mem.freeMemory();
+    }
 
     //PRINT SUMMARY
     if (udBldr != null) { println(udBldr.toString()); }

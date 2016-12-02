@@ -8,11 +8,8 @@ package com.yahoo.sketches.performance;
 import static java.lang.Math.log;
 import static java.lang.Math.pow;
 
-import com.yahoo.memory.Memory;
-import com.yahoo.memory.NativeMemory;
 import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.hll.HllSketchBuilder;
-import com.yahoo.sketches.theta.Sketch;
 import com.yahoo.sketches.theta.UpdateSketch;
 import com.yahoo.sketches.theta.UpdateSketchBuilder;
 
@@ -41,26 +38,13 @@ public class TrialManager {
   /**
    * Sets the theta UpdateSketch builder used to create the theta UpdateSketches.
    * @param udBldr the theta UpdateSketchBuilder
-   * @param direct true if direct (off heap) mode is desired.  Instead of actual off heap memory
-   * this will emulate that behavior by using an on-heap byte array accessed by the Memory package.
-   * Performance-wise it is the same except for issues of garbage collection, which is not the
-   * purpose of this test.
    * @param rebuild set true if rebuild is desired
    */
-  public void setUpdateSketchBuilder(final UpdateSketchBuilder udBldr,  final boolean direct,
-      final boolean rebuild) {
+  public void setUpdateSketchBuilder(final UpdateSketchBuilder udBldr, final boolean rebuild) {
     lgK_ = udBldr.getLgNominalEntries();
     p_ = udBldr.getP();
-    final int k = 1 << lgK_;
     lgBP_ = lgK_ + 1; //set the break point where the #trials starts to decrease.
-    Memory mem = null;
-    if (direct) {
-      final int bytes = Sketch.getMaxUpdateSketchBytes(k);
-      final byte[] memArr = new byte[bytes];
-      mem = new NativeMemory(memArr);
-      udBldr.initMemory(mem);
-    }
-    udSketch_ = udBldr.initMemory(mem).build(k);
+    udSketch_ = udBldr.build(1 << lgK_);
     rebuild_ = rebuild;
   }
 
