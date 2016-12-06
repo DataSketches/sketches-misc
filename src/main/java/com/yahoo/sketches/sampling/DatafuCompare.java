@@ -33,8 +33,6 @@ public class DatafuCompare {
     }
 
     final int numIters = 10000;
-    //final int k = 1 << 5;
-    //final int valueRange = k << 10;
 
     final String model = args[0];
     final int k = 1 << Integer.parseInt(args[1]);
@@ -96,82 +94,4 @@ public class DatafuCompare {
 
     return TupleFactory.getInstance().newTuple(inputBag);
   }
-
-  /*
-  private String runTrial(final ReservoirSample udf) throws IOException {
-    inputData = createData(sc);
-
-    final long[] trialTimes = new long[sc.getNumIters()];
-
-    for (int i = 0; i < sc.getNumIters(); ++i) {
-      final long startTime_ns = System.nanoTime();
-      udf.exec(inputData);
-      final long endTime_ns = System.nanoTime();
-
-      trialTimes[i] = endTime_ns - startTime_ns;
-      //System.err.println(i + ": " + trialTimes[i] / 1e6);
-    }
-
-    double mean = UpdateBenchmark.computeMean(trialTimes);
-    double stdev = UpdateBenchmark.computeStDev(trialTimes, mean);
-
-    return mean / 1e6 + " +- " + stdev / 1e6 + " ms";
-  }
-  */
-
-  /*
-  private long[] innerTestLoop(final ReservoirSampling udf) throws IOException {
-    final long[] trialTimes = new long[sc.getNumIters()];
-    //inputData = createData(sc);
-
-    for (int i = 0; i < sc.getNumIters(); ++i) {
-      final long startTime_ns = System.nanoTime();
-      udf.exec(inputData);
-      final long endTime_ns = System.nanoTime();
-
-      trialTimes[i] = endTime_ns - startTime_ns;
-      //System.err.println(i + ": " + trialTimes[i] / 1e6);
-    }
-
-    return trialTimes;
-  }
-
-  private String runTrial(final ReservoirSampling udf) throws IOException {
-    inputData = createData(sc);
-    //innerTestLoop(udf, sc, inputData);
-    final long[] trialTimes = innerTestLoop(udf);
-
-    double mean = UpdateBenchmark.computeMean(trialTimes);
-    double stdev = UpdateBenchmark.computeStDev(trialTimes, mean);
-
-    return mean / 1e6 + " +- " + stdev / 1e6 + " ms";
-  }
-
-  private long[] innerTestLoop(final ReservoirSample udf) throws IOException {
-    final long[] trialTimes = new long[sc.getNumIters()];
-    //inputData = createData(sc);
-
-    for (int i = 0; i < sc.getNumIters(); ++i) {
-      final long startTime_ns = System.nanoTime();
-      udf.exec(inputData);
-      final long endTime_ns = System.nanoTime();
-
-      trialTimes[i] = endTime_ns - startTime_ns;
-      //System.err.println(i + ": " + trialTimes[i] / 1e6);
-    }
-
-    return trialTimes;
-  }
-
-  private String runTrial(final ReservoirSample udf) throws IOException {
-    inputData = createData(sc);
-    //innerTestLoop(udf, sc, inputData);
-    final long[] trialTimes = innerTestLoop(udf);
-
-    double mean = UpdateBenchmark.computeMean(trialTimes);
-    double stdev = UpdateBenchmark.computeStDev(trialTimes, mean);
-
-    return mean / 1e6 + " +- " + stdev / 1e6 + " ms";
-  }
-  */
 }
