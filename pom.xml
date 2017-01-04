@@ -63,20 +63,20 @@
     <dependency>
       <groupId>com.yahoo.datasketches</groupId>
       <artifactId>sketches-core</artifactId>
-      <version>0.8.2</version>
+      <version>0.8.3</version>
     </dependency>     
     
     <dependency>
       <groupId>com.yahoo.datasketches</groupId>
       <artifactId>memory</artifactId>
-      <version>0.8.2</version>
+      <version>0.8.3</version>
     </dependency> 
     
     <!-- Test Scope -->
     <dependency>
       <groupId>org.testng</groupId>
       <artifactId>testng</artifactId>
-      <version>6.9.13.6</version>
+      <version>6.10</version>
       <scope>test</scope>
     </dependency>
     
@@ -206,7 +206,7 @@
         <plugin>
           <groupId>org.apache.maven.plugins</groupId>
           <artifactId>maven-resources-plugin</artifactId>
-          <version>3.0.1</version>
+          <version>3.0.2</version>
         </plugin>
 
         <plugin>
