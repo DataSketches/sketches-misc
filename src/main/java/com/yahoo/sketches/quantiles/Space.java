@@ -33,7 +33,8 @@ public final class Space {
     final String dFmt = "%," + tblColWidth + "d";
     final String fFmt = "%" + (tblColWidth - 1) + ".3f%%";
     final StringBuilder sb = new StringBuilder();
-    sb.append("Table Guide for Quantiles DoublesSketch Size in Bytes and Approximate Error:").append(LS);
+    sb.append(
+        "Table Guide for Quantiles DoublesSketch Size in Bytes and Approximate Error:").append(LS);
     sb.append(String.format(leftColStrFmt, "K => |"));
     for (int kpow = lgKlo; kpow <= lgKhi; kpow++) { //the header row of k values
       final int k = 1 << kpow;
