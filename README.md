@@ -27,5 +27,5 @@ was primarily writen for large-scale distributed systems.
 [mavenbadge]:http://search.maven.org/#search|gav|1|g%3A%22com.yahoo.datasketches%22%20AND%20a%3A%22sketches-misc%22
 [mavenbadge img]:https://maven-badges.herokuapp.com/maven-central/com.yahoo.datasketches/sketches-misc/badge.svg
 
-[versioneye]:https://www.versioneye.com/user/projects/5751f0527757a00041b3a1fb
-[versioneye img]:https://www.versioneye.com/user/projects/5751f0527757a00041b3a1fb/badge.svg?style=flat
+[versioneye]:https://www.versioneye.com/user/projects/587fd782b194d40038f4736b
+[versioneye img]:https://www.versioneye.com/user/projects/587fd782b194d40038f4736b/badge.svg?style=flat
