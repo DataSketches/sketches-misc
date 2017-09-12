@@ -100,7 +100,7 @@ public class ReservoirEntropy {
       final int k = sc.hasMultipleK() ? sc.getKArray()[i] : sc.getK();
       final int rangeMax = sc.getRangeSize(sc.hasMultipleK() ? i : 0);
 
-      final ReservoirItemsSketch<Integer> ris = ReservoirItemsSketch.getInstance(k);
+      final ReservoirItemsSketch<Integer> ris = ReservoirItemsSketch.newInstance(k);
       for (int j = 0; j < rangeMax; ++j) {
         ris.update(idx++);
       }
@@ -129,7 +129,7 @@ public class ReservoirEntropy {
     }
 
     return "H      = " + computeEntropy(outputCount, histogram) + Util.LS
-            + "Theo H = " + Math.log(countPossibleValues(sc)) / Math.log(2.0) + Util.LS
+            + "Theo H = " + (Math.log(countPossibleValues(sc)) / Math.log(2.0)) + Util.LS
             + "min    = " + min + Util.LS
             + "max    = " + max + Util.LS;
   }
@@ -160,7 +160,7 @@ public class ReservoirEntropy {
   static <T> T[] unionSketchList(final List<ReservoirItemsSketch<T>> sketches,
                                  final int stIdx,
                                  final SamplingConfig sc) {
-    final ReservoirItemsUnion<T> riu = ReservoirItemsUnion.getInstance(sc.getMaxK());
+    final ReservoirItemsUnion<T> riu = ReservoirItemsUnion.newInstance(sc.getMaxK());
 
     for (int i = 0; i < sketches.size(); ++i) {
       final int sketchIdx = (stIdx + i) % sc.getNumSketches();
@@ -184,15 +184,15 @@ public class ReservoirEntropy {
   }
 
   static Integer[] simpleUnion(final int k) {
-    final ReservoirItemsSketch<Integer> rls1 = ReservoirItemsSketch.getInstance(k);
-    final ReservoirItemsSketch<Integer> rls2 = ReservoirItemsSketch.getInstance(k);
+    final ReservoirItemsSketch<Integer> rls1 = ReservoirItemsSketch.newInstance(k);
+    final ReservoirItemsSketch<Integer> rls2 = ReservoirItemsSketch.newInstance(k);
 
-    for (int i = 0; i < 10 * k; ++i) {
+    for (int i = 0; i < (10 * k); ++i) {
       rls1.update(i);
-      rls2.update(k * k + i);
+      rls2.update((k * k) + i);
     }
 
-    final ReservoirItemsUnion<Integer> rlu = ReservoirItemsUnion.getInstance(k);
+    final ReservoirItemsUnion<Integer> rlu = ReservoirItemsUnion.newInstance(k);
     rlu.update(rls1);
     rlu.update(rls2);
 

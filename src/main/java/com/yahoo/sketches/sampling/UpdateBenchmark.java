@@ -32,7 +32,7 @@ public class UpdateBenchmark {
     final long[] pAcceptLowResults = new long[numIters];
     final long[] totalResults = new long[numIters];
 
-    final ReservoirLongsSketch rls = ReservoirLongsSketch.getInstance(k);
+    final ReservoirLongsSketch rls = ReservoirLongsSketch.newInstance(k);
 
     final int samplingBreakIdx = ACCEPT_BREAKPOINT * k; // p(accept) == 0.5, so measure update
     // before/after here
@@ -70,7 +70,7 @@ public class UpdateBenchmark {
     final long[] pAcceptLowResults = new long[numIters];
     final long[] totalResults = new long[numIters];
 
-    final ReservoirItemsSketch<Long> ris = ReservoirItemsSketch.getInstance(k);
+    final ReservoirItemsSketch<Long> ris = ReservoirItemsSketch.newInstance(k);
 
     final int samplingBreakIdx = ACCEPT_BREAKPOINT * k; // p(accept) == 0.5, so measure update
     // before/after here
@@ -125,7 +125,7 @@ public class UpdateBenchmark {
     sb.append("  high p per update (ns)    : ")
       .append(meanAcceptHigh / ((ACCEPT_BREAKPOINT - 1) * k)).append(LS);
     sb.append("  low p per update (ns)     : ")
-      .append(meanAcceptLow / (n - ACCEPT_BREAKPOINT * k)).append(LS);
+      .append(meanAcceptLow / (n - (ACCEPT_BREAKPOINT * k))).append(LS);
     sb.append("  total per update (ns)     : ").append(meanTotal / n).append(LS);
     return sb.toString();
   }

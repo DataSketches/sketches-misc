@@ -13,13 +13,6 @@ This project may not build due to being out-of-sync with the released versions o
 Additionally, this project may depend on methods in the test branch of other DataSketches repositories which are not included in jar releases.
 You may have better luck if you build this and the dependent repository snapshot together. 
 
-### [Memory Performance Experiments](https://github.com/DataSketches/sketches-misc/blob/master/docs/MemoryPerformance.md)
-
-### "sketch" Command Line Capability
-
-The core sketch library can be used from a command line with the simple CommandLine parser included. 
-This has limited utility as it can only be run on a single machine, while the DataSketches library 
-was primarily writen for large-scale distributed systems.
 
 [travis]:https://travis-ci.org//DataSketches/sketches-misc/builds?branch=master
 [travis img]:https://secure.travis-ci.org/DataSketches/sketches-misc.svg?branch=master

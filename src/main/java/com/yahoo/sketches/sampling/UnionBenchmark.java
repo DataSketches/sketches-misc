@@ -24,7 +24,7 @@ public class UnionBenchmark {
 
     for (int k : kSet) {
       for (int numSketches : numSketchesSet) {
-        if (k * numSketches > 1L << 28) {
+        if ((k * numSketches) > (1L << 28)) {
           continue;
         } // limit to 2^30 bytes = 1GB of data
 
@@ -81,7 +81,7 @@ public class UnionBenchmark {
 
   private static <T> long unionSketchList(final List<ReservoirItemsSketch<T>> sketches,
       final int stIdx, final int k) {
-    final ReservoirItemsUnion<T> riu = ReservoirItemsUnion.getInstance(k);
+    final ReservoirItemsUnion<T> riu = ReservoirItemsUnion.newInstance(k);
     final int numSketches = sketches.size();
 
     final long timeStartMs = System.currentTimeMillis();

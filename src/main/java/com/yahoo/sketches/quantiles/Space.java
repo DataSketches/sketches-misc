@@ -5,6 +5,8 @@
 
 package com.yahoo.sketches.quantiles;
 
+import static com.yahoo.sketches.quantiles.Util.computeCombinedBufferItemCapacity;
+
 /**
  * Utility functions for computing space consumed by the QuantileSketch.
  *
@@ -25,7 +27,7 @@ public final class Space {
    * @return a pretty print string of a table of the maximum sizes of a QuantileSketch
    */
   public static String spaceTableGuide(final int lgKlo, final int lgKhi, final int maxLgN) {
-    final int cols = lgKhi - lgKlo + 1;
+    final int cols = (lgKhi - lgKlo) + 1;
     final int maxUBbytes = elemCapacity(1 << lgKhi, (1L << maxLgN) - 1L);
     final int tblColWidth = String.format("%,d", maxUBbytes).length() + 1;
     final int leftColWidth = 16;
@@ -50,7 +52,7 @@ public final class Space {
     sb.append(LS);
     sb.append(String.format(leftColStrFmt, "N |"));
     sb.append(" Size in Bytes ->").append(LS);
-    final int numDashes = leftColWidth + tblColWidth * cols;
+    final int numDashes = leftColWidth + (tblColWidth * cols);
     final StringBuilder sb2 = new StringBuilder();
     for (int i = 0; i < numDashes; i++) { sb2.append("-"); }
     sb.append(sb2.toString()).append(LS);
@@ -71,7 +73,7 @@ public final class Space {
   //External calls
   private static int elemCapacity(final int k, final long n) {
     return (n == 0) ? 8
-        : (Util.computeCombinedBufferItemCapacity(k, n, true) + 4) * Double.BYTES;
+        : (computeCombinedBufferItemCapacity(k, n) + 4) * Double.BYTES;
   }
 
   private static double getEpsilon(final int k) {

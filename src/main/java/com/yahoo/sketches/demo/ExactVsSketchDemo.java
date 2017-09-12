@@ -14,7 +14,7 @@ package com.yahoo.sketches.demo;
  * <p>This demo becomes most significant in the case where the number of uniques in the
  * stream exceeds what the computer/JVM can hold in memory.
  *
- * <p>This demo utilizes the Unix/Linux/OS-X sort and wc commands for the brute force compuation.
+ * <p>This demo utilizes the Unix/Linux/OS-X sort and wc commands for the brute force computation.
  * So this needs to be run on a linux or mac machine. A windows machine with a suitable unix
  * library installed should also work, but it has not been tested.
  *

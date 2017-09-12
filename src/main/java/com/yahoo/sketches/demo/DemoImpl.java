@@ -74,7 +74,7 @@ public class DemoImpl {
   private long u_;    //global unique count;
 
   /**
-   * Constuct the demo.
+   * Construct the demo.
    * @param streamLen  The total stream length. Must be &gt; 1000. Will be rounded up to nearest
    * 1000.
    * @param uniquesFraction the fraction of streamLen values less than 1.0, that will be unique.
@@ -87,7 +87,7 @@ public class DemoImpl {
     }
     uniquesFrac_ = uniquesFraction;
     final long m = streamLen / 1000;
-    if (m * 1000 == streamLen) {
+    if ((m * 1000) == streamLen) {
       n_ = streamLen;
     } else {
       n_ = (m + 1) * 1000;
@@ -126,12 +126,12 @@ public class DemoImpl {
     println("# COMPUTE DISTINCT COUNT USING SKETCHES");
     configureThetaSketch();
     long sketchTimeMS = buildSketch();
-    double factor = exactTimeMS * 1.0 / sketchTimeMS;
+    double factor = (exactTimeMS * 1.0) / sketchTimeMS;
     println("Speedup Factor " + String.format("%.1f", factor) + LS);
 
     configureHLLSketch();
     sketchTimeMS = buildSketch();
-    factor = exactTimeMS * 1.0 / sketchTimeMS;
+    factor = (exactTimeMS * 1.0) / sketchTimeMS;
     println("Speedup Factor " + String.format("%.1f", factor));
 
   }
@@ -307,28 +307,24 @@ public class DemoImpl {
     rse2_ = 2.0 / sqrt(k);    //Error for 95% confidence
     tSketch_ = Sketches.updateSketchBuilder()
         .setResizeFactor(ResizeFactor.X1)
-        .setFamily(Family.ALPHA).build(k );
+        .setFamily(Family.ALPHA).setNominalEntries(k)
+        .build();
   }
 
   private final void configureHLLSketch() {
     final int k = 1 << lgK_; //14
-    final boolean compressed = true;
-    final boolean hipEstimator = true;
-    final boolean denseMode = true;
     tSketch_ = null;
-    maxMemSkBytes_ = (compressed) ? k / 2 : k;
-    rse2_ = 2.0 * ((hipEstimator) ? 0.836 / sqrt(k) : 1.04 / sqrt(k)); //for 95% confidence
-    hllSketch_ = HllSketch.builder().setLogBuckets(lgK_)
-        .setHipEstimator(hipEstimator)
-        .setDenseMode(denseMode)
-        .setCompressedDense(compressed)
-        .build();
+
+    maxMemSkBytes_ = k / 2;
+    rse2_ = (2.0 * 0.836) / sqrt(k); //for 95% confidence
+    hllSketch_ = new HllSketch(lgK_);
+
   }
 
   private static void printCommon(final long testTimeMilli, final long n, final long u) {
     println(getMinSecFromMilli(testTimeMilli));
     println("Total Values: " + String.format("%,d",n));
-    final int nSecRate = (int) (testTimeMilli * 1000000.0 / n);
+    final int nSecRate = (int) ((testTimeMilli * 1000000.0) / n);
     println("Build Rate: " + String.format("%d nSec/Value", nSecRate));
     println("Exact Uniques: " + String.format("%,d", u));
   }
@@ -338,7 +334,7 @@ public class DemoImpl {
     final double rounded = Math.round((tSketch_ != null)
         ? tSketch_.getEstimate() : hllSketch_.getEstimate());
     println("Sketch Estimate of Uniques: " + String.format("%,d", (long)rounded));
-    final double err = (u == 0) ? 0 : (rounded / u - 1.0);
+    final double err = (u == 0) ? 0 : ((rounded / u) - 1.0);
     println("Sketch Actual Relative Error: " + String.format("%.3f%%", err * 100));
     println("Sketch 95%ile Error Bounds  : " + String.format("+/- %.3f%%", rse2 * 100));
     println("Max Sketch Size Bytes: " + String.format("%,d", maxMemSkBytes));
