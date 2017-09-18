@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance;
+package com.yahoo.sketches.performance.accuracy;
 
 import static com.yahoo.sketches.Util.pwr2LawNext;
 
@@ -70,7 +70,7 @@ public class PerformanceUtil {
      if ((fileName != null) && !fileName.isEmpty()) {
        file = new File(fileName);
        if (file.isFile()) {
-         file.delete(); //remove old data
+         file.delete(); //remove old file if it exists
        } else {
          try {
            file.createNewFile();

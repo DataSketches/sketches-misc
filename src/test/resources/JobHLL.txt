@@ -1,0 +1,24 @@
+# Time Profile
+TimeZone=PST
+TimeZoneOffset=-28800000 # offset in millisec
+FileNameDateFormat=yyyyMMdd'_'HHmmssz
+ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
+
+# Trials Profile
+Trials_lgQK=13   #size of quantiles sketch
+Trials_lgMinT=8  #prints intermediate results starting w/ this lgMinT
+Trials_lgMaxT=16 #The max trials
+Trials_TPPO=1    #how often intermediate results are printed
+Trials_interData=true
+Trials_postPMFs=false
+
+Trials_lgMinU=0  #The starting # of uniques that is printed at the end.
+Trials_lgMaxU=24 #How high the # uniques go
+Trials_UPPO=16   #The horizontal x-resolution of trials points
+
+#Sketch Profile
+Sketch=HLL
+HLL_lgK=21
+HLL_direct=false #only for Theta, HLL. See javadocs.
+HLL_tgtHllType=HLL8
+HLL_useComposite=false

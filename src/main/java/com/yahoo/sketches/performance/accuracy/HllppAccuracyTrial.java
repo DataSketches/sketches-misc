@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance;
+package com.yahoo.sketches.performance.accuracy;
 
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
 
@@ -23,8 +23,8 @@ public class HllppAccuracyTrial implements SketchAccuracyTrial {
     this.qArr = qArr;
     qArrLen = qArr.length;
 
-    p = Integer.parseInt(prop.mustGet("hllpp_p"));
-    sp = Integer.parseInt(prop.mustGet("hllpp_sp"));
+    p = Integer.parseInt(prop.mustGet("HLLP_p"));
+    sp = Integer.parseInt(prop.mustGet("HLLP_sp"));
   }
 
   @Override
@@ -48,8 +48,8 @@ public class HllppAccuracyTrial implements SketchAccuracyTrial {
   @Override
   public Properties defaultProperties() { //defaults
     Properties p = new Properties();
-    p.put("hllpp_p", "14");
-    p.put("hllpp_sp", "25"); // lgSK <= SP < 32
+    p.put("HLLP_p", "14");
+    p.put("HLLP_sp", "25"); // lgSK <= SP < 32
     return p;
   }
 

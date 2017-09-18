@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance;
+package com.yahoo.sketches.performance.accuracy;
 
 /**
  * A trial is one pass through all uniques, pausing to store the estimate into a

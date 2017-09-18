@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance;
+package com.yahoo.sketches.performance.accuracy;
 
 import java.util.ArrayList;
 import java.util.Comparator;
@@ -69,14 +69,18 @@ public class Properties {
 
   /**
    * Load the string containing key-value pairs into the map.
-   * key-value pairs are split by ",".
-   * Each key-value pair is split by "[:=]".
+   * key-value pairs are split by the RegEx: "[,\t\n]".
+   * Each key-value pair is split by the RegEx: "[:=]".
+   * Beginning and ending spaces are removed.
    * @param kvPairs the given string
    */
   public void loadKvPairs(String kvPairs) {
-    String[] pairs = kvPairs.split(",");
+    String[] pairs = kvPairs.split("[,\t\n]");
     for (String pair : pairs) {
-      String[] kv = pair.split("[:=]", 2);
+      String[] kv = pair.split("=", 2);
+      if (kv.length < 2) {
+        throw new IllegalArgumentException("Missing valid key-value separator");
+      }
       String k = kv[0].trim();
       String v = kv[1].trim();
       map.put(k, v);
@@ -85,12 +89,27 @@ public class Properties {
 
   /**
    * Extract a sorted String representing all the KV pairs of this map.
+   * Returns an empty string if the map is empty.
+   * Keys are separated from values with "=". Key-value pairs are separate with ",".
+   * If the map is not empty, the final character will be a comma ",".
    * @return a sorted String representing all the KV pairs of this map.
    */
   public String extractKvPairs() {
+    return extractKvPairs(",");
+  }
+
+  /**
+   * Extract a sorted String representing all the KV pairs of this map.
+   * Returns an empty string if the map is empty.
+   * Keys are separated from values with "=". Key-value pairs are separate with the pairSeparator.
+   * If the map is not empty, the final character will be a pairSeparator.
+   * @param pairSeparator the string to use to separate the key-value pairs.
+   * @return a sorted String representing all the KV pairs of this map
+   */
+  public String extractKvPairs(String pairSeparator) {
     ArrayList<String> list = new ArrayList<>();
     map.forEach((key, value) -> {
-      String s = key + "=" + value + ",";
+      String s = key + "=" + value + pairSeparator;
       list.add(s);
     });
     list.sort(Comparator.naturalOrder());
@@ -102,4 +121,19 @@ public class Properties {
     return sb.toString();
   }
 
+  /**
+   * Removes the trailing comma if there is one.
+   * @param kvPairs a sequence of key-value pairs separated by pairSeparator.
+   * @param pairSeparator the character used to separate the key-value pairs.
+   * @return the same string but with the trailing comma removed if there was one.
+   */
+  public static String removeLastPairSeparator(String kvPairs, char pairSeparator) {
+    StringBuilder sb = new StringBuilder(kvPairs);
+    int len = sb.length();
+    Character last = sb.charAt(len - 1);
+    if (last.equals(pairSeparator)) {
+      sb.deleteCharAt(len - 1);
+    }
+    return sb.toString();
+  }
 }

@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance;
+package com.yahoo.sketches.performance.accuracy;
 
 import com.yahoo.memory.WritableMemory;
 import com.yahoo.sketches.Family;
@@ -33,12 +33,12 @@ public class ThetaAccuracyTrial implements SketchAccuracyTrial {
     this.qArr = qArr;
     qArrLen = qArr.length;
 
-    lgK = Integer.parseInt(prop.mustGet("theta_lgK"));
-    family = Family.stringToFamily(prop.mustGet("theta_famName"));
-    p = Float.parseFloat(prop.mustGet("theta_p"));
-    rf = ResizeFactor.getRF(Integer.parseInt(prop.mustGet("theta_lgRF")));
-    direct = Boolean.parseBoolean(prop.mustGet("theta_direct"));
-    rebuild = Boolean.parseBoolean(prop.mustGet("theta_rebuild"));
+    lgK = Integer.parseInt(prop.mustGet("THETA_lgK"));
+    family = Family.stringToFamily(prop.mustGet("THETA_famName"));
+    p = Float.parseFloat(prop.mustGet("THETA_p"));
+    rf = ResizeFactor.getRF(Integer.parseInt(prop.mustGet("THETA_lgRF")));
+    direct = Boolean.parseBoolean(prop.mustGet("THETA_direct"));
+    rebuild = Boolean.parseBoolean(prop.mustGet("THETA_rebuild"));
 
     int k = 1 << lgK;
     UpdateSketchBuilder udBldr = UpdateSketch.builder()
@@ -77,12 +77,12 @@ public class ThetaAccuracyTrial implements SketchAccuracyTrial {
   @Override
   public Properties defaultProperties() {
     Properties p = new Properties();
-    p.put("theta_lgK", "14");
-    p.put("theta_direct", "false"); //only for Theta, HLL
-    p.put("theta_famName", "alpha"); //for the builder
-    p.put("theta_lgRF", "0"); //ResizeFactor = X1
-    p.put("theta_p", "1.0");
-    p.put("theta_rebuild", "true");  //set true if rebuild is desired to reduce size down to k.
+    p.put("THETA_lgK", "14");
+    p.put("THETA_direct", "false"); //only for Theta, HLL
+    p.put("THETA_famName", "alpha"); //for the builder
+    p.put("THETA_lgRF", "0"); //ResizeFactor = X1
+    p.put("THETA_p", "1.0");
+    p.put("THETA_rebuild", "true");  //set true if rebuild is desired to reduce size down to k.
     return p;
   }
 

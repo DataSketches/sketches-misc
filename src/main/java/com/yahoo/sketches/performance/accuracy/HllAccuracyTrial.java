@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance;
+package com.yahoo.sketches.performance.accuracy;
 
 import com.yahoo.memory.WritableMemory;
 import com.yahoo.sketches.hll.HllSketch;
@@ -25,12 +25,12 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
     this.qArr = qArr;
     qArrLen = qArr.length;
 
-    int lgK = Integer.parseInt(prop.mustGet("hll_lgK"));
-    boolean direct = Boolean.parseBoolean(prop.mustGet("hll_direct"));
-    useComposite = Boolean.parseBoolean(prop.mustGet("hll_useComposite"));
+    int lgK = Integer.parseInt(prop.mustGet("HLL_lgK"));
+    boolean direct = Boolean.parseBoolean(prop.mustGet("HLL_direct"));
+    useComposite = Boolean.parseBoolean(prop.mustGet("HLL_useComposite"));
 
     TgtHllType tgtHllType;
-    String type = prop.mustGet("hll_tgtHllType");
+    String type = prop.mustGet("HLL_tgtHllType");
     if (type.equalsIgnoreCase("HLL4")) { tgtHllType = TgtHllType.HLL_4; }
     else if (type.equalsIgnoreCase("HLL6")) { tgtHllType = TgtHllType.HLL_6; }
     else { tgtHllType = TgtHllType.HLL_8; }
@@ -79,10 +79,10 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
   @Override
   public Properties defaultProperties() {
     Properties p = new Properties();
-    p.put("hll_lgK", "14");
-    p.put("hll_direct", "false"); //only for Theta, HLL. See javadocs.
-    p.put("hll_tgtHllType", "HLL8");
-    p.put("hll_useComposite", "false");
+    p.put("HLL_lgK", "14");
+    p.put("HLL_direct", "false"); //only for Theta, HLL. See javadocs.
+    p.put("HLL_tgtHllType", "HLL8");
+    p.put("HLL_useComposite", "false");
     return p;
   }
 
