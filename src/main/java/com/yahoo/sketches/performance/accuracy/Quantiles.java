@@ -18,6 +18,7 @@ public class Quantiles {
   double sumRelErr = 0;
   double sumAbsErrSq = 0;
   int uniques;
+  int bytes = 0;
 
   public Quantiles(int k, int uniques) {
     qsk = new DoublesSketchBuilder().setK(k).build(); //Quantiles
@@ -30,6 +31,10 @@ public class Quantiles {
     sumRelErr += (est / uniques) - 1.0;
     double absErr = est - uniques;
     sumAbsErrSq += absErr * absErr;
+  }
+
+  public void updateBytes(int bytes) {
+    this.bytes = bytes;
   }
 
   public double[] getQuantiles(double[] fractions) {

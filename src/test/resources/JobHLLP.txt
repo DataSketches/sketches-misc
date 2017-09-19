@@ -11,6 +11,7 @@ Trials_lgMaxT=14 #The max trials
 Trials_TPPO=1    #how often intermediate results are printed
 Trials_interData=true
 Trials_postPMFs=false
+Trials_bytes=true
 
 Trials_lgMinU=0  #The starting # of uniques that is printed at the end.
 Trials_lgMaxU=24 #How high the # uniques go
@@ -18,5 +19,5 @@ Trials_UPPO=16   #The horizontal x-resolution of trials points
 
 #Sketch Profile
 Sketch=HLLP
-HLLP_p=21
+lgK=21 #same as p
 HLLP_sp=25

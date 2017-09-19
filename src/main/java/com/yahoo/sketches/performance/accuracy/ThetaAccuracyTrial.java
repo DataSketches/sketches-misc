@@ -18,6 +18,7 @@ import com.yahoo.sketches.theta.UpdateSketchBuilder;
 public class ThetaAccuracyTrial implements SketchAccuracyTrial {
   private Quantiles[] qArr;
   private int qArrLen;
+  private boolean getSize = false;
 
   //unique to sketch
   private int lgK;
@@ -33,7 +34,10 @@ public class ThetaAccuracyTrial implements SketchAccuracyTrial {
     this.qArr = qArr;
     qArrLen = qArr.length;
 
-    lgK = Integer.parseInt(prop.mustGet("THETA_lgK"));
+    String getSizeStr = prop.get("Trials_bytes");
+    getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
+
+    lgK = Integer.parseInt(prop.mustGet("lgK"));
     family = Family.stringToFamily(prop.mustGet("THETA_famName"));
     p = Float.parseFloat(prop.mustGet("THETA_p"));
     rf = ResizeFactor.getRF(Integer.parseInt(prop.mustGet("THETA_lgRF")));
@@ -70,6 +74,9 @@ public class ThetaAccuracyTrial implements SketchAccuracyTrial {
       lastUniques += delta;
       if (rebuild) { sketch.rebuild(); } //Resizes down to k. Only useful with QSSketch
       q.update(sketch.getEstimate());
+      if (getSize) {
+        q.updateBytes(sketch.compact().toByteArray().length);
+      }
     }
     return vIn;
   }

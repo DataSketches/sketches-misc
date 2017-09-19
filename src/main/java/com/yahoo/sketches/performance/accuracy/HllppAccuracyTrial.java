@@ -5,6 +5,8 @@
 
 package com.yahoo.sketches.performance.accuracy;
 
+import java.io.IOException;
+
 import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
 
 /**
@@ -13,6 +15,7 @@ import com.clearspring.analytics.stream.cardinality.HyperLogLogPlus;
 public class HllppAccuracyTrial implements SketchAccuracyTrial {
   private Quantiles[] qArr;
   private int qArrLen;
+  private boolean getSize = false;
 
   //unique to sketch used in doTrial
   private int p;
@@ -23,7 +26,10 @@ public class HllppAccuracyTrial implements SketchAccuracyTrial {
     this.qArr = qArr;
     qArrLen = qArr.length;
 
-    p = Integer.parseInt(prop.mustGet("HLLP_p"));
+    String getSizeStr = prop.get("Trials_bytes");
+    getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
+
+    p = Integer.parseInt(prop.mustGet("lgK"));
     sp = Integer.parseInt(prop.mustGet("HLLP_sp"));
   }
 
@@ -41,6 +47,13 @@ public class HllppAccuracyTrial implements SketchAccuracyTrial {
       lastUniques += delta;
       double est = sketch.cardinality();
       q.update(est);
+      if (getSize) {
+        try {
+          q.updateBytes(sketch.getBytes().length);
+        } catch (IOException e) {
+          throw new RuntimeException(e);
+        }
+      }
     }
     return vIn;
   }

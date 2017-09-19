@@ -51,6 +51,7 @@ public class RunAccuracy {
       }
       p.put(kv[0].trim(), kv[1].trim());
     }
+    setDateFormats(p);
     chooseSketchAndRunJob(p);
   }
 

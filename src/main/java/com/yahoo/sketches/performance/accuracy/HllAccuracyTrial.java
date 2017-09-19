@@ -15,6 +15,7 @@ import com.yahoo.sketches.hll.TgtHllType;
 public class HllAccuracyTrial implements SketchAccuracyTrial {
   private Quantiles[] qArr;
   private int qArrLen;
+  private boolean getSize = false;
 
   //unique to sketch used in doTrial
   private boolean useComposite;
@@ -25,7 +26,10 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
     this.qArr = qArr;
     qArrLen = qArr.length;
 
-    int lgK = Integer.parseInt(prop.mustGet("HLL_lgK"));
+    String getSizeStr = prop.get("Trials_bytes");
+    getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
+
+    int lgK = Integer.parseInt(prop.mustGet("lgK"));
     boolean direct = Boolean.parseBoolean(prop.mustGet("HLL_direct"));
     useComposite = Boolean.parseBoolean(prop.mustGet("HLL_useComposite"));
 
@@ -59,6 +63,9 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
         lastUniques += delta;
         double est = sketch.getCompositeEstimate();
         q.update(est);
+        if (getSize) {
+          q.updateBytes(sketch.toCompactByteArray().length);
+        }
       }
     }
     else { //use HIP
@@ -71,6 +78,9 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
         lastUniques += delta;
         double est = sketch.getEstimate();
         q.update(est);
+        if (getSize) {
+          q.updateBytes(sketch.toCompactByteArray().length);
+        }
       }
     }
     return vIn;

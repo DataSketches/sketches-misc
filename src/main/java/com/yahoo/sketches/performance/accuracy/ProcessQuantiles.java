@@ -16,16 +16,22 @@ public class ProcessQuantiles {
 
   public static void processCumTrials(AccuracyPerformance perf, int cumTrials) {
     Quantiles[] qArr = perf.getQuantilesArr();
+
+    Properties p = perf.getProperties();
+    String getSizeStr = p.get("Trials_bytes");
+    boolean getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
+
     int points = qArr.length;
     StringBuilder sb = new StringBuilder();
-    for (int p = 0; p < points; p++) {
-      Quantiles q = qArr[p];
+    for (int pt = 0; pt < points; pt++) {
+      Quantiles q = qArr[pt];
       int uniques = q.uniques;
       double meanEst = q.sumEst / cumTrials;
       double meanRelErr = q.sumRelErr / cumTrials;
       double meanAbsErrSq = q.sumAbsErrSq / cumTrials;
       double normMeanSqErr = meanAbsErrSq / (1.0*uniques * uniques);
       double nRMSerr = Math.sqrt(normMeanSqErr);
+      int bytes = q.bytes;
 
       //OUTPUT
       sb.setLength(0);
@@ -40,11 +46,17 @@ public class ProcessQuantiles {
       sb.append(cumTrials).append(TAB);
 
       //Quantiles
-      double[] quants = qArr[p].getQuantiles(FRACTIONS);
+      double[] quants = qArr[pt].getQuantiles(FRACTIONS);
       for (int i = 0; i < FRACT_LEN; i++) {
         sb.append((quants[i]/uniques) - 1.0).append(TAB);
       }
-
+      if (getSize) {
+        sb.append(bytes).append(TAB);
+        sb.append(nRMSerr * Math.sqrt(bytes));
+      } else {
+        sb.append(0);
+        sb.append(0);
+      }
       perf.println(sb.toString());
     }
   }
@@ -71,7 +83,9 @@ public class ProcessQuantiles {
     sb.append("Q(.97725)").append(TAB);
     sb.append("Q(.99865)").append(TAB);
     sb.append("Q(.9999683)").append(TAB);
-    sb.append("Max");
+    sb.append("Max").append(TAB);
+    sb.append("Bytes").append(TAB);
+    sb.append("ReMerit");
     return sb.toString();
   }
 
