@@ -6,36 +6,53 @@
 package com.yahoo.sketches.performance.accuracy;
 
 import static com.yahoo.sketches.Util.milliSecToString;
-import static com.yahoo.sketches.performance.accuracy.PerformanceUtil.LS;
-import static com.yahoo.sketches.performance.accuracy.PerformanceUtil.buildQuantilesArray;
-import static com.yahoo.sketches.performance.accuracy.PerformanceUtil.configureFile;
+import static com.yahoo.sketches.performance.PerformanceUtil.LS;
+import static com.yahoo.sketches.performance.PerformanceUtil.buildAccuracyStatsArray;
+import static com.yahoo.sketches.performance.PerformanceUtil.configureFile;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
+import com.yahoo.sketches.performance.AccuracyStats;
+import com.yahoo.sketches.performance.Properties;
+import com.yahoo.sketches.performance.SketchTrial;
+
 /**
  * @author Lee Rhodes
  */
-public class AccuracyPerformance {
+public class PerformanceJob {
   private final Properties prop;
-  private final Quantiles[] qArr;
-  private PrintWriter out = null;
-  private final SketchAccuracyTrial trial;
+  //Accuracy
+  private AccuracyStats[] qArr;
   private AccuracyTrialsManager trialsMgr;
+  //Speed
+
+  //Sketch
+  private final SketchTrial trial;
+  //Output to File
+  private PrintWriter out = null;
+  //Date-Time
   private SimpleDateFormat fileSDF;
   private SimpleDateFormat readSDF;
   private GregorianCalendar gc;
   private long startTime_mS;
 
-  public AccuracyPerformance(Properties prop, SketchAccuracyTrial trial) {
+  public PerformanceJob(Properties prop, SketchTrial trial) {
     this.prop = prop;
     this.trial = trial;
-    qArr = buildQuantilesArray(prop);
     configureDateFormats();
     configurePrintWriter();
-    startJob();
+    String jobType = prop.mustGet("JobType");
+    if (jobType.equalsIgnoreCase("accuracy")) {
+      qArr = buildAccuracyStatsArray(prop);
+      trialsMgr = new AccuracyTrialsManager(this);
+      startAccuracyJob();
+    } else { //assume speed for now
+
+      startSpeedJob();
+    }
   }
 
   private void configureDateFormats() {
@@ -58,7 +75,6 @@ public class AccuracyPerformance {
     String nowStr = fileSDF.format(gc.getTime());
     String outputFileName = prop.mustGet("Sketch") + nowStr + ".txt";
     prop.put("OutputFileName", outputFileName);
-    trialsMgr = new AccuracyTrialsManager(this);
     out = configureFile(outputFileName);
   }
 
@@ -72,17 +88,32 @@ public class AccuracyPerformance {
   }
 
   /**
-   * This method drives the whole process.
-   * See the main() method as an example of how to configure this.
-   * @param prop the properties class
+   * This method drives the accuracy process.
    */
-  private void startJob() {
+  private void startAccuracyJob() {
     startTime_mS = System.currentTimeMillis();
-    println("JOBNUM=" + prop.mustGet("JOBNUM"));
     println(prop.extractKvPairs(LS));
-    flush();
+
     //Run the full suite of trials for this job
+    flush(); //flush print buffer
     trialsMgr.doTrials();
+
+    long testTime_mS = System.currentTimeMillis() - startTime_mS;
+    println("Total Test Time        : " + milliSecToString(testTime_mS) + LS);
+    if (out != null) {
+      out.close();
+    }
+  }
+
+  /**
+   * This method drives the speed process.
+   */
+  private void startSpeedJob() {
+    startTime_mS = System.currentTimeMillis();
+
+  //Run the full suite of trials for this job
+    flush(); //flush print buffer
+    //trialsMgr.doTrials();
 
     long testTime_mS = System.currentTimeMillis() - startTime_mS;
     println("Total Test Time        : " + milliSecToString(testTime_mS) + LS);
@@ -95,11 +126,11 @@ public class AccuracyPerformance {
     return prop;
   }
 
-  public Quantiles[] getQuantilesArr() {
+  public AccuracyStats[] getAccuracyStatsArr() {
     return qArr;
   }
 
-  public SketchAccuracyTrial getSketchAccuracyTrial() {
+  public SketchTrial getSketchTrial() {
     return trial;
   }
 

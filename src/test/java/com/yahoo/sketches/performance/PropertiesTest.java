@@ -9,8 +9,6 @@ import static org.testng.Assert.assertTrue;
 
 import org.testng.annotations.Test;
 
-import com.yahoo.sketches.performance.accuracy.Properties;
-
 /**
  * @author Lee Rhodes
  */

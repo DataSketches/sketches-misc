@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance.accuracy;
+package com.yahoo.sketches.performance;
 
 import com.yahoo.memory.WritableMemory;
 import com.yahoo.sketches.Family;
@@ -15,8 +15,8 @@ import com.yahoo.sketches.theta.UpdateSketchBuilder;
 /**
  * @author Lee Rhodes
  */
-public class ThetaAccuracyTrial implements SketchAccuracyTrial {
-  private Quantiles[] qArr;
+public class ThetaTrial implements SketchTrial {
+  private AccuracyStats[] qArr;
   private int qArrLen;
   private boolean getSize = false;
 
@@ -30,10 +30,7 @@ public class ThetaAccuracyTrial implements SketchAccuracyTrial {
   private UpdateSketch sketch;
 
   @Override
-  public void configure(Properties prop, Quantiles[] qArr) {
-    this.qArr = qArr;
-    qArrLen = qArr.length;
-
+  public void configureSketch(Properties prop) {
     String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
@@ -61,12 +58,18 @@ public class ThetaAccuracyTrial implements SketchAccuracyTrial {
   }
 
   @Override
-  public long doTrial(long vInStart) {
+  public void setQuantilesArray(AccuracyStats[] qArr) {
+    this.qArr = qArr;
+    qArrLen = qArr.length;
+  }
+
+  @Override
+  public long doAccuracyTrial(long vInStart) {
     long vIn = vInStart;
     sketch.reset(); //reuse the same sketch
     int lastUniques = 0;
     for (int i = 0; i < qArrLen; i++) {
-      Quantiles q = qArr[i];
+      AccuracyStats q = qArr[i];
       int delta = q.uniques - lastUniques;
       for (int u = 0; u < delta; u++) {
         sketch.update(++vIn);
@@ -75,23 +78,23 @@ public class ThetaAccuracyTrial implements SketchAccuracyTrial {
       if (rebuild) { sketch.rebuild(); } //Resizes down to k. Only useful with QSSketch
       q.update(sketch.getEstimate());
       if (getSize) {
-        q.updateBytes(sketch.compact().toByteArray().length);
+        q.bytes = sketch.compact().toByteArray().length;
       }
     }
     return vIn;
   }
 
   @Override
-  public Properties defaultProperties() {
-    Properties p = new Properties();
-    p.put("THETA_lgK", "14");
-    p.put("THETA_direct", "false"); //only for Theta, HLL
-    p.put("THETA_famName", "alpha"); //for the builder
-    p.put("THETA_lgRF", "0"); //ResizeFactor = X1
-    p.put("THETA_p", "1.0");
-    p.put("THETA_rebuild", "true");  //set true if rebuild is desired to reduce size down to k.
-    return p;
+  public long doSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
+    long vIn = vInStart;
+    sketch.reset(); // reuse the same sketch
+    long startUpdateTime_nS = System.nanoTime();
+    for (int u = uPerTrial; u-- > 0;) {
+      sketch.update(++vIn);
+    }
+    long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
+    stats.update(uPerTrial, updateTime_nS);
+    return vIn;
   }
-
 
 }

@@ -7,27 +7,32 @@ package com.yahoo.sketches.performance.accuracy;
 
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.Util.pwr2LawNext;
-import static com.yahoo.sketches.performance.accuracy.PerformanceUtil.outputPMF;
+import static com.yahoo.sketches.performance.PerformanceUtil.outputPMF;
+
+import com.yahoo.sketches.performance.AccuracyStats;
+import com.yahoo.sketches.performance.Properties;
+import com.yahoo.sketches.performance.SketchTrial;
 
 /**
  * @author Lee Rhodes
  */
 public class AccuracyTrialsManager {
-  private AccuracyPerformance perf;
-  private SketchAccuracyTrial trial;
+  private PerformanceJob perf;
+  private SketchTrial trial;
 
   //Global counter that increments for every new input value.
   //This ensures that every trial is based on a different set of uniques
   private long vIn = 0;
   private Properties prop;
-  private Quantiles[] qArr;
+  private AccuracyStats[] qArr;
 
-  public AccuracyTrialsManager(AccuracyPerformance perf) {
+  public AccuracyTrialsManager(PerformanceJob perf) {
     this.perf = perf;
     prop = perf.getProperties();
-    qArr = perf.getQuantilesArr();
-    trial = perf.getSketchAccuracyTrial();
-    trial.configure(prop, qArr);
+    qArr = perf.getAccuracyStatsArr();
+    trial = perf.getSketchTrial();
+    trial.configureSketch(prop);
+    trial.setQuantilesArray(qArr);
   }
 
   public void doTrials() {
@@ -46,17 +51,17 @@ public class AccuracyTrialsManager {
       int nextT = (lastT == 0) ? minT : pwr2LawNext(tPPO, lastT);
       int delta = nextT - lastT;
       for (int i = 0; i < delta; i++) {
-        vIn = trial.doTrial(vIn);
+        vIn = trial.doAccuracyTrial(vIn);
       }
       lastT = nextT;
       if (nextT < maxT) { // intermediate
         if (interData) {
-          perf.println(ProcessQuantiles.getTableHeader());
-          ProcessQuantiles.processCumTrials(perf, lastT);
+          perf.println(ProcessAccuracyStats.getTableHeader());
+          ProcessAccuracyStats.processCumTrials(perf, lastT);
         }
       } else { //done
-        perf.println(ProcessQuantiles.getTableHeader());
-        ProcessQuantiles.processCumTrials(perf, lastT);
+        perf.println(ProcessAccuracyStats.getTableHeader());
+        ProcessAccuracyStats.processCumTrials(perf, lastT);
       }
 
       perf.println(prop.extractKvPairs());

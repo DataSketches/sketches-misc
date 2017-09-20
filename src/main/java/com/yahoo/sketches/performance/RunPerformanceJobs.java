@@ -8,22 +8,17 @@ package com.yahoo.sketches.performance;
 import org.testng.annotations.Test;
 
 import com.yahoo.sketches.Files;
-import com.yahoo.sketches.performance.accuracy.AccuracyPerformance;
-import com.yahoo.sketches.performance.accuracy.HllAccuracyTrial;
-import com.yahoo.sketches.performance.accuracy.HllppAccuracyTrial;
-import com.yahoo.sketches.performance.accuracy.Properties;
-import com.yahoo.sketches.performance.accuracy.SketchAccuracyTrial;
-import com.yahoo.sketches.performance.accuracy.ThetaAccuracyTrial;
+import com.yahoo.sketches.performance.accuracy.PerformanceJob;
 
 /**
  * @author Lee Rhodes
  */
-public class RunAccuracy {
+public class RunPerformanceJobs {
   static final char TAB = '\t';
   static final String LS = System.getProperty("line.separator");
 
   void parseJobs(String cmdFile) {
-    char[] chArr = Files.fileToCharArray(cmdFile);
+    char[] chArr = Files.fileToCharArray(cmdFile); //includes line feeds
     String cmdStr = new String(chArr);
     String[] jobs = cmdStr.split(";");
     for (int i = 0; i < jobs.length; i++) {
@@ -80,23 +75,23 @@ public class RunAccuracy {
 
   void chooseSketchAndRunJob(Properties p) {
     String sketch = p.mustGet("Sketch");
-    SketchAccuracyTrial trial;
+    SketchTrial trial;
     if (sketch.equals("HLL")) {
-      trial = new HllAccuracyTrial();
+      trial = new HllTrial();
     } else if (sketch.equals("HLLP")) {
-      trial = new HllppAccuracyTrial();
+      trial = new HllppTrial();
     } else if (sketch.equals("THETA")) {
-      trial = new ThetaAccuracyTrial();
+      trial = new ThetaTrial();
     } else {
       throw new IllegalArgumentException("Sketch type not found");
     }
     @SuppressWarnings("unused")
-    AccuracyPerformance ap = new AccuracyPerformance(p, trial);
+    PerformanceJob ap = new PerformanceJob(p, trial);
   }
 
   @Test
   public void runFromTest() {
-    parseJobs("local/OpenStackLocal/AccuracyJobsTest.txt");
+    //parseJobs("local/OpenStackLocal/AccuracyJobsTest.txt");
   }
 
   public static void main(String[] args) {
@@ -104,7 +99,7 @@ public class RunAccuracy {
     if ((cmdFile == null) || cmdFile.isEmpty()) {
       throw new IllegalArgumentException("No command file.");
     }
-    RunAccuracy perfRun = new RunAccuracy();
+    RunPerformanceJobs perfRun = new RunPerformanceJobs();
     perfRun.parseJobs(cmdFile);
   }
 }

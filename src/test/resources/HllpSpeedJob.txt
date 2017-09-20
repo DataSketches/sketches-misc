@@ -6,8 +6,8 @@ ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
 # Trials Profile
 Trials_lgQK=13   #size of quantiles sketch
-Trials_lgMinT=0  #prints intermediate results starting w/ this lgMinT
-Trials_lgMaxT=0  #The max trials
+Trials_lgMinT=8  #prints intermediate results starting w/ this #T
+Trials_lgMaxT=14 #The max trials
 Trials_TPPO=1    #how often intermediate results are printed
 Trials_interData=true
 Trials_postPMFs=false
@@ -18,8 +18,6 @@ Trials_lgMaxU=24 #How high the # uniques go
 Trials_UPPO=16   #The horizontal x-resolution of trials points
 
 #Sketch Profile
-Sketch=HLL
-lgK=21
-HLL_direct=false #only for Theta, HLL. See javadocs.
-HLL_tgtHllType=HLL8
-HLL_useComposite=false
+Sketch=HLLP
+lgK=21 #same as p
+HLLP_sp=25

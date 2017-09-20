@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance.accuracy;
+package com.yahoo.sketches.performance;
 
 import com.yahoo.memory.WritableMemory;
 import com.yahoo.sketches.hll.HllSketch;
@@ -12,8 +12,8 @@ import com.yahoo.sketches.hll.TgtHllType;
 /**
  * @author Lee Rhodes
  */
-public class HllAccuracyTrial implements SketchAccuracyTrial {
-  private Quantiles[] qArr;
+public class HllTrial implements SketchTrial {
+  private AccuracyStats[] qArr;
   private int qArrLen;
   private boolean getSize = false;
 
@@ -22,10 +22,7 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
   private HllSketch sketch;
 
   @Override
-  public void configure(Properties prop, Quantiles[] qArr) {
-    this.qArr = qArr;
-    qArrLen = qArr.length;
-
+  public void configureSketch(Properties prop) {
     String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
@@ -49,13 +46,19 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
   }
 
   @Override
-  public long doTrial(long vInStart) {
+  public void setQuantilesArray(AccuracyStats[] qArr) {
+    this.qArr = qArr;
+    qArrLen = qArr.length;
+  }
+
+  @Override
+  public long doAccuracyTrial(long vInStart) {
     long vIn = vInStart;
     sketch.reset(); //reuse the same sketch
     int lastUniques = 0;
     if (useComposite) {
       for (int i = 0; i < qArrLen; i++) {
-        Quantiles q = qArr[i];
+        AccuracyStats q = qArr[i];
         int delta = q.uniques - lastUniques;
         for (int u = 0; u < delta; u++) {
           sketch.update(++vIn);
@@ -64,13 +67,13 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
         double est = sketch.getCompositeEstimate();
         q.update(est);
         if (getSize) {
-          q.updateBytes(sketch.toCompactByteArray().length);
+          q.bytes = sketch.toCompactByteArray().length;
         }
       }
     }
     else { //use HIP
       for (int i = 0; i < qArrLen; i++) {
-        Quantiles q = qArr[i];
+        AccuracyStats q = qArr[i];
         int delta = q.uniques - lastUniques;
         for (int u = 0; u < delta; u++) {
           sketch.update(++vIn);
@@ -79,7 +82,7 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
         double est = sketch.getEstimate();
         q.update(est);
         if (getSize) {
-          q.updateBytes(sketch.toCompactByteArray().length);
+          q.bytes = sketch.toCompactByteArray().length;
         }
       }
     }
@@ -87,13 +90,16 @@ public class HllAccuracyTrial implements SketchAccuracyTrial {
   }
 
   @Override
-  public Properties defaultProperties() {
-    Properties p = new Properties();
-    p.put("HLL_lgK", "14");
-    p.put("HLL_direct", "false"); //only for Theta, HLL. See javadocs.
-    p.put("HLL_tgtHllType", "HLL8");
-    p.put("HLL_useComposite", "false");
-    return p;
+  public long doSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
+    long vIn = vInStart;
+    sketch.reset(); // reuse the same sketch
+    long startUpdateTime_nS = System.nanoTime();
+    for (int u = uPerTrial; u-- > 0;) {
+      sketch.update(++vIn);
+    }
+    long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
+    stats.update(uPerTrial, updateTime_nS);
+    return vIn;
   }
 
 }

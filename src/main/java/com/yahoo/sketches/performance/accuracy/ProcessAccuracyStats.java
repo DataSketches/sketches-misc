@@ -5,17 +5,20 @@
 
 package com.yahoo.sketches.performance.accuracy;
 
-import static com.yahoo.sketches.performance.accuracy.PerformanceUtil.FRACTIONS;
-import static com.yahoo.sketches.performance.accuracy.PerformanceUtil.FRACT_LEN;
-import static com.yahoo.sketches.performance.accuracy.PerformanceUtil.TAB;
+import static com.yahoo.sketches.performance.PerformanceUtil.FRACTIONS;
+import static com.yahoo.sketches.performance.PerformanceUtil.FRACT_LEN;
+import static com.yahoo.sketches.performance.PerformanceUtil.TAB;
+
+import com.yahoo.sketches.performance.AccuracyStats;
+import com.yahoo.sketches.performance.Properties;
 
 /**
  * @author Lee Rhodes
  */
-public class ProcessQuantiles {
+public class ProcessAccuracyStats {
 
-  public static void processCumTrials(AccuracyPerformance perf, int cumTrials) {
-    Quantiles[] qArr = perf.getQuantilesArr();
+  public static void processCumTrials(PerformanceJob perf, int cumTrials) {
+    AccuracyStats[] qArr = perf.getAccuracyStatsArr();
 
     Properties p = perf.getProperties();
     String getSizeStr = p.get("Trials_bytes");
@@ -24,13 +27,14 @@ public class ProcessQuantiles {
     int points = qArr.length;
     StringBuilder sb = new StringBuilder();
     for (int pt = 0; pt < points; pt++) {
-      Quantiles q = qArr[pt];
+      AccuracyStats q = qArr[pt];
       int uniques = q.uniques;
       double meanEst = q.sumEst / cumTrials;
       double meanRelErr = q.sumRelErr / cumTrials;
-      double meanAbsErrSq = q.sumAbsErrSq / cumTrials;
-      double normMeanSqErr = meanAbsErrSq / (1.0*uniques * uniques);
-      double nRMSerr = Math.sqrt(normMeanSqErr);
+      double meanSqErr = q.sumSqErr / cumTrials;
+      double normMeanSqErr = meanSqErr / (1.0*uniques * uniques);
+      double rmsRelErr = Math.sqrt(normMeanSqErr);
+      q.rmsre = rmsRelErr;
       int bytes = q.bytes;
 
       //OUTPUT
@@ -40,19 +44,19 @@ public class ProcessQuantiles {
       //Sketch meanEst, meanEstErr, norm RMS Err
       sb.append(meanEst).append(TAB);
       sb.append(meanRelErr).append(TAB);
-      sb.append(nRMSerr).append(TAB);
+      sb.append(rmsRelErr).append(TAB);
 
       //TRIALS
       sb.append(cumTrials).append(TAB);
 
       //Quantiles
-      double[] quants = qArr[pt].getQuantiles(FRACTIONS);
+      double[] quants = qArr[pt].qsk.getQuantiles(FRACTIONS);
       for (int i = 0; i < FRACT_LEN; i++) {
         sb.append((quants[i]/uniques) - 1.0).append(TAB);
       }
       if (getSize) {
         sb.append(bytes).append(TAB);
-        sb.append(nRMSerr * Math.sqrt(bytes));
+        sb.append(rmsRelErr * Math.sqrt(bytes));
       } else {
         sb.append(0);
         sb.append(0);
@@ -63,11 +67,11 @@ public class ProcessQuantiles {
 
   public static String getTableHeader() {
     StringBuilder sb = new StringBuilder();
-    sb.append("InU").append(TAB);       //col 1
+    sb.append("InU").append(TAB);        //col 1
     //Estimates
     sb.append("MeanEst").append(TAB);    //col 2
     sb.append("MeanRelErr").append(TAB); //col 3
-    sb.append("nRMSerr").append(TAB);    //col 4
+    sb.append("RMS_RE").append(TAB);     //col 4
 
     //Trials
     sb.append("Trials").append(TAB);     //col 5

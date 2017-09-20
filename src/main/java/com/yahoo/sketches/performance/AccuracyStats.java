@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance.accuracy;
+package com.yahoo.sketches.performance;
 
 import com.yahoo.sketches.quantiles.DoublesSketchBuilder;
 import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
@@ -12,15 +12,16 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
  * @author Lee Rhodes
  *
  */
-public class Quantiles {
-  UpdateDoublesSketch qsk;
-  double sumEst = 0;
-  double sumRelErr = 0;
-  double sumAbsErrSq = 0;
-  int uniques;
-  int bytes = 0;
+public class AccuracyStats {
+  public UpdateDoublesSketch qsk;
+  public double sumEst = 0;
+  public double sumRelErr = 0;
+  public double sumSqErr = 0;
+  public double rmsre = 0;
+  public int uniques;
+  public int bytes = 0;
 
-  public Quantiles(int k, int uniques) {
+  public AccuracyStats(int k, int uniques) {
     qsk = new DoublesSketchBuilder().setK(k).build(); //Quantiles
     this.uniques = uniques;
   }
@@ -29,15 +30,7 @@ public class Quantiles {
     qsk.update(est);
     sumEst += est;
     sumRelErr += (est / uniques) - 1.0;
-    double absErr = est - uniques;
-    sumAbsErrSq += absErr * absErr;
-  }
-
-  public void updateBytes(int bytes) {
-    this.bytes = bytes;
-  }
-
-  public double[] getQuantiles(double[] fractions) {
-    return qsk.getQuantiles(fractions);
+    double error = est - uniques;
+    sumSqErr += error * error;
   }
 }
