@@ -31,6 +31,7 @@ build.xml
 *.releaseBackup
 *.next
 *.tag
+*.txt
 
 # Jekyll
 Gemfile
