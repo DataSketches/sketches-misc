@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance.accuracy;
+package com.yahoo.sketches.performance;
 
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.performance.PerformanceUtil.LS;
@@ -15,20 +15,13 @@ import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
-import com.yahoo.sketches.performance.AccuracyStats;
-import com.yahoo.sketches.performance.Properties;
-import com.yahoo.sketches.performance.SketchTrial;
-
 /**
  * @author Lee Rhodes
  */
 public class PerformanceJob {
   private final Properties prop;
-  //Accuracy
   private AccuracyStats[] qArr;
-  private AccuracyTrialsManager trialsMgr;
-  //Speed
-
+  private TrialsManager trialsMgr;
   //Sketch
   private final SketchTrial trial;
   //Output to File
@@ -40,18 +33,32 @@ public class PerformanceJob {
   private long startTime_mS;
 
   public PerformanceJob(Properties prop, SketchTrial trial) {
+    startTime_mS = System.currentTimeMillis();
     this.prop = prop;
     this.trial = trial;
     configureDateFormats();
     configurePrintWriter();
     String jobType = prop.mustGet("JobType");
+    println("START " + jobType + " JOB");
+    println(prop.extractKvPairs(LS));
+    flush(); //flush print buffer
+
     if (jobType.equalsIgnoreCase("accuracy")) {
       qArr = buildAccuracyStatsArray(prop);
       trialsMgr = new AccuracyTrialsManager(this);
-      startAccuracyJob();
-    } else { //assume speed for now
+    }
+    else { //assume speed for now
+      trialsMgr = new SpeedTrialsManager(this);
+    }
 
-      startSpeedJob();
+    trialsMgr.doTrials();
+
+    long testTime_mS = System.currentTimeMillis() - startTime_mS;
+    println("Total Job Time        : " + milliSecToString(testTime_mS));
+    println("END " + jobType + " JOB" + LS + LS);
+    flush();
+    if (out != null) {
+      out.close();
     }
   }
 
@@ -85,41 +92,6 @@ public class PerformanceJob {
 
   public long getStartTime() {
     return startTime_mS;
-  }
-
-  /**
-   * This method drives the accuracy process.
-   */
-  private void startAccuracyJob() {
-    startTime_mS = System.currentTimeMillis();
-    println(prop.extractKvPairs(LS));
-
-    //Run the full suite of trials for this job
-    flush(); //flush print buffer
-    trialsMgr.doTrials();
-
-    long testTime_mS = System.currentTimeMillis() - startTime_mS;
-    println("Total Test Time        : " + milliSecToString(testTime_mS) + LS);
-    if (out != null) {
-      out.close();
-    }
-  }
-
-  /**
-   * This method drives the speed process.
-   */
-  private void startSpeedJob() {
-    startTime_mS = System.currentTimeMillis();
-
-  //Run the full suite of trials for this job
-    flush(); //flush print buffer
-    //trialsMgr.doTrials();
-
-    long testTime_mS = System.currentTimeMillis() - startTime_mS;
-    println("Total Test Time        : " + milliSecToString(testTime_mS) + LS);
-    if (out != null) {
-      out.close();
-    }
   }
 
   public Properties getProperties() {

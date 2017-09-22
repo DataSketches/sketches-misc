@@ -15,7 +15,6 @@ import java.io.OutputStreamWriter;
 import java.io.PrintWriter;
 import java.nio.charset.Charset;
 
-import com.yahoo.sketches.performance.accuracy.PerformanceJob;
 import com.yahoo.sketches.quantiles.DoublesSketch;
 
 /**

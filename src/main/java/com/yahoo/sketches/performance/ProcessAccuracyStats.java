@@ -3,14 +3,11 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance.accuracy;
+package com.yahoo.sketches.performance;
 
 import static com.yahoo.sketches.performance.PerformanceUtil.FRACTIONS;
 import static com.yahoo.sketches.performance.PerformanceUtil.FRACT_LEN;
 import static com.yahoo.sketches.performance.PerformanceUtil.TAB;
-
-import com.yahoo.sketches.performance.AccuracyStats;
-import com.yahoo.sketches.performance.Properties;
 
 /**
  * @author Lee Rhodes

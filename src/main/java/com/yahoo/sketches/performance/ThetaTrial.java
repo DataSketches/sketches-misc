@@ -34,7 +34,7 @@ public class ThetaTrial implements SketchTrial {
     String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
-    lgK = Integer.parseInt(prop.mustGet("lgK"));
+    lgK = Integer.parseInt(prop.mustGet("LgK"));
     family = Family.stringToFamily(prop.mustGet("THETA_famName"));
     p = Float.parseFloat(prop.mustGet("THETA_p"));
     rf = ResizeFactor.getRF(Integer.parseInt(prop.mustGet("THETA_lgRF")));
@@ -58,7 +58,7 @@ public class ThetaTrial implements SketchTrial {
   }
 
   @Override
-  public void setQuantilesArray(AccuracyStats[] qArr) {
+  public void setAccuracyStatsArray(AccuracyStats[] qArr) {
     this.qArr = qArr;
     qArrLen = qArr.length;
   }

@@ -8,7 +8,6 @@ package com.yahoo.sketches.performance;
 import org.testng.annotations.Test;
 
 import com.yahoo.sketches.Files;
-import com.yahoo.sketches.performance.accuracy.PerformanceJob;
 
 /**
  * @author Lee Rhodes
@@ -75,23 +74,23 @@ public class RunPerformanceJobs {
 
   void chooseSketchAndRunJob(Properties p) {
     String sketch = p.mustGet("Sketch");
-    SketchTrial trial;
+    SketchTrial sketchTrial;
     if (sketch.equals("HLL")) {
-      trial = new HllTrial();
+      sketchTrial = new HllTrial();
     } else if (sketch.equals("HLLP")) {
-      trial = new HllppTrial();
+      sketchTrial = new HllppTrial();
     } else if (sketch.equals("THETA")) {
-      trial = new ThetaTrial();
+      sketchTrial = new ThetaTrial();
     } else {
       throw new IllegalArgumentException("Sketch type not found");
     }
     @SuppressWarnings("unused")
-    PerformanceJob ap = new PerformanceJob(p, trial);
+    PerformanceJob ap = new PerformanceJob(p, sketchTrial);
   }
 
   @Test
   public void runFromTest() {
-    //parseJobs("local/OpenStackLocal/AccuracyJobsTest.txt");
+    parseJobs("local/OpenStackLocal/HllSpeedJob.txt");
   }
 
   public static void main(String[] args) {

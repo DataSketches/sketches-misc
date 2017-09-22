@@ -13,7 +13,7 @@ public interface SketchTrial {
 
   void configureSketch(Properties prop);
 
-  void setQuantilesArray(AccuracyStats[] qArr);
+  void setAccuracyStatsArray(AccuracyStats[] qArr);
 
   /**
    * An accuracy trial is one pass through all uniques, pausing to store the estimate into a

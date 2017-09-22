@@ -6,8 +6,8 @@ Trials_lgMaxT=23 #Max trials at start (low counts)
 Trials_lgMinT=4  #Min trials at tail (high counts) 
 
 #Trails Speed related
-Trials_lgMinBpU=4   #start the downward slope of trials at this U
-Trials_lgMaxBpU=20  #stop the downward slope of trials at this U
+Trials_lgMinBpU=4   #start the downward slope of trials at this LgU
+Trials_lgMaxBpU=20  #stop the downward slope of trials at this LgU
 
 #Uniques Profile
 Trials_lgMinU=0  #The starting # of uniques that is printed at the end.
@@ -21,6 +21,8 @@ FileNameDateFormat=yyyyMMdd'_'HHmmssz
 ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
 #Sketch Profile
-Sketch=HLLP
-LgK=21 #same as p
-HLLP_sp=25
+Sketch=HLL
+LgK=12
+HLL_direct=false #only for Theta, HLL. See javadocs.
+HLL_tgtHllType=HLL8
+HLL_useComposite=false

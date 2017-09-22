@@ -26,12 +26,12 @@ public class HllppTrial implements SketchTrial {
     String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
-    p = Integer.parseInt(prop.mustGet("lgK"));
+    p = Integer.parseInt(prop.mustGet("LgK"));
     sp = Integer.parseInt(prop.mustGet("HLLP_sp"));
   }
 
   @Override
-  public void setQuantilesArray(AccuracyStats[] qArr) {
+  public void setAccuracyStatsArray(AccuracyStats[] qArr) {
     this.qArr = qArr;
     qArrLen = qArr.length;
   }

@@ -3,20 +3,16 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.performance.accuracy;
+package com.yahoo.sketches.performance;
 
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.Util.pwr2LawNext;
 import static com.yahoo.sketches.performance.PerformanceUtil.outputPMF;
 
-import com.yahoo.sketches.performance.AccuracyStats;
-import com.yahoo.sketches.performance.Properties;
-import com.yahoo.sketches.performance.SketchTrial;
-
 /**
  * @author Lee Rhodes
  */
-public class AccuracyTrialsManager {
+public class AccuracyTrialsManager implements TrialsManager {
   private PerformanceJob perf;
   private SketchTrial trial;
 
@@ -32,9 +28,10 @@ public class AccuracyTrialsManager {
     qArr = perf.getAccuracyStatsArr();
     trial = perf.getSketchTrial();
     trial.configureSketch(prop);
-    trial.setQuantilesArray(qArr);
+    trial.setAccuracyStatsArray(qArr);
   }
 
+  @Override
   public void doTrials() {
     int lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
     int minT = 1 << lgMinT;
@@ -82,7 +79,6 @@ public class AccuracyTrialsManager {
       perf.println("Est Time at Completion : "
           + perf.getReadableDateString(timeToComplete_mS + currentTime_mS));
       perf.println("");
-      perf.flush();
       if (postPMFs) {
         for (int i = 0; i < qArr.length; i++) {
           outputPMF(perf, qArr[i]);

@@ -26,7 +26,7 @@ public class HllTrial implements SketchTrial {
     String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
-    int lgK = Integer.parseInt(prop.mustGet("lgK"));
+    int lgK = Integer.parseInt(prop.mustGet("LgK"));
     boolean direct = Boolean.parseBoolean(prop.mustGet("HLL_direct"));
     useComposite = Boolean.parseBoolean(prop.mustGet("HLL_useComposite"));
 
@@ -46,7 +46,7 @@ public class HllTrial implements SketchTrial {
   }
 
   @Override
-  public void setQuantilesArray(AccuracyStats[] qArr) {
+  public void setAccuracyStatsArray(AccuracyStats[] qArr) {
     this.qArr = qArr;
     qArrLen = qArr.length;
   }

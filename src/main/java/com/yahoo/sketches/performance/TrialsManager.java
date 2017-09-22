@@ -10,4 +10,6 @@ package com.yahoo.sketches.performance;
  */
 public interface TrialsManager {
 
+  void doTrials();
+
 }
