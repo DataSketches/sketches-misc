@@ -90,7 +90,7 @@ public class RunPerformanceJobs {
 
   @Test
   public void runFromTest() {
-    parseJobs("local/OpenStackLocal/HllSpeedJob.txt");
+    parseJobs("src/test/resources/HllSerDeJob.txt");
   }
 
   public static void main(String[] args) {

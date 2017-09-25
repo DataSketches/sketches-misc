@@ -24,7 +24,23 @@ public interface SketchTrial {
    */
   long doAccuracyTrial(long vInStart);
 
+  /**
+   * A speed trial is filling a sketch from empty to uPerTrial.
+   * @param stats where the results are stored
+   * @param uPerTrial the number of uniques to be fed to the sketch
+   * @param vInStart the starting value of the uniques.
+   * @return the updated global unique value after this trial is finished.
+   */
+  long doUpdateSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart);
 
-  long doSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart);
-
+  /**
+   * A speed trial is filling a sketch from empty to uPerTrial, getting the estimate,
+   * serializing it, deserializing it, and getting the estimate and checking against the
+   * original estimate.
+   * @param stats where the results are stored
+   * @param uPerTrial the number of uniques to be fed to the sketch
+   * @param vInStart the starting value of the uniques.
+   * @return the updated global unique value after this trial is finished.
+   */
+  long doSerDeTrial(SerDeStats stats, int uPerTrial, long vInStart);
 }

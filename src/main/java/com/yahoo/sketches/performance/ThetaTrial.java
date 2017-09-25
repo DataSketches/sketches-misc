@@ -5,6 +5,7 @@
 
 package com.yahoo.sketches.performance;
 
+import com.yahoo.memory.Memory;
 import com.yahoo.memory.WritableMemory;
 import com.yahoo.sketches.Family;
 import com.yahoo.sketches.ResizeFactor;
@@ -85,7 +86,7 @@ public class ThetaTrial implements SketchTrial {
   }
 
   @Override
-  public long doSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
+  public long doUpdateSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
     long vIn = vInStart;
     sketch.reset(); // reuse the same sketch
     long startUpdateTime_nS = System.nanoTime();
@@ -93,7 +94,34 @@ public class ThetaTrial implements SketchTrial {
       sketch.update(++vIn);
     }
     long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
-    stats.update(uPerTrial, updateTime_nS);
+    stats.update(updateTime_nS);
+    return vIn;
+  }
+
+  @Override
+  public long doSerDeTrial(SerDeStats stats, int uPerTrial, long vInStart) {
+    long vIn = vInStart;
+    sketch.reset(); // reuse the same sketch
+
+    for (int u = uPerTrial; u-- > 0;) {
+      sketch.update(++vIn);
+    }
+    double est1 = sketch.getEstimate();
+
+    long startSerTime_nS = System.nanoTime();
+    byte[] byteArr = sketch.compact().toByteArray();
+
+    long startDeSerTime_nS = System.nanoTime();
+
+    UpdateSketch sketch2 = UpdateSketch.heapify(Memory.wrap(byteArr));
+    long endDeTime_nS = System.nanoTime();
+
+    double est2 = sketch2.getEstimate();
+    assert est1 == est2;
+
+    long serTime_nS = startDeSerTime_nS - startSerTime_nS;
+    long deSerTime_nS = endDeTime_nS - startDeSerTime_nS;
+    stats.update(serTime_nS, deSerTime_nS);
     return vIn;
   }
 

@@ -9,8 +9,9 @@ import com.yahoo.sketches.quantiles.DoublesSketchBuilder;
 import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
 
 /**
- * @author Lee Rhodes
+ * Holds key metrics from a single accuracy trial
  *
+ * @author Lee Rhodes
  */
 public class AccuracyStats {
   public UpdateDoublesSketch qsk;
@@ -26,6 +27,12 @@ public class AccuracyStats {
     this.uniques = uniques;
   }
 
+  /**
+   * Update
+   *
+   * @param est the value of the estimate for this trial
+   * nanoSeconds.
+   */
   public void update(double est) {
     qsk.update(est);
     sumEst += est;

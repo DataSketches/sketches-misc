@@ -5,6 +5,7 @@
 
 package com.yahoo.sketches.performance;
 
+import com.yahoo.memory.Memory;
 import com.yahoo.memory.WritableMemory;
 import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.hll.TgtHllType;
@@ -17,7 +18,9 @@ public class HllTrial implements SketchTrial {
   private int qArrLen;
   private boolean getSize = false;
 
-  //unique to sketch used in doTrial
+  //unique to sketch, used in doTrial
+  private boolean compact;
+  private boolean wrap;
   private boolean useComposite;
   private HllSketch sketch;
 
@@ -29,6 +32,8 @@ public class HllTrial implements SketchTrial {
     int lgK = Integer.parseInt(prop.mustGet("LgK"));
     boolean direct = Boolean.parseBoolean(prop.mustGet("HLL_direct"));
     useComposite = Boolean.parseBoolean(prop.mustGet("HLL_useComposite"));
+    compact = Boolean.parseBoolean(prop.mustGet("HLL_compact"));
+    wrap = Boolean.parseBoolean(prop.mustGet("HLL_wrap"));
 
     TgtHllType tgtHllType;
     String type = prop.mustGet("HLL_tgtHllType");
@@ -90,7 +95,7 @@ public class HllTrial implements SketchTrial {
   }
 
   @Override
-  public long doSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
+  public long doUpdateSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
     long vIn = vInStart;
     sketch.reset(); // reuse the same sketch
     long startUpdateTime_nS = System.nanoTime();
@@ -98,7 +103,51 @@ public class HllTrial implements SketchTrial {
       sketch.update(++vIn);
     }
     long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
-    stats.update(uPerTrial, updateTime_nS);
+    stats.update(updateTime_nS);
+    return vIn;
+  }
+
+  @Override
+  public long doSerDeTrial(SerDeStats stats, int uPerTrial, long vInStart) {
+    long vIn = vInStart;
+    sketch.reset(); // reuse the same sketch
+
+    for (int u = uPerTrial; u-- > 0;) {
+      sketch.update(++vIn);
+    }
+    double est1 = sketch.getEstimate();
+
+    byte[] byteArr;
+    long startSerTime_nS, stopSerTime_nS;
+    if (compact) {
+      startSerTime_nS = System.nanoTime();
+      byteArr = sketch.toCompactByteArray();
+      stopSerTime_nS = System.nanoTime();
+    } else {
+      startSerTime_nS = System.nanoTime();
+      byteArr = sketch.toUpdatableByteArray();
+      stopSerTime_nS = System.nanoTime();
+    }
+
+    Memory mem = Memory.wrap(byteArr);
+    HllSketch sketch2;
+    long startDeserTime_nS, stopDeserTime_nS;
+    if (wrap) {
+      startDeserTime_nS = System.nanoTime();
+      sketch2 = HllSketch.wrap(mem);
+      stopDeserTime_nS = System.nanoTime();
+    } else {
+      startDeserTime_nS = System.nanoTime();
+      sketch2 = HllSketch.heapify(mem);
+      stopDeserTime_nS = System.nanoTime();
+    }
+
+    double est2 = sketch2.getEstimate();
+    assert est1 == est2;
+
+    long serTime_nS = stopSerTime_nS - startSerTime_nS;
+    long deTime_nS = stopDeserTime_nS - startDeserTime_nS;
+    stats.update(serTime_nS, deTime_nS);
     return vIn;
   }
 

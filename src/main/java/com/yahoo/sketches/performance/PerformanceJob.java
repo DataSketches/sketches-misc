@@ -7,7 +7,6 @@ package com.yahoo.sketches.performance;
 
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.performance.PerformanceUtil.LS;
-import static com.yahoo.sketches.performance.PerformanceUtil.buildAccuracyStatsArray;
 import static com.yahoo.sketches.performance.PerformanceUtil.configureFile;
 
 import java.io.PrintWriter;
@@ -20,7 +19,6 @@ import java.util.SimpleTimeZone;
  */
 public class PerformanceJob {
   private final Properties prop;
-  private AccuracyStats[] qArr;
   private TrialsManager trialsMgr;
   //Sketch
   private final SketchTrial trial;
@@ -43,12 +41,15 @@ public class PerformanceJob {
     println(prop.extractKvPairs(LS));
     flush(); //flush print buffer
 
-    if (jobType.equalsIgnoreCase("accuracy")) {
-      qArr = buildAccuracyStatsArray(prop);
+    //### Choose the type of performance to run
+    if (jobType.equalsIgnoreCase("Accuracy")) {
       trialsMgr = new AccuracyTrialsManager(this);
     }
-    else { //assume speed for now
+    else if (jobType.equalsIgnoreCase("Speed")){
       trialsMgr = new SpeedTrialsManager(this);
+    }
+    else if (jobType.equalsIgnoreCase("SerDe")) {
+      trialsMgr = new SerDeTrialsManager(this);
     }
 
     trialsMgr.doTrials();
@@ -96,10 +97,6 @@ public class PerformanceJob {
 
   public Properties getProperties() {
     return prop;
-  }
-
-  public AccuracyStats[] getAccuracyStatsArr() {
-    return qArr;
   }
 
   public SketchTrial getSketchTrial() {

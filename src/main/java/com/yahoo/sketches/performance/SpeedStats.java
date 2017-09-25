@@ -6,23 +6,19 @@
 package com.yahoo.sketches.performance;
 
 /**
- * Holds key metrics from a single trial
+ * Holds key metrics from a single speed trial
  *
  * @author Lee Rhodes
  */
 public class SpeedStats {
-  public int uPerTrial;
-  public double updateTimePerU_nS;
+  public double updateTime_nS;
 
   /**
-   * Update this Stats
+   * Update
    *
-   * @param uPerTrial the number of uniques fed to the sketch in this trial
-   * @param updateTime_nS the update time required for all the updates in
-   * nanoSeconds.
+   * @param updateTime_nS the update time for this trial in nanoSeconds.
    */
-  public void update(int uPerTrial, long updateTime_nS) {
-    this.uPerTrial = uPerTrial;
-    updateTimePerU_nS = (double) updateTime_nS / uPerTrial;
+  public void update(long updateTime_nS) {
+    this.updateTime_nS = updateTime_nS;
   }
 }

@@ -62,7 +62,7 @@ public class HllppTrial implements SketchTrial {
   }
 
   @Override
-  public long doSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
+  public long doUpdateSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
     long vIn = vInStart;
     HyperLogLogPlus sketch = new HyperLogLogPlus(p, sp);
     long startUpdateTime_nS = System.nanoTime();
@@ -70,7 +70,39 @@ public class HllppTrial implements SketchTrial {
       sketch.offer(++vIn);
     }
     long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
-    stats.update(uPerTrial, updateTime_nS);
+    stats.update(updateTime_nS);
+    return vIn;
+  }
+
+  @Override
+  public long doSerDeTrial(SerDeStats stats, int uPerTrial, long vInStart) {
+    long vIn = vInStart;
+    HyperLogLogPlus sketch = new HyperLogLogPlus(p, sp);
+    HyperLogLogPlus sketch2 = null;
+    for (int u = uPerTrial; u-- > 0;) {
+      sketch.offer(++vIn);
+    }
+    double est1 = sketch.cardinality();
+
+    long startSerTime_nS = System.nanoTime();
+    byte[] byteArr = null;
+    long startDeTime_nS = 0;
+
+    try {
+      byteArr = sketch.getBytes();
+
+      startDeTime_nS = System.nanoTime();
+
+      sketch2 = HyperLogLogPlus.Builder.build(byteArr);
+    } catch (IOException e) { throw new RuntimeException(e); }
+
+    long endDeTime_nS = System.nanoTime();
+    double est2 = sketch2.cardinality();
+    assert est1 == est2;
+
+    long serTime_nS = startDeTime_nS - startSerTime_nS;
+    long deTime_nS = endDeTime_nS - startDeTime_nS;
+    stats.update(serTime_nS, deTime_nS);
     return vIn;
   }
 

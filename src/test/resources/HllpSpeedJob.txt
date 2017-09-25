@@ -22,5 +22,5 @@ ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
 #Sketch Profile
 Sketch=HLLP
-LgK=21 #same as p
+LgK=12 #same as p
 HLLP_sp=25

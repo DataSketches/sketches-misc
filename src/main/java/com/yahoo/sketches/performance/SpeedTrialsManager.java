@@ -13,29 +13,29 @@ import static java.lang.Math.pow;
  * @author Lee Rhodes
  */
 public class SpeedTrialsManager implements TrialsManager {
-  private static final char TAB = '\t';
-  private static final double LN2 = log(2.0);
-  private PerformanceJob perf;
-  private SketchTrial trial;
-  private int lgMinT;
-  private int minT;
-  private int lgMaxT;
-  private int maxT;
-  private int lgMinBpU;
-  private int minBpU;
-  private int lgMaxBpU;
-  private int maxBpU;
-  private int lgMaxU;
-  private int maxU;
-  private int lgMinU;
-  private int minU;
-  private int uPPO;
-  private double slope;
+  static final char TAB = '\t';
+  static final double LN2 = log(2.0);
+  PerformanceJob perf;
+  SketchTrial trial;
+  int lgMinT;
+  int minT;
+  int lgMaxT;
+  int maxT;
+  int lgMinBpU;
+  int minBpU;
+  int lgMaxBpU;
+  int maxBpU;
+  int lgMaxU;
+  int maxU;
+  int lgMinU;
+  int minU;
+  int uPPO;
+  double slope;
 
   //Global counter that increments for every new input value.
   //This ensures that every trial is based on a different set of uniques
-  private long vIn = 0;
-  private Properties prop;
+  long vIn = 0;
+  Properties prop;
   //private SpeedStats[] sArr; ??
 
   public SpeedTrialsManager(PerformanceJob perf) {
@@ -69,20 +69,24 @@ public class SpeedTrialsManager implements TrialsManager {
     int lastU = 0;
     StringBuilder dataStr = new StringBuilder();
     perf.println(getHeader());
-    while (lastU < maxU) { //for each U point on X-axis, OR one row on output
+    while (lastU < maxU) { //Trial for each U point on X-axis, and one row on output
       int nextU = (lastU == 0) ? minU : pwr2LawNext(uPPO, lastU);
       lastU = nextU;
       int trials = getNumTrials(nextU);
+      //Build stats arr
       SpeedStats[] statsArr = new SpeedStats[trials];
-
       for (int t = 0; t < trials; t++) { //do # trials
         SpeedStats stats = statsArr[t];
         if (stats == null) {
           stats = statsArr[t] = new SpeedStats();
         }
-        vIn = trial.doSpeedTrial(stats, nextU, vIn); //at this # of uniques
       }
-      process(statsArr, nextU, dataStr);
+
+      System.gc();
+      for (int t = 0; t < trials; t++) {
+        vIn = trial.doUpdateSpeedTrial(statsArr[t], nextU, vIn); //at this # of uniques
+      }
+      process(statsArr, trials, nextU, dataStr);
       perf.println(dataStr.toString());
     }
   }
@@ -92,22 +96,22 @@ public class SpeedTrialsManager implements TrialsManager {
    *
    * @param statsArr the input Stats array
    * @param uPerTrial the number of uniques per trial for this trial set.
-   * @param dataStr The StringBuilder object that is reused for each row of output
+   * @param sb The StringBuilder object that is reused for each row of output
    */
-  public static void process(SpeedStats[] statsArr, int uPerTrial, StringBuilder dataStr) {
-    int trials = statsArr.length;
+  private static void process(SpeedStats[] statsArr, int trials, int uPerTrial,
+      StringBuilder sb) {
     double sumUpdateTimePerU_nS = 0;
 
     for (int t = 0; t < trials; t++) {
-      sumUpdateTimePerU_nS += statsArr[t].updateTimePerU_nS;
+      sumUpdateTimePerU_nS += (statsArr[t].updateTime_nS * 1.0)/uPerTrial;
     }
     double meanUpdateTimePerU_nS = sumUpdateTimePerU_nS / trials;
 
     // OUTPUT
-    dataStr.setLength(0);
-    dataStr.append(uPerTrial).append(TAB);
-    dataStr.append(trials).append(TAB);
-    dataStr.append(meanUpdateTimePerU_nS);
+    sb.setLength(0);
+    sb.append(uPerTrial).append(TAB);
+    sb.append(trials).append(TAB);
+    sb.append(meanUpdateTimePerU_nS);
   }
 
   /**
@@ -118,7 +122,7 @@ public class SpeedTrialsManager implements TrialsManager {
    * @return the number of trials for a given current number of uniques for a
    * trial set.
    */
-  public int getNumTrials(int curU) {
+  int getNumTrials(int curU) {
     if ((lgMinT == lgMaxT) || (curU <= (minBpU))) {
       return maxT;
     }
@@ -135,7 +139,7 @@ public class SpeedTrialsManager implements TrialsManager {
    *
    * @return a column header row
    */
-  public static String getHeader() {
+  private static String getHeader() {
     StringBuilder sb = new StringBuilder();
     sb.append("InU").append(TAB);
     sb.append("Trials").append(TAB);

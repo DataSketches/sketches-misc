@@ -26,3 +26,5 @@ LgK=12
 HLL_direct=false #only for Theta, HLL. See javadocs.
 HLL_tgtHllType=HLL8
 HLL_useComposite=false
+HLL_compact=true
+HLL_wrap=false
