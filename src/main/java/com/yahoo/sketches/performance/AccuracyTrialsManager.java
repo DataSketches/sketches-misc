@@ -113,7 +113,7 @@ public class AccuracyTrialsManager implements TrialsManager {
       int bytes = q.bytes;
 
       //OUTPUT
-      sb.setLength(0);
+      //sb.setLength(0);
       sb.append(uniques).append(TAB);
 
       //Sketch meanEst, meanEstErr, norm RMS Err
@@ -133,7 +133,7 @@ public class AccuracyTrialsManager implements TrialsManager {
         sb.append(bytes).append(TAB);
         sb.append(rmsRelErr * Math.sqrt(bytes));
       } else {
-        sb.append(0);
+        sb.append(0).append(TAB);
         sb.append(0);
       }
       sb.append(LS);
