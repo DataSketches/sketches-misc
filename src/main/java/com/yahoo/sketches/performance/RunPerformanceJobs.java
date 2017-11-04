@@ -90,7 +90,7 @@ public class RunPerformanceJobs {
 
   @Test
   public void runFromTest() {
-    parseJobs("src/test/resources/HllpAccuracyJob.txt");
+    parseJobs("src/test/resources/HllAccuracyJob.txt");
   }
 
   public static void main(String[] args) {

@@ -22,6 +22,7 @@ public class HllTrial implements SketchTrial {
   private boolean compact;
   private boolean wrap;
   private boolean useComposite;
+  private boolean useCharArr;
   private HllSketch sketch;
 
   @Override
@@ -34,6 +35,8 @@ public class HllTrial implements SketchTrial {
     useComposite = Boolean.parseBoolean(prop.mustGet("HLL_useComposite"));
     compact = Boolean.parseBoolean(prop.mustGet("HLL_compact"));
     wrap = Boolean.parseBoolean(prop.mustGet("HLL_wrap"));
+    String useCharArrStr = prop.get("Trials_charArr");
+    useCharArr = (useCharArrStr == null) ? false: Boolean.parseBoolean(useCharArrStr);
 
     TgtHllType tgtHllType;
     String type = prop.mustGet("HLL_tgtHllType");
@@ -61,34 +64,73 @@ public class HllTrial implements SketchTrial {
     long vIn = vInStart;
     sketch.reset(); //reuse the same sketch
     int lastUniques = 0;
-    if (useComposite) {
-      for (int i = 0; i < qArrLen; i++) {
-        AccuracyStats q = qArr[i];
-        int delta = q.uniques - lastUniques;
-        for (int u = 0; u < delta; u++) {
-          sketch.update(++vIn);
+    int sw = (useCharArr ? 2 : 0) | (useComposite ? 1 : 0);
+    switch(sw) {
+      case 0: { //use longs; use HIP
+        for (int i = 0; i < qArrLen; i++) {
+          AccuracyStats q = qArr[i];
+          int delta = q.uniques - lastUniques;
+          for (int u = 0; u < delta; u++) {
+            sketch.update(++vIn);
+          }
+          lastUniques += delta;
+          double est = sketch.getEstimate();
+          q.update(est);
+          if (getSize) {
+            q.bytes = sketch.toCompactByteArray().length;
+          }
         }
-        lastUniques += delta;
-        double est = sketch.getCompositeEstimate();
-        q.update(est);
-        if (getSize) {
-          q.bytes = sketch.toCompactByteArray().length;
-        }
+        break;
       }
-    }
-    else { //use HIP
-      for (int i = 0; i < qArrLen; i++) {
-        AccuracyStats q = qArr[i];
-        int delta = q.uniques - lastUniques;
-        for (int u = 0; u < delta; u++) {
-          sketch.update(++vIn);
+      case 1: { //use longs; use Composite
+        for (int i = 0; i < qArrLen; i++) {
+          AccuracyStats q = qArr[i];
+          int delta = q.uniques - lastUniques;
+          for (int u = 0; u < delta; u++) {
+            sketch.update(++vIn);
+          }
+          lastUniques += delta;
+          double est = sketch.getCompositeEstimate();
+          q.update(est);
+          if (getSize) {
+            q.bytes = sketch.toCompactByteArray().length;
+          }
         }
-        lastUniques += delta;
-        double est = sketch.getEstimate();
-        q.update(est);
-        if (getSize) {
-          q.bytes = sketch.toCompactByteArray().length;
+        break;
+      }
+      case 2: { //use char[]; use HIP
+        for (int i = 0; i < qArrLen; i++) {
+          AccuracyStats q = qArr[i];
+          int delta = q.uniques - lastUniques;
+          for (int u = 0; u < delta; u++) {
+            String vstr = Long.toHexString(++vIn);
+            sketch.update(vstr.toCharArray());
+          }
+          lastUniques += delta;
+          double est = sketch.getEstimate();
+          q.update(est);
+          if (getSize) {
+            q.bytes = sketch.toCompactByteArray().length;
+          }
         }
+        break;
+      }
+      case 3: { //use char[]; use Composite
+        for (int i = 0; i < qArrLen; i++) {
+          AccuracyStats q = qArr[i];
+          int delta = q.uniques - lastUniques;
+          for (int u = 0; u < delta; u++) {
+            String vstr = Long.toHexString(++vIn);
+            sketch.update(vstr.toCharArray());
+          }
+          lastUniques += delta;
+          double est = sketch.getCompositeEstimate();
+          q.update(est);
+          if (getSize) {
+            q.bytes = sketch.toCompactByteArray().length;
+          }
+        }
+        break;
       }
     }
     return vIn;
