@@ -40,7 +40,8 @@ import java.util.Arrays;
  */
 public final class Files {
   private static final String LS = System.getProperty("line.separator");
-  private static final byte CR = 0xD, LF = 0xA;
+  private static final byte CR = 0xD;
+  private static final byte LF = 0xA;
   public static final int DEFAULT_BUFSIZE = 8192;
 
   // Common IO & NIO file methods
@@ -52,7 +53,7 @@ public final class Files {
    * @param fileName the given fileName
    * @throws RuntimeException if fileName is null or empty.
    */
-  public static void checkFileName(String fileName) {
+  public static void checkFileName(final String fileName) {
     if (fileName == null) {
       throw new RuntimeException(LS + "FileName is null.");
     }
@@ -72,9 +73,9 @@ public final class Files {
    * @throws RuntimeException if fileName cannot resolve to a existing normal
    * file.
    */
-  public static File getExistingFile(String fileName) {
+  public static File getExistingFile(final String fileName) {
     checkFileName(fileName);
-    File file = new File(fileName);
+    final File file = new File(fileName);
     if (file.isFile()) {
       return file;
     }
@@ -92,9 +93,9 @@ public final class Files {
    * @return true if file is a normal file and not a directory.
    * @throws RuntimeException if fileName is null or empty.
    */
-  public static boolean isFileValid(String fileName) {
+  public static boolean isFileValid(final String fileName) {
     checkFileName(fileName);
-    File file = new File(fileName);
+    final File file = new File(fileName);
     return file.isFile();
   }
 
@@ -117,11 +118,11 @@ public final class Files {
    * @return RandomAccessFile
    * @throws RuntimeException if an IOException occurs.
    */
-  public static RandomAccessFile openRandomAccessFile(File file, String mode) {
-    RandomAccessFile raf;
+  public static RandomAccessFile openRandomAccessFile(final File file, final String mode) {
+    final RandomAccessFile raf;
     try {
       raf = new RandomAccessFile(file, mode);
-    } catch (FileNotFoundException e) {
+    } catch (final FileNotFoundException e) {
       throw new RuntimeException(LS + "Failed to open RandomAccessFile " + LS + e);
     }
     return raf;
@@ -134,11 +135,11 @@ public final class Files {
    * @return the FileDescriptor
    * @throws RuntimeException if an IOException occurs.
    */
-  public static FileDescriptor getFD(RandomAccessFile raf) {
+  public static FileDescriptor getFD(final RandomAccessFile raf) {
     FileDescriptor fd = null;
     try {
       fd = raf.getFD();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(LS + "RandomAccessFile.getFD() failure" + LS + e);
     }
     return fd;
@@ -151,10 +152,10 @@ public final class Files {
    * @param position the given position
    * @throws RuntimeException if an IOException occurs.
    */
-  public static void seek(RandomAccessFile raf, long position) {
+  public static void seek(final RandomAccessFile raf, final long position) {
     try {
       raf.seek(position);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(LS + "RandomAccessFile seek failure" + LS + e);
     }
   }
@@ -167,12 +168,12 @@ public final class Files {
    * @return the number of bytes actually read.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int readBytes(RandomAccessFile raf, byte[] buf) {
-    int len = buf.length;
+  public static int readBytes(final RandomAccessFile raf, final byte[] buf) {
+    final int len = buf.length;
     int read = 0;
     try {
       read = raf.read(buf);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(LS + "RandomAccessFile read failure" + LS + e);
     }
     if (read < len) {
@@ -196,12 +197,12 @@ public final class Files {
    * @return a MappedByteBuffer
    * @throws RuntimeException if an IOException occurs.
    */
-  public static MappedByteBuffer getMappedByteBuffer(FileChannel fChan, FileChannel.MapMode mmode,
-      long position, long size) {
-    MappedByteBuffer mbBuf;
+  public static MappedByteBuffer getMappedByteBuffer(final FileChannel fChan,
+      final FileChannel.MapMode mmode, final long position, final long size) {
+    final MappedByteBuffer mbBuf;
     try {
       mbBuf = fChan.map(mmode, position, size);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
     return mbBuf;
@@ -218,7 +219,8 @@ public final class Files {
    * @return a MappedByteBuffer
    * @throws RuntimeException if an IOException occurs.
    */
-  public static MappedByteBuffer getMappedByteBuffer(FileChannel fChan, FileChannel.MapMode mmode) {
+  public static MappedByteBuffer getMappedByteBuffer(final FileChannel fChan,
+      final FileChannel.MapMode mmode) {
     return getMappedByteBuffer(fChan, mmode, 0L, size(fChan));
   }
 
@@ -238,7 +240,7 @@ public final class Files {
    * @return the line as a string
    *
    */
-  public static String readLine(ByteBuffer mbBuf, ByteArrayBuilder bab) {
+  public static String readLine(final ByteBuffer mbBuf, final ByteArrayBuilder bab) {
     return readLine(mbBuf, bab, Charset.defaultCharset());
   }
 
@@ -259,11 +261,12 @@ public final class Files {
    * @return The characters of a line, or NULL if End-of-File, or "" if line was
    * empty.
    */
-  public static String readLine(ByteBuffer mbBuf, ByteArrayBuilder bab, Charset charset) {
+  public static String readLine(final ByteBuffer mbBuf, final ByteArrayBuilder bab,
+      final Charset charset) {
     if (!mbBuf.hasRemaining()) {
       return null;
     }
-    ByteArrayBuilder bab1;
+    final ByteArrayBuilder bab1;
     if (bab == null) {
       bab1 = new ByteArrayBuilder();
     } else {
@@ -271,7 +274,7 @@ public final class Files {
       bab1.setLength(0);
     }
     while (mbBuf.hasRemaining()) {
-      byte b = mbBuf.get();
+      final byte b = mbBuf.get();
       if (b == LF) {
         break; // EOL
       }
@@ -292,8 +295,8 @@ public final class Files {
       }
       return "";
     }
-    byte[] out = bab1.toByteArray();
-    String s = new String(out, charset);
+    final byte[] out = bab1.toByteArray();
+    final String s = new String(out, charset);
     return s;
   }
 
@@ -309,12 +312,12 @@ public final class Files {
    * @throws BufferUnderflowException if numBytes is greater than bytes
    * available in the buffer.
    */
-  public static int readByteBuffer(ByteBuffer bb, int numBytes, byte[] out) {
-    int rem = bb.remaining();
+  public static int readByteBuffer(final ByteBuffer bb, final int numBytes, final byte[] out) {
+    final int rem = bb.remaining();
     if (rem == 0) {
       return 0;
     }
-    int nBytes = (rem < numBytes) ? rem : numBytes;
+    final int nBytes = (rem < numBytes) ? rem : numBytes;
     bb.get(out);
     return nBytes;
   }
@@ -327,10 +330,10 @@ public final class Files {
    * @param position the position
    * @throws RuntimeException if an IOException occurs.
    */
-  public static void position(FileChannel fc, long position) {
+  public static void position(final FileChannel fc, final long position) {
     try {
       fc.position(position);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -342,11 +345,11 @@ public final class Files {
    * @return the size in bytes.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static long size(FileChannel fc) {
-    long sz;
+  public static long size(final FileChannel fc) {
+    final long sz;
     try {
       sz = fc.size();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
     return sz;
@@ -362,7 +365,7 @@ public final class Files {
    * @return the number of bytes actually appended.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int append(String out, FileChannel fc) {
+  public static int append(final String out, final FileChannel fc) {
     return append(out, fc, Charset.defaultCharset());
   }
 
@@ -377,12 +380,12 @@ public final class Files {
    * @return the number of bytes actually appended.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int append(String out, FileChannel fc, Charset charset) {
-    int bytes;
-    ByteBuffer bb = ByteBuffer.wrap(out.getBytes(charset));
+  public static int append(final String out, final FileChannel fc, final Charset charset) {
+    final int bytes;
+    final ByteBuffer bb = ByteBuffer.wrap(out.getBytes(charset));
     try {
       bytes = fc.write(bb, fc.size());
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
     return bytes;
@@ -397,12 +400,12 @@ public final class Files {
    * @return the number of bytes actually appended.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int append(byte[] byteArr, FileChannel fc) {
-    int bytes;
-    ByteBuffer bb = ByteBuffer.wrap(byteArr);
+  public static int append(final byte[] byteArr, final FileChannel fc) {
+    final int bytes;
+    final ByteBuffer bb = ByteBuffer.wrap(byteArr);
     try {
       bytes = fc.write(bb, fc.size());
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
     return bytes;
@@ -419,7 +422,7 @@ public final class Files {
    * @return the total number of bytes written.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int write(String out, FileChannel fc, long position) {
+  public static int write(final String out, final FileChannel fc, final long position) {
     return write(out, fc, position, Charset.defaultCharset());
   }
 
@@ -435,12 +438,13 @@ public final class Files {
    * @return the total number of bytes written.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int write(String out, FileChannel fc, long position, Charset charset) {
-    int bytes;
-    ByteBuffer bb = ByteBuffer.wrap(out.getBytes(charset));
+  public static int write(final String out, final FileChannel fc, final long position,
+      final Charset charset) {
+    final int bytes;
+    final ByteBuffer bb = ByteBuffer.wrap(out.getBytes(charset));
     try {
       bytes = fc.write(bb, position);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
     return bytes;
@@ -456,12 +460,12 @@ public final class Files {
    * @return the number of bytes actually appended.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int write(byte[] byteArr, FileChannel fc, long position) {
-    int bytes;
-    ByteBuffer bb = ByteBuffer.wrap(byteArr);
+  public static int write(final byte[] byteArr, final FileChannel fc, final long position) {
+    final int bytes;
+    final ByteBuffer bb = ByteBuffer.wrap(byteArr);
     try {
       bytes = fc.write(bb, position);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
     return bytes;
@@ -477,7 +481,7 @@ public final class Files {
    * @return the total number of bytes written.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int stringToFileNIO(String text, String fileName) {
+  public static int stringToFileNIO(final String text, final String fileName) {
     return stringToFileNIO(text, fileName, Charset.defaultCharset());
   }
 
@@ -491,19 +495,20 @@ public final class Files {
    * @return the total number of bytes written.
    * @throws RuntimeException if an IOException occurs.
    */
-  public static int stringToFileNIO(String text, String fileName, Charset charset) {
+  public static int stringToFileNIO(final String text, final String fileName,
+      final Charset charset) {
     checkFileName(fileName);
-    File file = new File(fileName);
+    final File file = new File(fileName);
     int bytes = 0;
     if (!file.isFile()) {
       try {
         file.createNewFile();
-      } catch (IOException e) {
+      } catch (final IOException e) {
         throw new RuntimeException("Cannot create new file: " + fileName + LS + e);
       }
       try (FileChannel fc = openRandomAccessFile(file, "rw").getChannel()) {
         bytes = write(text, fc, 0L, charset);
-      } catch (IOException e) {
+      } catch (final IOException e) {
         throw new RuntimeException("Cannot create File Channel: " + fileName + LS + e);
       }
     }
@@ -523,7 +528,7 @@ public final class Files {
    * @throws RuntimeException if IOException or SecurityException occurs, or if
    * fileName is null or empty.
    */
-  public static int appendStringToFileNIO(String text, String fileName) {
+  public static int appendStringToFileNIO(final String text, final String fileName) {
     return appendStringToFileNIO(text, fileName, Charset.defaultCharset());
   }
 
@@ -540,20 +545,21 @@ public final class Files {
    * @throws RuntimeException if IOException or SecurityException occurs, or if
    * fileName is null or empty.
    */
-  public static int appendStringToFileNIO(String text, String fileName, Charset charset) {
+  public static int appendStringToFileNIO(final String text, final String fileName,
+      final Charset charset) {
     checkFileName(fileName);
-    File file = new File(fileName);
+    final File file = new File(fileName);
     if (!file.isFile()) { // does not exist
       try {
         file.createNewFile();
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Cannot create file: " + fileName + LS + e);
       }
     }
     int bytes = 0;
     try (FileChannel fc = openRandomAccessFile(file, "rw").getChannel()) {
       bytes = append(text, fc, charset);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException("Cannot create File Channel: " + fileName + LS + e);
     }
     return bytes;
@@ -572,7 +578,7 @@ public final class Files {
    * @throws IllegalArgumentException if File size is greater than
    * Integer.MAX_VALUE.
    */
-  public static char[] fileToCharArrayNIO(String fileName) {
+  public static char[] fileToCharArrayNIO(final String fileName) {
     return fileToCharArrayNIO(fileName, Charset.defaultCharset());
   }
 
@@ -588,22 +594,22 @@ public final class Files {
    * @throws IllegalArgumentException if File size is greater than
    * Integer.MAX_VALUE.
    */
-  public static char[] fileToCharArrayNIO(String fileName, Charset charset) {
-    File file = getExistingFile(fileName);
+  public static char[] fileToCharArrayNIO(final String fileName, final Charset charset) {
+    final File file = getExistingFile(fileName);
     char[] chArr = null;
     try (RandomAccessFile raf = openRandomAccessFile(file, "r");
         FileChannel fc = raf.getChannel();) {
-      MappedByteBuffer mbBuf = getMappedByteBuffer(fc, READ_ONLY);
-      long len = size(fc);
+      final MappedByteBuffer mbBuf = getMappedByteBuffer(fc, READ_ONLY);
+      final long len = size(fc);
       if (len > Integer.MAX_VALUE) {
         fc.close();
         throw new IllegalArgumentException("File size cannot exceed Integer.MAX_VALUE.");
       }
-      byte[] in = new byte[(int) len];
+      final byte[] in = new byte[(int) len];
       mbBuf.get(in); // fill the buffer
-      String out = new String(in, charset);
+      final String out = new String(in, charset);
       chArr = out.toCharArray();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException("Could not create or close File Channel.");
     }
     return chArr;
@@ -619,7 +625,7 @@ public final class Files {
    * @return a String
    * @throws RuntimeException if IOException occurs.
    */
-  public static String fileToStringNIO(String fileName) {
+  public static String fileToStringNIO(final String fileName) {
     return fileToStringNIO(fileName, Charset.defaultCharset());
   }
 
@@ -634,20 +640,20 @@ public final class Files {
    * @return a String
    * @throws RuntimeException if IOException occurs.
    */
-  public static String fileToStringNIO(String fileName, Charset charset) {
-    File file = getExistingFile(fileName);
-    StringBuilder sb = new StringBuilder(1024);
+  public static String fileToStringNIO(final String fileName, final Charset charset) {
+    final File file = getExistingFile(fileName);
+    final StringBuilder sb = new StringBuilder(1024);
     try (RandomAccessFile raf = openRandomAccessFile(file, "r");
         FileChannel fChan = raf.getChannel();) {
-      MappedByteBuffer mbBuf = getMappedByteBuffer(fChan, READ_ONLY);
-      ByteArrayBuilder bab = new ByteArrayBuilder();
+      final MappedByteBuffer mbBuf = getMappedByteBuffer(fChan, READ_ONLY);
+      final ByteArrayBuilder bab = new ByteArrayBuilder();
 
       String s;
       while ((s = readLine(mbBuf, bab, charset)) != null) {
         sb.append(s);
         sb.append(LS);
       }
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException("Cannot create File Channel.");
     }
     return sb.toString();
@@ -665,7 +671,7 @@ public final class Files {
    * @return BufferedReader object
    * @throws RuntimeException if File Not Found.
    */
-  public static BufferedReader openBufferedReader(File file) {
+  public static BufferedReader openBufferedReader(final File file) {
     return openBufferedReader(file, DEFAULT_BUFSIZE, Charset.defaultCharset());
   }
 
@@ -679,7 +685,7 @@ public final class Files {
    * @return a BufferedReader object
    * @throws RuntimeException if File Not Found.
    */
-  public static BufferedReader openBufferedReader(File file, int bufSize) {
+  public static BufferedReader openBufferedReader(final File file, final int bufSize) {
     return openBufferedReader(file, bufSize, Charset.defaultCharset());
   }
 
@@ -696,15 +702,16 @@ public final class Files {
    * @return a BufferedReader object
    * @throws RuntimeException if FileNotFoundException occurs.
    */
-  public static BufferedReader openBufferedReader(File file, int bufSize, Charset charset) {
-    int bufSz = (bufSize < DEFAULT_BUFSIZE) ? DEFAULT_BUFSIZE : bufSize;
-    Charset cSet = (charset == null) ? Charset.defaultCharset() : charset;
+  public static BufferedReader openBufferedReader(final File file, final int bufSize,
+      final Charset charset) {
+    final int bufSz = (bufSize < DEFAULT_BUFSIZE) ? DEFAULT_BUFSIZE : bufSize;
+    final Charset cSet = (charset == null) ? Charset.defaultCharset() : charset;
     BufferedReader in = null; // default bufsize is 8192.
     try {
-      FileInputStream fis = new FileInputStream(file);
-      InputStreamReader isr = new InputStreamReader(fis, cSet);
+      final FileInputStream fis = new FileInputStream(file);
+      final InputStreamReader isr = new InputStreamReader(fis, cSet);
       in = new BufferedReader(isr, bufSz);
-    } catch (FileNotFoundException e) { // from FileInputStream
+    } catch (final FileNotFoundException e) { // from FileInputStream
       // never opened, so don't close it.
       throw new RuntimeException(LS + "File Not Found: " + file.getPath() + LS + e);
     }
@@ -718,11 +725,11 @@ public final class Files {
    * @return boolean true if ready.
    * @throws RuntimeException if IOException occurs.
    */
-  public static boolean ready(Reader in) {
+  public static boolean ready(final Reader in) {
     boolean out = false;
     try {
       out = in.ready();
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(LS + "Reader.ready() unsuccessful: " + LS + e);
     }
     return out;
@@ -735,13 +742,13 @@ public final class Files {
    * @param skipLen in bytes.
    * @throws RuntimeException if IOException occurs.
    */
-  public static void skip(Reader in, long skipLen) {
+  public static void skip(final Reader in, final long skipLen) {
     try {
       in.skip(skipLen);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       try {
         in.close();
-      } catch (IOException f) {
+      } catch (final IOException f) {
         throw new RuntimeException(LS + "Close Unsuccessful" + LS + f);
       }
       throw new RuntimeException(LS + "Reader.skip(len) unsuccessful: " + LS + e);
@@ -757,14 +764,14 @@ public final class Files {
    * @return number of characters actually read from Reader
    * @throws RuntimeException if IOException occurs.
    */
-  public static int readCharacters(Reader in, int length, char[] cArr) {
+  public static int readCharacters(final Reader in, final int length, final char[] cArr) {
     int readLen = 0;
     try {
       readLen = in.read(cArr, 0, length);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       try {
         in.close();
-      } catch (IOException f) {
+      } catch (final IOException f) {
         throw new RuntimeException(LS + "Close Unsuccessful" + LS + f);
       }
       throw new RuntimeException(LS + "Reader.read(char[],0,len) unsuccessful: " + LS + e);
@@ -783,7 +790,7 @@ public final class Files {
    * @throws IllegalArgumentException if File size is greater than
    * Integer.MAX_VALUE.
    */
-  public static char[] fileToCharArray(String fileName) {
+  public static char[] fileToCharArray(final String fileName) {
     return fileToCharArray(fileName, DEFAULT_BUFSIZE, Charset.defaultCharset());
   }
 
@@ -800,19 +807,20 @@ public final class Files {
    * @throws IllegalArgumentException if File size is greater than
    * Integer.MAX_VALUE.
    */
-  public static char[] fileToCharArray(String fileName, int bufSize, Charset charset) {
-    File file = getExistingFile(fileName);
+  public static char[] fileToCharArray(final String fileName, final int bufSize,
+      final Charset charset) {
+    final File file = getExistingFile(fileName);
     char[] cArr = null;
-    long fileLen = (long) (file.length() * 1.1); // 10% headroom
+    final long fileLen = (long) (file.length() * 1.1); // 10% headroom
     if (fileLen > Integer.MAX_VALUE) {
       throw new IllegalArgumentException(
           LS + "File Size is too large: " + fileLen + " >" + " Max: " + Integer.MAX_VALUE);
     }
-    int len = (int) fileLen;
+    final int len = (int) fileLen;
     try (BufferedReader in = openBufferedReader(file, bufSize, charset)) {
       cArr = new char[len];
       in.read(cArr, 0, len);
-    } catch (IOException e) { // thrown by read()
+    } catch (final IOException e) { // thrown by read()
       throw new RuntimeException(LS + "BufferedReader.read(char[],0,len) unsuccessful: " + LS + e);
     }
     return cArr;
@@ -828,7 +836,7 @@ public final class Files {
    * @return a String
    * @throws RuntimeException if IOException occurs.
    */
-  public static String fileToString(String fileName) {
+  public static String fileToString(final String fileName) {
     return fileToString(fileName, DEFAULT_BUFSIZE, Charset.defaultCharset());
   }
 
@@ -843,16 +851,17 @@ public final class Files {
    * @return String
    * @throws RuntimeException if IOException occurs.
    */
-  public static String fileToString(String fileName, int bufSize, Charset charset) {
-    StringBuilder sb = new StringBuilder();
-    File file = getExistingFile(fileName);
+  public static String fileToString(final String fileName, final int bufSize,
+      final Charset charset) {
+    final StringBuilder sb = new StringBuilder();
+    final File file = getExistingFile(fileName);
     try (BufferedReader in = openBufferedReader(file, bufSize, charset)) {
       String s;
       while ((s = in.readLine()) != null) {
         sb.append(s);
         sb.append(LS);
       }
-    } catch (IOException e) { // thrown by readLine()
+    } catch (final IOException e) { // thrown by readLine()
       throw new RuntimeException(LS + "BufferedReader.readLine() unsuccessful: " + LS + e);
     }
     return sb.toString();
@@ -870,7 +879,8 @@ public final class Files {
    * @return BufferedWriter object
    * @throws RuntimeException if IOException occurs.
    */
-  public static BufferedWriter openBufferedWriter(File file, int bufSize, boolean append) {
+  public static BufferedWriter openBufferedWriter(final File file, final int bufSize,
+      final boolean append) {
     return openBufferedWriter(file, bufSize, append, Charset.defaultCharset());
   }
 
@@ -887,15 +897,15 @@ public final class Files {
    * @return BufferedWriter object
    * @throws RuntimeException if IOException occurs.
    */
-  public static BufferedWriter openBufferedWriter(File file, int bufSize, boolean append,
-      Charset charset) {
-    int bufSz = (bufSize < DEFAULT_BUFSIZE) ? DEFAULT_BUFSIZE : bufSize;
+  public static BufferedWriter openBufferedWriter(final File file, final int bufSize,
+      final boolean append, final Charset charset) {
+    final int bufSz = (bufSize < DEFAULT_BUFSIZE) ? DEFAULT_BUFSIZE : bufSize;
     BufferedWriter out = null; // default bufsize is 8192.
     try {
-      FileOutputStream fos = new FileOutputStream(file, append);
-      OutputStreamWriter osw = new OutputStreamWriter(fos, charset);
+      final FileOutputStream fos = new FileOutputStream(file, append);
+      final OutputStreamWriter osw = new OutputStreamWriter(fos, charset);
       out = new BufferedWriter(osw, bufSz);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       // never opened, so don't close it.
       throw new RuntimeException(LS + "Could not create: " + file.getPath() + LS + e);
     }
@@ -910,7 +920,7 @@ public final class Files {
    * @throws RuntimeException if IOException occurs or if fileName is null or
    * empty.
    */
-  public static void stringToFile(String text, String fileName) {
+  public static void stringToFile(final String text, final String fileName) {
     stringToFile(text, fileName, DEFAULT_BUFSIZE, Charset.defaultCharset());
   }
 
@@ -925,13 +935,14 @@ public final class Files {
    * @throws RuntimeException if IOException occurs or if fileName is null or
    * empty.
    */
-  public static void stringToFile(String text, String fileName, int bufSize, Charset charset) {
+  public static void stringToFile(final String text, final String fileName, final int bufSize,
+      final Charset charset) {
     checkFileName(fileName);
-    File file = new File(fileName);
+    final File file = new File(fileName);
     try (BufferedWriter bw = openBufferedWriter(file, bufSize, false, charset);
         PrintWriter out = new PrintWriter(bw);) {
       out.print(text);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }
@@ -946,7 +957,7 @@ public final class Files {
    * @throws RuntimeException if IOException or SecurityException occurs, or if
    * fileName is null or empty.
    */
-  public static void appendStringToFile(String text, String fileName) {
+  public static void appendStringToFile(final String text, final String fileName) {
     appendStringToFile(text, fileName, DEFAULT_BUFSIZE, Charset.defaultCharset());
   }
 
@@ -963,21 +974,21 @@ public final class Files {
    * @throws RuntimeException if IOException or SecurityException occurs, or if
    * fileName is null or empty.
    */
-  public static void appendStringToFile(String text, String fileName, int bufSize,
-      Charset charset) {
+  public static void appendStringToFile(final String text, final String fileName,
+      final int bufSize, final Charset charset) {
     checkFileName(fileName);
-    File file = new File(fileName);
+    final File file = new File(fileName);
     if (!file.isFile()) { // does not exist
       try {
         file.createNewFile();
-      } catch (Exception e) {
+      } catch (final Exception e) {
         throw new RuntimeException("Cannot create file: " + fileName + LS + e);
       }
     }
     try (BufferedWriter bw = openBufferedWriter(file, bufSize, true, charset);
         PrintWriter out = new PrintWriter(bw);) {
       out.print(text);
-    } catch (IOException e) {
+    } catch (final IOException e) {
       throw new RuntimeException(e);
     }
   }

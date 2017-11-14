@@ -14,8 +14,8 @@ import java.util.Arrays;
 
 /**
  * A mutable sequence of bytes.
- * <p>
- * Implements a modifiable byte array. At any point in time it contains some
+ *
+ * <p>Implements a modifiable byte array. At any point in time it contains some
  * particular sequence of bytes but the length and content of the sequence can
  * be changed through certain method calls.
  *
@@ -38,7 +38,7 @@ public class ByteArrayBuilder {
    * @throws NegativeArraySizeException if the <code>capacity</code> argument is
    * less than <code>0</code>.
    */
-  public ByteArrayBuilder(int capacity) {
+  public ByteArrayBuilder(final int capacity) {
     arr_ = new byte[capacity];
   }
 
@@ -75,7 +75,7 @@ public class ByteArrayBuilder {
    *
    * @param minimumCapacity the minimum desired capacity.
    */
-  public void ensureCapacity(int minimumCapacity) {
+  public void ensureCapacity(final int minimumCapacity) {
     if (minimumCapacity > arr_.length) {
       expandCapacity(minimumCapacity);
     }
@@ -85,7 +85,7 @@ public class ByteArrayBuilder {
    * This implements the expansion semantics of ensureCapacity with no size
    * check or synchronization.
    */
-  void expandCapacity(int minimumCapacity) {
+  void expandCapacity(final int minimumCapacity) {
     int newCapacity = (arr_.length + 1) * 2;
     if (newCapacity < 0) {
       newCapacity = Integer.MAX_VALUE;
@@ -101,8 +101,8 @@ public class ByteArrayBuilder {
    *
    * @param space the given space in bytes
    */
-  public void ensureSpace(int space) {
-    int newCount = count_ + space;
+  public void ensureSpace(final int space) {
+    final int newCount = count_ + space;
     if (newCount > arr_.length) {
       expandCapacity(newCount);
     }
@@ -114,7 +114,7 @@ public class ByteArrayBuilder {
    * @param b byte
    * @return this ByteArrayBuilder
    */
-  public ByteArrayBuilder append(byte b) {
+  public ByteArrayBuilder append(final byte b) {
     ensureSpace(1);
     arr_[count_++] = b;
     return this;
@@ -126,8 +126,8 @@ public class ByteArrayBuilder {
    * @param bArr byte array
    * @return this ByteArrayBuilder
    */
-  public ByteArrayBuilder append(byte[] bArr) {
-    int len = bArr.length;
+  public ByteArrayBuilder append(final byte[] bArr) {
+    final int len = bArr.length;
     ensureSpace(len);
     System.arraycopy(bArr, 0, arr_, count_, len);
     count_ += len;
@@ -142,21 +142,21 @@ public class ByteArrayBuilder {
    * old sequence if <i>k</i> is less than the length of the old byte sequence;
    * otherwise, it is the null byte <code>0</code>.
    *
-   * In other words, if the <code>newLength</code> argument is less than the
+   * <p>In other words, if the <code>newLength</code> argument is less than the
    * current length, the length is changed to the specified length.
-   * <p>
-   * If the <code>newLength</code> argument is greater than or equal to the
+   *
+   * <p>If the <code>newLength</code> argument is greater than or equal to the
    * current length, sufficient null byte (<code>0</code>) are appended so that
    * length becomes the <code>newLength</code> argument.
-   * <p>
-   * The <code>newLength</code> argument must be greater than or equal to
+   *
+   * <p>The <code>newLength</code> argument must be greater than or equal to
    * <code>0</code>.
    *
    * @param newLength the new length
    * @throws IndexOutOfBoundsException if the <code>newLength</code> argument is
    * negative.
    */
-  public void setLength(int newLength) {
+  public void setLength(final int newLength) {
     if (newLength < 0) {
       throw new ArrayIndexOutOfBoundsException(newLength);
     }

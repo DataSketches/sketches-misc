@@ -1,117 +1,104 @@
-  /*
+/*
  * Copyright 2016, Yahoo! Inc.
  * Licensed under the terms of the Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
 package com.yahoo.sketches.cmd;
 
-
-import static com.yahoo.sketches.Util.LS;
 import static com.yahoo.sketches.Util.TAB;
 import static java.lang.Math.log10;
 import static java.lang.Math.pow;
-import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.util.Arrays;
 
-import java.util.ArrayList;
-import java.util.Arrays; 
-
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Option;
 
+import com.yahoo.memory.Memory;
 import com.yahoo.sketches.quantiles.DoublesSketch;
-import com.yahoo.sketches.quantiles.DoublesSketchBuilder;
 import com.yahoo.sketches.quantiles.DoublesUnion;
 import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
 
+  public class QuantilesCL extends CommandLine<UpdateDoublesSketch> {
 
-import com.yahoo.memory.Memory;
-
-
-  public class QuantilesCL extends CommandLine <UpdateDoublesSketch> {
-    QuantilesCL(){
+    QuantilesCL() {
       super();
       // input options
-      options.addOption(OptionBuilder.withDescription("parameter k")
-                                     .hasArg()
-                                     .create("k"));
-      
+      options.addOption(Option.builder("k")
+          .desc("parameter k")
+          .hasArg()
+          .build());
       // output options
-      options.addOption(OptionBuilder.withLongOpt("rank2value")
-                                     .withDescription("query values with ranks DOUBLES")
-                                     .hasArgs(Option.UNLIMITED_VALUES)
-                                     .withArgName("DOUBLES")
-                                     .create("R"));
-      
-      options.addOption(OptionBuilder.withLongOpt("rank2value-file")
-                                     .withDescription("query values with ranks from FILE")
-                                     .hasArg()
-                                     .withArgName("FILE")
-                                     .create("r"));
-      
-      options.addOption(OptionBuilder.withLongOpt("value2rank")
-                                     .withDescription("query ranks with values DOUBLES")
-                                     .hasArgs(Option.UNLIMITED_VALUES)
-                                     .withArgName("DOUBLES")
-                                     .create("V"));
-
-      options.addOption(OptionBuilder.withLongOpt("value2rank-file")
-                                     .withDescription("query ranks with values from FILE")
-                                     .hasArg()
-                                     .withArgName("FILE")
-                                     .create("v"));
-
-      options.addOption(OptionBuilder.withLongOpt("median")
-                                     .withDescription("query median")
-                                     .create("m"));
-      
-      options.addOption(OptionBuilder.withLongOpt("histogram-bars-number")
-                                     .withDescription("number of bars in the histogram")
-                                     .hasArg()
-                                     .withArgName("INT")
-                                     .create("b"));
-
-      options.addOption(OptionBuilder.withLongOpt("query-histogram")
-                                     .withDescription("query histogram")
-                                     .create("h"));
-
-      options.addOption(OptionBuilder.withLongOpt("query-loghistogram")
-                                     .withDescription("query log scale histogram")
-                                     .create("lh"));
+      options.addOption(Option.builder("R")
+          .longOpt("rank2value")
+          .desc("query values with ranks DOUBLES")
+          .hasArgs() //unlimited
+          .argName("DOUBLES")
+          .build());
+      options.addOption(Option.builder("r")
+          .longOpt("rank2value-file")
+          .desc("query values with ranks from FILE")
+          .hasArg()
+          .argName("FILE")
+          .build());
+      options.addOption(Option.builder("V")
+          .longOpt("value2rank")
+          .desc("query ranks with values DOUBLES")
+          .hasArgs() //unlimited
+          .argName("DOUBLES")
+          .build());
+      options.addOption(Option.builder("v")
+          .longOpt("value2rank-file")
+          .desc("query ranks with values from FILE")
+          .hasArg()
+          .argName("FILE")
+          .build());
+      options.addOption(Option.builder("m")
+          .longOpt("median")
+          .desc("query median")
+          .build());
+      options.addOption(Option.builder("b")
+          .longOpt("histogram-bars-number")
+          .desc("number of bars in the histogram")
+          .hasArg()
+          .argName("INT")
+          .build());
+      options.addOption(Option.builder("h")
+          .longOpt("query-histogram")
+          .desc("query histogram")
+          .build());
+      options.addOption(Option.builder("lh")
+          .longOpt("query-loghistogram")
+          .desc("query log scale histogram")
+          .build());
     }
 
-  protected void showHelp(){
-        HelpFormatter helpf = new HelpFormatter();
+  @Override
+  protected void showHelp() {
+        final HelpFormatter helpf = new HelpFormatter();
         helpf.setOptionComparator(null);
-
-        helpf.printHelp( "ds quant", options);  
+        helpf.printHelp( "ds quant", options);
   }
 
-
-  protected void buildSketch(){
-    UpdateDoublesSketch sketch;
-    if(cmd.hasOption("k")){
-      sketch = UpdateDoublesSketch.builder()
+  @Override
+  protected void buildSketch() {
+    final UpdateDoublesSketch sketch;
+    if (cmd.hasOption("k")) {
+      sketch = DoublesSketch.builder()
                                   .setK(Integer.parseInt(cmd.getOptionValue("k")))
                                   .build();  // user defined k
-    }else{
-      sketch = UpdateDoublesSketch.builder().build();                                           // default k
+    } else {
+      sketch = DoublesSketch.builder().build(); // default k
     }
     sketches.add(sketch);
   }
-  
-  protected void updateSketch(BufferedReader br){
+
+  @Override
+  protected void updateSketch(final BufferedReader br) {
     String itemStr = "";
-    UpdateDoublesSketch sketch = sketches.get(sketches.size() - 1);
+    final UpdateDoublesSketch sketch = sketches.get(sketches.size() - 1);
     try {
       while ((itemStr = br.readLine()) != null) {
         final double item = Double.parseDouble(itemStr);
@@ -121,33 +108,36 @@ import com.yahoo.memory.Memory;
       printlnErr("Read Error: Item: " + itemStr + ", " + br.toString());
       throw new RuntimeException(e);
     }
-  };
+  }
 
-  protected UpdateDoublesSketch deserializeSketch(byte[] bytes){
+  @Override
+  protected UpdateDoublesSketch deserializeSketch(final byte[] bytes) {
     return UpdateDoublesSketch.heapify(Memory.wrap(bytes));  //still questionable
-  };
+  }
 
-  protected byte[] serializeSketch(UpdateDoublesSketch sketch){
+  @Override
+  protected byte[] serializeSketch(final UpdateDoublesSketch sketch) {
     return sketch.toByteArray();
   }
 
-  protected void mergeSketches(){
-      DoublesUnion union = DoublesUnion.builder().build(); // default k=128
+  @Override
+  protected void mergeSketches() {
+    final DoublesUnion union = DoublesUnion.builder().build(); // default k=128
       for (UpdateDoublesSketch sketch: sketches) {
         union.update(sketch);
       }
       sketches.add(union.getResult());
   }
 
-  protected void queryCurrentSketch(){
-    if (sketches.size()>0) {
-      UpdateDoublesSketch sketch = sketches.get(sketches.size() -1);
-  
+  @Override
+  protected void queryCurrentSketch() {
+    if (sketches.size() > 0) {
+      final UpdateDoublesSketch sketch = sketches.get(sketches.size() - 1);
 
-      if (cmd.hasOption("h")){
-        int splitPoints = 30; 
+      if (cmd.hasOption("h")) {
+        int splitPoints = 30;
         if (cmd.hasOption("b")) {
-          splitPoints = Integer.parseInt(cmd.getOptionValue("b")); 
+          splitPoints = Integer.parseInt(cmd.getOptionValue("b"));
         }
         final long n = sketch.getN();
         final double[] splitsArr = getEvenSplits(sketch, splitPoints);
@@ -165,10 +155,10 @@ import com.yahoo.memory.Memory;
         return;
       }
 
-      if (cmd.hasOption("lh")){
+      if (cmd.hasOption("lh")) {
         int splitPoints = 30;
         if (cmd.hasOption("b")) {
-          splitPoints = Integer.parseInt(cmd.getOptionValue("b")); 
+          splitPoints = Integer.parseInt(cmd.getOptionValue("b"));
         }
         final long n = sketch.getN();
         final double[] splitsArr = getLogSplits(sketch, splitPoints);
@@ -185,56 +175,50 @@ import com.yahoo.memory.Memory;
         }
         return;
       }
-      
-      if (cmd.hasOption("m")){       
+
+      if (cmd.hasOption("m")) {
           final String median = String.format("%.2f",sketch.getQuantile(0.5));
           println(median);
         return;
       }
 
-      if (cmd.hasOption("R")){      
-        String[] items = cmd.getOptionValues("R");
-        for (int i=0; i<items.length; i++) {
+      if (cmd.hasOption("R")) {
+        final String[] items = cmd.getOptionValues("R");
+        for (int i = 0; i < items.length; i++) {
           final String quant = String.format("%.2f",sketch.getQuantile(Double.parseDouble(items[i])));
           println(items[i] + TAB + quant);
         }
         return;
       }
 
-
-
-
-
-      if (cmd.hasOption("r")){
-        String[] items = queryFileReader(cmd.getOptionValue("r"));
-        println("Rank" + TAB + "Value");      
-        for (String item: items){
+      if (cmd.hasOption("r")) {
+        final String[] items = queryFileReader(cmd.getOptionValue("r"));
+        println("Rank" + TAB + "Value");
+        for (String item: items) {
             final String quant = String.format("%.2f",sketch.getQuantile(Double.parseDouble(item)));
             println(item + TAB + quant);
         }
         return;
       }
 
-
-      if (cmd.hasOption("V")){      
-        String[] items = cmd.getOptionValues("V");
-        double[] valuesArray = Arrays.stream(items).mapToDouble(Double::parseDouble).toArray(); 
+      if (cmd.hasOption("V")) {
+        final String[] items = cmd.getOptionValues("V");
+        final double[] valuesArray = Arrays.stream(items).mapToDouble(Double::parseDouble).toArray();
         Arrays.sort(valuesArray);
-        double[] cdf =  sketch.getCDF(valuesArray);
-        for (int i=0; i < valuesArray.length ; i++) {
+        final double[] cdf =  sketch.getCDF(valuesArray);
+        for (int i = 0; i < valuesArray.length ; i++) {
           println(String.format("%.2f",valuesArray[i]) + TAB + String.format("%.6f",cdf[i]));
         }
         return;
       }
 
-
-      if (cmd.hasOption("v")){
-        String[] items = queryFileReader(cmd.getOptionValue("v"));
-        double[] valuesArray = Arrays.stream(items).mapToDouble(Double::parseDouble).toArray();
-        double[] cdf =  sketch.getCDF(valuesArray);
-        for (int i=0; i < valuesArray.length ; i++) {
+      if (cmd.hasOption("v")) {
+        final String[] items = queryFileReader(cmd.getOptionValue("v"));
+        final double[] valuesArray = Arrays.stream(items).mapToDouble(Double::parseDouble).toArray();
+        final double[] cdf =  sketch.getCDF(valuesArray);
+        for (int i = 0; i < valuesArray.length ; i++) {
           println(String.format("%.2f",valuesArray[i]) + TAB + String.format("%.6f",cdf[i]));
-        }  
+        }
         return;
       }
 
@@ -246,11 +230,9 @@ import com.yahoo.memory.Memory;
         final String r = String.format("%.2f",(double)i / ranks);
         println(r + TAB + valArr[i]);
       }
-      return; 
+      return;
     }
   }
-
-
 
   private static double[] getEvenSplits(final DoublesSketch sketch, final int splitPoints) {
     final double min = sketch.getMinValue();

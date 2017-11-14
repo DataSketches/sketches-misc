@@ -26,7 +26,7 @@ public class Properties {
    * @param value the given value
    * @return the previous value or null, if the key did not exist.
    */
-  public String put(String key, String value) {
+  public String put(final String key, final String value) {
     return map.put(key, value);
   }
 
@@ -36,8 +36,8 @@ public class Properties {
    * @param key the given key
    * @return the value associated with the given key
    */
-  public String mustGet(String key) {
-    String v = map.get(key);
+  public String mustGet(final String key) {
+    final String v = map.get(key);
     if ((v == null) || (v.isEmpty())) {
       throw new IllegalArgumentException("Key: " + key + " not found or empty.");
     }
@@ -51,7 +51,7 @@ public class Properties {
    * @param key the given key
    * @return the value associated with the given key. It may be empty.
    */
-  public String get(String key) {
+  public String get(final String key) {
     return map.get(key);
   }
 
@@ -61,8 +61,8 @@ public class Properties {
    * @param prop the given Properties.
    * @return this Properties
    */
-  public Properties merge(Properties prop) {
-    String kvPairs = prop.extractKvPairs();
+  public Properties merge(final Properties prop) {
+    final String kvPairs = prop.extractKvPairs();
     loadKvPairs(kvPairs);
     return this;
   }
@@ -74,15 +74,15 @@ public class Properties {
    * Beginning and ending spaces are removed.
    * @param kvPairs the given string
    */
-  public void loadKvPairs(String kvPairs) {
-    String[] pairs = kvPairs.split("[,\t\n]");
+  public void loadKvPairs(final String kvPairs) {
+    final String[] pairs = kvPairs.split("[,\t\n]");
     for (String pair : pairs) {
-      String[] kv = pair.split("=", 2);
+      final String[] kv = pair.split("=", 2);
       if (kv.length < 2) {
         throw new IllegalArgumentException("Missing valid key-value separator");
       }
-      String k = kv[0].trim();
-      String v = kv[1].trim();
+      final String k = kv[0].trim();
+      final String v = kv[1].trim();
       map.put(k, v);
     }
   }
@@ -106,15 +106,15 @@ public class Properties {
    * @param pairSeparator the string to use to separate the key-value pairs.
    * @return a sorted String representing all the KV pairs of this map
    */
-  public String extractKvPairs(String pairSeparator) {
-    ArrayList<String> list = new ArrayList<>();
+  public String extractKvPairs(final String pairSeparator) {
+    final ArrayList<String> list = new ArrayList<>();
     map.forEach((key, value) -> {
-      String s = key + "=" + value + pairSeparator;
+      final String s = key + "=" + value + pairSeparator;
       list.add(s);
     });
     list.sort(Comparator.naturalOrder());
-    Iterator<String> itr = list.iterator();
-    StringBuilder sb = new StringBuilder();
+    final Iterator<String> itr = list.iterator();
+    final StringBuilder sb = new StringBuilder();
     itr.forEachRemaining((s) -> {
       sb.append(s);
     });
@@ -127,10 +127,10 @@ public class Properties {
    * @param pairSeparator the character used to separate the key-value pairs.
    * @return the same string but with the trailing comma removed if there was one.
    */
-  public static String removeLastPairSeparator(String kvPairs, char pairSeparator) {
-    StringBuilder sb = new StringBuilder(kvPairs);
-    int len = sb.length();
-    Character last = sb.charAt(len - 1);
+  public static String removeLastPairSeparator(final String kvPairs, final char pairSeparator) {
+    final StringBuilder sb = new StringBuilder(kvPairs);
+    final int len = sb.length();
+    final Character last = sb.charAt(len - 1);
     if (last.equals(pairSeparator)) {
       sb.deleteCharAt(len - 1);
     }

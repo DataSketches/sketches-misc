@@ -18,7 +18,7 @@ public class SpeedStats {
    *
    * @param updateTime_nS the update time for this trial in nanoSeconds.
    */
-  public void update(long updateTime_nS) {
+  public void update(final long updateTime_nS) {
     this.updateTime_nS = updateTime_nS;
   }
 }

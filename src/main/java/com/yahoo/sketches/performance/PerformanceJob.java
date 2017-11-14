@@ -30,13 +30,18 @@ public class PerformanceJob {
   private GregorianCalendar gc;
   private long startTime_mS;
 
-  public PerformanceJob(Properties prop, SketchTrial trial) {
+  /**
+   * Run the Performance Job
+   * @param prop the given Properties
+   * @param trial the given SketchTrial
+   */
+  public PerformanceJob(final Properties prop, final SketchTrial trial) {
     startTime_mS = System.currentTimeMillis();
     this.prop = prop;
     this.trial = trial;
     configureDateFormats();
     configurePrintWriter();
-    String jobType = prop.mustGet("JobType");
+    final String jobType = prop.mustGet("JobType");
     println("START " + jobType + " JOB");
     println(prop.extractKvPairs(LS));
     flush(); //flush print buffer
@@ -45,7 +50,7 @@ public class PerformanceJob {
     if (jobType.equalsIgnoreCase("Accuracy")) {
       trialsMgr = new AccuracyTrialsManager(this);
     }
-    else if (jobType.equalsIgnoreCase("Speed")){
+    else if (jobType.equalsIgnoreCase("Speed")) {
       trialsMgr = new SpeedTrialsManager(this);
     }
     else if (jobType.equalsIgnoreCase("SerDe")) {
@@ -54,7 +59,7 @@ public class PerformanceJob {
 
     trialsMgr.doTrials();
 
-    long testTime_mS = System.currentTimeMillis() - startTime_mS;
+    final long testTime_mS = System.currentTimeMillis() - startTime_mS;
     println("Total Job Time        : " + milliSecToString(testTime_mS));
     println("END " + jobType + " JOB" + LS + LS);
     flush();
@@ -64,13 +69,13 @@ public class PerformanceJob {
   }
 
   private void configureDateFormats() {
-    String fileSdfStr = prop.mustGet("FileNameDateFormat");
+    final String fileSdfStr = prop.mustGet("FileNameDateFormat");
     fileSDF = new SimpleDateFormat(fileSdfStr);
-    String readSdfStr = prop.mustGet("ReadableDateFormat");
+    final String readSdfStr = prop.mustGet("ReadableDateFormat");
     readSDF = new SimpleDateFormat(readSdfStr);
-    int timeZoneOffset = Integer.parseInt(prop.mustGet("TimeZoneOffset"));
-    String zoneStr = prop.mustGet("TimeZone");
-    SimpleTimeZone stz = new SimpleTimeZone(timeZoneOffset, zoneStr);
+    final int timeZoneOffset = Integer.parseInt(prop.mustGet("TimeZoneOffset"));
+    final String zoneStr = prop.mustGet("TimeZone");
+    final SimpleTimeZone stz = new SimpleTimeZone(timeZoneOffset, zoneStr);
     fileSDF.setTimeZone(stz);
     readSDF.setTimeZone(stz);
     gc = new GregorianCalendar(stz);
@@ -80,13 +85,13 @@ public class PerformanceJob {
   private void configurePrintWriter() {
     //create file name
     gc.setTimeInMillis(System.currentTimeMillis());
-    String nowStr = fileSDF.format(gc.getTime());
-    String outputFileName = prop.mustGet("Sketch") + nowStr + ".txt";
+    final String nowStr = fileSDF.format(gc.getTime());
+    final String outputFileName = prop.mustGet("Sketch") + nowStr + ".txt";
     prop.put("OutputFileName", outputFileName);
     out = configureFile(outputFileName);
   }
 
-  public String getReadableDateString(long timeMillisec) {
+  public String getReadableDateString(final long timeMillisec) {
     gc.setTimeInMillis(timeMillisec);
     return readSDF.format(gc.getTime());
   }
@@ -103,14 +108,20 @@ public class PerformanceJob {
     return trial;
   }
 
-  //All output passes through here
-  public void println(String s) {
+  /**
+   *
+   * @param s The String to print
+   */
+  public void println(final String s) {
     System.out.println(s);
     if (out != null) {
       out.println(s);
     }
   }
 
+  /**
+   * Flush any buffered output
+   */
   public void flush() {
     if (out != null) {
       out.flush();

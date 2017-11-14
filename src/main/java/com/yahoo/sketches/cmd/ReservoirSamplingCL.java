@@ -1,62 +1,52 @@
 package com.yahoo.sketches.cmd;
 
-import static com.yahoo.sketches.Util.LS;
-import static com.yahoo.sketches.Util.TAB;
-import static java.lang.Math.log10;
-import static java.lang.Math.pow;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.Option;
 
 import com.yahoo.memory.Memory;
 import com.yahoo.sketches.ArrayOfLongsSerDe;
 import com.yahoo.sketches.sampling.ReservoirItemsSketch;
 import com.yahoo.sketches.sampling.ReservoirItemsUnion;
 
-import com.yahoo.memory.Memory;
 
-
-public class ReservoirSamplingCL extends CommandLine <ReservoirItemsSketch<Long> > {
-  ReservoirSamplingCL(){
+public class ReservoirSamplingCL extends CommandLine<ReservoirItemsSketch<Long>> {
+  ReservoirSamplingCL() {
     super();
     // input options
-    options.addOption(OptionBuilder.withDescription("parameter k")
-                                     .hasArg()
-                                     .create("k"));
+    options.addOption(Option.builder("k")
+        .desc("parameter k")
+        .hasArg()
+        .build());
+
   }
-  
-  protected void showHelp(){
-        HelpFormatter helpf = new HelpFormatter();
+
+  @Override
+  protected void showHelp() {
+        final HelpFormatter helpf = new HelpFormatter();
         helpf.setOptionComparator(null);
-        helpf.printHelp( "ds rsamp", options);  
+        helpf.printHelp( "ds rsamp", options);
   }
 
 
-  protected void buildSketch(){
+  @Override
+  protected void buildSketch() {
     final ReservoirItemsSketch<Long> sketch;
-    if( cmd.hasOption("k")){
-      sketch = ReservoirItemsSketch.newInstance(Integer.parseInt(cmd.getOptionValue("k"))); ;  // user defined k
-    }else{  
+    if (cmd.hasOption("k")) {
+      sketch = //user defined k
+          ReservoirItemsSketch.newInstance(Integer.parseInt(cmd.getOptionValue("k")));
+    } else {
       sketch = ReservoirItemsSketch.newInstance(32); // default k is 32
     }
     sketches.add(sketch);
   }
-  
-  protected void updateSketch(BufferedReader br){
+
+  @Override
+  protected void updateSketch(final BufferedReader br) {
     String itemStr = "";
-    ReservoirItemsSketch<Long> sketch = sketches.get(sketches.size() - 1);
+    final ReservoirItemsSketch<Long> sketch = sketches.get(sketches.size() - 1);
     try {
       while ((itemStr = br.readLine()) != null) {
         final long item = Long.parseLong(itemStr);
@@ -68,29 +58,33 @@ public class ReservoirSamplingCL extends CommandLine <ReservoirItemsSketch<Long>
     }
   }
 
-  protected ReservoirItemsSketch<Long>  deserializeSketch(byte[] bytes){
+  @Override
+  protected ReservoirItemsSketch<Long>  deserializeSketch(final byte[] bytes) {
     return ReservoirItemsSketch.heapify(Memory.wrap(bytes), new ArrayOfLongsSerDe());
   }
 
-  protected byte[] serializeSketch(ReservoirItemsSketch<Long> sketch){
+  @Override
+  protected byte[] serializeSketch(final ReservoirItemsSketch<Long> sketch) {
     return sketch.toByteArray(new ArrayOfLongsSerDe());
   }
 
-  protected void mergeSketches(){
-      int k = sketches.get(sketches.size()-1).getK();
-      ReservoirItemsUnion<Long> union = ReservoirItemsUnion.newInstance(k);
-      for (ReservoirItemsSketch<Long>  sketch: sketches) {
-        union.update(sketch);
-      }
-      sketches.add(union.getResult());
+  @Override
+  protected void mergeSketches() {
+    final int k = sketches.get(sketches.size() - 1).getK();
+    final ReservoirItemsUnion<Long> union = ReservoirItemsUnion.newInstance(k);
+    for (ReservoirItemsSketch<Long>  sketch: sketches) {
+      union.update(sketch);
+    }
+    sketches.add(union.getResult());
   }
 
-  protected void queryCurrentSketch(){
-      ReservoirItemsSketch<Long>  sketch =  sketches.get(sketches.size()-1);
-      Long[] samples = sketch.getSamples();
-      for (int i = 0; i < samples.length; i++) {
-          System.out.println(samples[i]);
-      }
-      return;
+  @Override
+  protected void queryCurrentSketch() {
+    final ReservoirItemsSketch<Long>  sketch =  sketches.get(sketches.size() - 1);
+    final Long[] samples = sketch.getSamples();
+    for (int i = 0; i < samples.length; i++) {
+        System.out.println(samples[i]);
+    }
+    return;
   }
 }

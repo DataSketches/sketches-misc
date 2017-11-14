@@ -37,14 +37,19 @@ public class PerformanceUtil {
     {0.0, M4SD, M3SD, M2SD, M1SD, MED, P1SD, P2SD, P3SD, P4SD, 1.0};
   public static final int FRACT_LEN = FRACTIONS.length;
 
-  public static final AccuracyStats[] buildAccuracyStatsArray(Properties prop) {
-    int lgMinU = Integer.parseInt(prop.mustGet("Trials_lgMinU"));
-    int lgMaxU = Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
-    int uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
-    int lgQK = Integer.parseInt(prop.mustGet("Trials_lgQK"));
+  /**
+   *
+   * @param prop the given Properties
+   * @return an AccuracyStats array
+   */
+  public static final AccuracyStats[] buildAccuracyStatsArray(final Properties prop) {
+    final int lgMinU = Integer.parseInt(prop.mustGet("Trials_lgMinU"));
+    final int lgMaxU = Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
+    final int uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
+    final int lgQK = Integer.parseInt(prop.mustGet("Trials_lgQK"));
 
-    int qLen = countPoints(lgMinU, lgMaxU, uPPO);
-    AccuracyStats[] qArr = new AccuracyStats[qLen];
+    final int qLen = countPoints(lgMinU, lgMaxU, uPPO);
+    final AccuracyStats[] qArr = new AccuracyStats[qLen];
     int p = 1 << lgMinU;
     for (int i = 0; i < qLen; i++) {
       qArr[i] = new AccuracyStats(1 << lgQK, p);
@@ -53,9 +58,9 @@ public class PerformanceUtil {
     return qArr;
   }
 
-   private static final int countPoints(int lgStart, int lgEnd, int ppo) {
+   private static final int countPoints(final int lgStart, final int lgEnd, final int ppo) {
      int p = 1 << lgStart;
-     int end = 1 << lgEnd;
+     final int end = 1 << lgEnd;
      int count = 0;
      while (p <= end) {
        p = pwr2LawNext(ppo, p);
@@ -64,7 +69,12 @@ public class PerformanceUtil {
      return count;
    }
 
-   public static final PrintWriter configureFile(String fileName) {
+   /**
+    *
+    * @param fileName the name of the file to configure
+    * @return a PrintWriter
+    */
+   public static final PrintWriter configureFile(final String fileName) {
      File file = null;
      PrintWriter pw = null;
      if ((fileName != null) && !fileName.isEmpty()) {
@@ -74,16 +84,16 @@ public class PerformanceUtil {
        } else {
          try {
            file.createNewFile();
-         } catch (Exception e) {
+         } catch (final Exception e) {
            throw new RuntimeException("Cannot create file: " + fileName + LS + e);
          }
        }
-       BufferedWriter bw;
+       final BufferedWriter bw;
        try {
-         FileOutputStream fos = new FileOutputStream(file, true);
-         OutputStreamWriter osw = new OutputStreamWriter(fos, Charset.defaultCharset());
+         final FileOutputStream fos = new FileOutputStream(file, true);
+         final OutputStreamWriter osw = new OutputStreamWriter(fos, Charset.defaultCharset());
          bw = new BufferedWriter(osw, 8192);
-       } catch (IOException e) {
+       } catch (final IOException e) {
          // never opened, so don't close it.
          throw new RuntimeException("Could not create: " + file.getPath() + LS + e);
        }
@@ -92,42 +102,52 @@ public class PerformanceUtil {
      return pw;
    }
 
-   public static void outputPMF(PerformanceJob perf, AccuracyStats q) {
-     DoublesSketch qSk = q.qsk;
-     double[] splitPoints = qSk.getQuantiles(FRACTIONS); //1:1
-     double[] reducedSp = reduceSplitPoints(splitPoints);
-     double[] pmfArr = qSk.getPMF(reducedSp); //pmfArr is one larger
-     long trials = qSk.getN();
+   /**
+    *
+    * @param perf the given PerformanceJob
+    * @param q the given AccuracyStats
+    */
+   public static void outputPMF(final PerformanceJob perf, final AccuracyStats q) {
+     final DoublesSketch qSk = q.qsk;
+     final double[] splitPoints = qSk.getQuantiles(FRACTIONS); //1:1
+     final double[] reducedSp = reduceSplitPoints(splitPoints);
+     final double[] pmfArr = qSk.getPMF(reducedSp); //pmfArr is one larger
+     final long trials = qSk.getN();
 
      //output Histogram
-     String hdr = String.format("%10s%4s%12s", "Trials", "    ", "Est");
-     String fmt = "%10d%4s%12.2f";
+     final String hdr = String.format("%10s%4s%12s", "Trials", "    ", "Est");
+     final String fmt = "%10d%4s%12.2f";
      perf.println("Histogram At " + q.uniques);
      perf.println(hdr);
      for (int i = 0; i < reducedSp.length; i++) {
-       int hits = (int)(pmfArr[i+1] * trials);
-       double est = reducedSp[i];
-       String line = String.format(fmt, hits, " >= ", est);
+       final int hits = (int)(pmfArr[i + 1] * trials);
+       final double est = reducedSp[i];
+       final String line = String.format(fmt, hits, " >= ", est);
        perf.println(line);
      }
      perf.println("");
    }
 
-   public static double[] reduceSplitPoints(double[] splitPoints) {
+   /**
+    *
+    * @param splitPoints the given splitPoints
+    * @return the reduced array of splitPoints
+    */
+   public static double[] reduceSplitPoints(final double[] splitPoints) {
      int num = 1;
      double lastV = splitPoints[0];
      for (int i = 0; i < splitPoints.length; i++) {
-       double v = splitPoints[i];
+       final double v = splitPoints[i];
        if (v <= lastV) { continue; }
        num++;
        lastV = v;
      }
      lastV = splitPoints[0];
      int idx = 0;
-     double[] sp = new double[num];
+     final double[] sp = new double[num];
      sp[0] = lastV;
      for (int i = 0; i < splitPoints.length; i++) {
-       double v = splitPoints[i];
+       final double v = splitPoints[i];
        if (v <= lastV) { continue; }
        sp[++idx] = v;
        lastV = v;

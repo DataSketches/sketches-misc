@@ -12,7 +12,7 @@ import static com.yahoo.sketches.Util.pwr2LawNext;
  */
 public class SerDeTrialsManager extends SpeedTrialsManager {
 
-  public SerDeTrialsManager(PerformanceJob perf) {
+  public SerDeTrialsManager(final PerformanceJob perf) {
     super(perf);
   }
 
@@ -23,16 +23,16 @@ public class SerDeTrialsManager extends SpeedTrialsManager {
   @Override
   public void doTrials() {
     int lastU = 0;
-    StringBuilder dataStr = new StringBuilder();
+    final StringBuilder dataStr = new StringBuilder();
     perf.println(getHeader());
     while (lastU < maxU) { //for each U point on X-axis, OR one row on output
-      int nextU = (lastU == 0) ? minU : pwr2LawNext(uPPO, lastU);
+      final int nextU = (lastU == 0) ? minU : pwr2LawNext(uPPO, lastU);
       lastU = nextU;
-      int trials = getNumTrials(nextU);
+      final int trials = getNumTrials(nextU);
       //Build stats arr
-      SerDeStats[] statsArr = new SerDeStats[trials];
+      final SerDeStats[] statsArr = new SerDeStats[trials];
       for (int t = 0; t < trials; t++) {
-        SerDeStats stats = statsArr[t];
+        final SerDeStats stats = statsArr[t];
         if (stats == null) {
           statsArr[t] = new SerDeStats();
         }
@@ -47,8 +47,8 @@ public class SerDeTrialsManager extends SpeedTrialsManager {
     }
   }
 
-
-  private static void process(SerDeStats[] statsArr, int trials, int uPerTrial, StringBuilder dataStr) {
+  private static void process(final SerDeStats[] statsArr, final int trials, final int uPerTrial,
+      final StringBuilder dataStr) {
     double sumSerTime_nS = 0;
     double sumDeserTime_nS = 0;
 
@@ -56,8 +56,8 @@ public class SerDeTrialsManager extends SpeedTrialsManager {
       sumSerTime_nS += statsArr[t].serializeTime_nS;
       sumDeserTime_nS += statsArr[t].deserializeTime_nS;
     }
-    double meanSerTime_nS = sumSerTime_nS / trials;
-    double meanDeserTime_ns = sumDeserTime_nS / trials;
+    final double meanSerTime_nS = sumSerTime_nS / trials;
+    final double meanDeserTime_ns = sumDeserTime_nS / trials;
 
     //OUTPUT
     dataStr.setLength(0);
@@ -68,7 +68,7 @@ public class SerDeTrialsManager extends SpeedTrialsManager {
   }
 
   private static String getHeader() {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     sb.append("InU").append(TAB);
     sb.append("Trials").append(TAB);
     sb.append("Ser_nS").append(TAB);

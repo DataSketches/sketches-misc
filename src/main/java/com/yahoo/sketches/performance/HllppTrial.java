@@ -22,8 +22,8 @@ public class HllppTrial implements SketchTrial {
   private int sp;
 
   @Override
-  public void configureSketch(Properties prop) {
-    String getSizeStr = prop.get("Trials_bytes");
+  public void configureSketch(final Properties prop) {
+    final String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
     p = Integer.parseInt(prop.mustGet("LgK"));
@@ -31,29 +31,29 @@ public class HllppTrial implements SketchTrial {
   }
 
   @Override
-  public void setAccuracyStatsArray(AccuracyStats[] qArr) {
+  public void setAccuracyStatsArray(final AccuracyStats[] qArr) {
     this.qArr = qArr;
     qArrLen = qArr.length;
   }
 
   @Override
-  public long doAccuracyTrial(long vInStart) {
+  public long doAccuracyTrial(final long vInStart) {
     long vIn = vInStart;
-    HyperLogLogPlus sketch = new HyperLogLogPlus(p, sp);
+    final HyperLogLogPlus sketch = new HyperLogLogPlus(p, sp);
     int lastUniques = 0;
     for (int i = 0; i < qArrLen; i++) {
-      AccuracyStats q = qArr[i];
-      int delta = q.uniques - lastUniques;
+      final AccuracyStats q = qArr[i];
+      final int delta = q.uniques - lastUniques;
       for (int u = 0; u < delta; u++) {
         sketch.offer(++vIn);
       }
       lastUniques += delta;
-      double est = sketch.cardinality();
+      final double est = sketch.cardinality();
       q.update(est);
       if (getSize) {
         try {
           q.bytes = sketch.getBytes().length;
-        } catch (IOException e) {
+        } catch (final IOException e) {
           throw new RuntimeException(e);
         }
       }
@@ -62,29 +62,30 @@ public class HllppTrial implements SketchTrial {
   }
 
   @Override
-  public long doUpdateSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
+  public long doUpdateSpeedTrial(final SpeedStats stats, final int uPerTrial,
+      final long vInStart) {
     long vIn = vInStart;
-    HyperLogLogPlus sketch = new HyperLogLogPlus(p, sp);
-    long startUpdateTime_nS = System.nanoTime();
+    final HyperLogLogPlus sketch = new HyperLogLogPlus(p, sp);
+    final long startUpdateTime_nS = System.nanoTime();
     for (int u = uPerTrial; u-- > 0;) {
       sketch.offer(++vIn);
     }
-    long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
+    final long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
     stats.update(updateTime_nS);
     return vIn;
   }
 
   @Override
-  public long doSerDeTrial(SerDeStats stats, int uPerTrial, long vInStart) {
+  public long doSerDeTrial(final SerDeStats stats, final int uPerTrial, final long vInStart) {
     long vIn = vInStart;
-    HyperLogLogPlus sketch = new HyperLogLogPlus(p, sp);
+    final HyperLogLogPlus sketch = new HyperLogLogPlus(p, sp);
     HyperLogLogPlus sketch2 = null;
     for (int u = uPerTrial; u-- > 0;) {
       sketch.offer(++vIn);
     }
-    double est1 = sketch.cardinality();
+    final double est1 = sketch.cardinality();
 
-    long startSerTime_nS = System.nanoTime();
+    final long startSerTime_nS = System.nanoTime();
     byte[] byteArr = null;
     long startDeTime_nS = 0;
 
@@ -94,14 +95,14 @@ public class HllppTrial implements SketchTrial {
       startDeTime_nS = System.nanoTime();
 
       sketch2 = HyperLogLogPlus.Builder.build(byteArr);
-    } catch (IOException e) { throw new RuntimeException(e); }
+    } catch (final IOException e) { throw new RuntimeException(e); }
 
-    long endDeTime_nS = System.nanoTime();
-    double est2 = sketch2.cardinality();
+    final long endDeTime_nS = System.nanoTime();
+    final double est2 = sketch2.cardinality();
     assert est1 == est2;
 
-    long serTime_nS = startDeTime_nS - startSerTime_nS;
-    long deTime_nS = endDeTime_nS - startDeTime_nS;
+    final long serTime_nS = startDeTime_nS - startSerTime_nS;
+    final long deTime_nS = endDeTime_nS - startDeTime_nS;
     stats.update(serTime_nS, deTime_nS);
     return vIn;
   }

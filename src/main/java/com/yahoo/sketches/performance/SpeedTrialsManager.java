@@ -38,7 +38,11 @@ public class SpeedTrialsManager implements TrialsManager {
   Properties prop;
   //private SpeedStats[] sArr; ??
 
-  public SpeedTrialsManager(PerformanceJob perf) {
+  /**
+   *
+   * @param perf the given PerformanceJob
+   */
+  public SpeedTrialsManager(final PerformanceJob perf) {
     this.perf = perf;
     prop = perf.getProperties();
     trial = perf.getSketchTrial();
@@ -67,14 +71,14 @@ public class SpeedTrialsManager implements TrialsManager {
   @Override
   public void doTrials() {
     int lastU = 0;
-    StringBuilder dataStr = new StringBuilder();
+    final StringBuilder dataStr = new StringBuilder();
     perf.println(getHeader());
     while (lastU < maxU) { //Trial for each U point on X-axis, and one row on output
-      int nextU = (lastU == 0) ? minU : pwr2LawNext(uPPO, lastU);
+      final int nextU = (lastU == 0) ? minU : pwr2LawNext(uPPO, lastU);
       lastU = nextU;
-      int trials = getNumTrials(nextU);
+      final int trials = getNumTrials(nextU);
       //Build stats arr
-      SpeedStats[] statsArr = new SpeedStats[trials];
+      final SpeedStats[] statsArr = new SpeedStats[trials];
       for (int t = 0; t < trials; t++) { //do # trials
         SpeedStats stats = statsArr[t];
         if (stats == null) {
@@ -98,14 +102,14 @@ public class SpeedTrialsManager implements TrialsManager {
    * @param uPerTrial the number of uniques per trial for this trial set.
    * @param sb The StringBuilder object that is reused for each row of output
    */
-  private static void process(SpeedStats[] statsArr, int trials, int uPerTrial,
-      StringBuilder sb) {
+  private static void process(final SpeedStats[] statsArr, final int trials, final int uPerTrial,
+      final StringBuilder sb) {
     double sumUpdateTimePerU_nS = 0;
 
     for (int t = 0; t < trials; t++) {
-      sumUpdateTimePerU_nS += (statsArr[t].updateTime_nS * 1.0)/uPerTrial;
+      sumUpdateTimePerU_nS += (statsArr[t].updateTime_nS * 1.0) / uPerTrial;
     }
-    double meanUpdateTimePerU_nS = sumUpdateTimePerU_nS / trials;
+    final double meanUpdateTimePerU_nS = sumUpdateTimePerU_nS / trials;
 
     // OUTPUT
     sb.setLength(0);
@@ -122,15 +126,15 @@ public class SpeedTrialsManager implements TrialsManager {
    * @return the number of trials for a given current number of uniques for a
    * trial set.
    */
-  int getNumTrials(int curU) {
+  int getNumTrials(final int curU) {
     if ((lgMinT == lgMaxT) || (curU <= (minBpU))) {
       return maxT;
     }
     if (curU >= maxBpU) {
       return minT;
     }
-    double lgCurU = log(curU) / LN2;
-    double lgTrials = (slope * (lgCurU - lgMinBpU)) + lgMaxT;
+    final double lgCurU = log(curU) / LN2;
+    final double lgTrials = (slope * (lgCurU - lgMinBpU)) + lgMaxT;
     return (int) pow(2.0, lgTrials);
   }
 
@@ -140,7 +144,7 @@ public class SpeedTrialsManager implements TrialsManager {
    * @return a column header row
    */
   private static String getHeader() {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     sb.append("InU").append(TAB);
     sb.append("Trials").append(TAB);
     sb.append("nS/u");

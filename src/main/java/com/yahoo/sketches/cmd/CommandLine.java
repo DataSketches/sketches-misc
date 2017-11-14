@@ -1,4 +1,4 @@
-  /*
+/*
  * Copyright 2016, Yahoo! Inc.
  * Licensed under the terms of the Apache License 2.0. See LICENSE file at the project root for terms.
  */
@@ -43,7 +43,7 @@ public abstract class CommandLine<T> {
   CommandLineParser parser;
   org.apache.commons.cli.CommandLine cmd;
 
-  CommandLine(){
+  CommandLine() {
     sketches = new ArrayList<>();
     options = new Options();
     options.addOption(Option.builder("d")
@@ -57,7 +57,7 @@ public abstract class CommandLine<T> {
         .desc("read data from system in")
         .build());
     options.addOption(Option.builder("s")
-        .longOpt("sketch-input-file")
+        .longOpt("sketch-input-files")
         .desc("read sketches from FILES")
         .hasArgs() //unlimited
         .argName("FILES")
@@ -71,69 +71,47 @@ public abstract class CommandLine<T> {
     options.addOption(Option.builder("help")
         .desc("usage/help")
         .build());
-
-
-//    options.addOption(OptionBuilder.withLongOpt("data-from-file")
-//                                   .withDescription("read data from FILE")
-//                                   .hasArg()
-//                                   .withArgName("FILE")
-//                                   .create("d"));
-//
-//    options.addOption(OptionBuilder.withLongOpt("data-from-system-in")
-//                                   .withDescription("read data from system in")
-//                                   .create("D"));
-//
-//    options.addOption(OptionBuilder.withLongOpt("sketch-input-file")
-//                                   .withDescription("read sketches from FILES")
-//                                   .hasArgs(Option.UNLIMITED_VALUES)
-//                                   .withArgName("FILES")
-//                                   .create("s"));
-//
-//    options.addOption(OptionBuilder.withLongOpt("sketch-output-file")
-//                                   .withDescription("save sketch to FILE")
-//                                   .hasArg()
-//                                   .withArgName("FILE")
-//                                   .create("o"));
-//
-//    options.addOption(OptionBuilder.withDescription("usage/help")
-//                                   .create("help"));
-
   }
 
   protected abstract void showHelp();
+
   protected abstract void buildSketch();
+
   protected abstract void updateSketch(BufferedReader br);
+
   protected abstract T deserializeSketch(byte[] bytes);
+
   protected abstract byte[] serializeSketch(T sketch);
+
   protected abstract void mergeSketches();
+
   protected abstract void queryCurrentSketch();
 
 
-  protected void loadInputSketches(){
-
-      try{
-        String[] inputSketchesPathes = cmd.getOptionValues("s");
-        for (int i=0; i<inputSketchesPathes.length; i++) {
+  protected void loadInputSketches() {
+      try {
+        final String[] inputSketchesPathes = cmd.getOptionValues("s");
+        for (int i = 0; i < inputSketchesPathes.length; i++) {
           try (FileInputStream in = new FileInputStream(inputSketchesPathes[i])) {
-            byte[] bytes = new byte[in.available()];
+            final byte[] bytes = new byte[in.available()];
             in.read(bytes);
             sketches.add(deserializeSketch(bytes));
           }
         }
-      }catch(IOException e) {
+      } catch (final IOException e) {
         printlnErr("loadInputSketches Error: " + e.getMessage());
       }
   }
 
-  protected void saveCurrentSketch(){
+  protected void saveCurrentSketch() {
       try (FileOutputStream out = new FileOutputStream(cmd.getOptionValue("o"))) {
         out.write(serializeSketch(sketches.get(sketches.size() - 1)));
-      } catch(IOException e) {
+      } catch (final IOException e) {
         printlnErr("saveCurrentSketch Error: " + e.getMessage());
       }
   }
 
-  protected void updateCurrentSketch(){
+  protected void updateCurrentSketch() {
     try {
       if (cmd.hasOption("D")) {
         try (BufferedReader br = new BufferedReader(new InputStreamReader(
@@ -150,40 +128,23 @@ public abstract class CommandLine<T> {
         }
       }
       else { return; }
-    } catch (IOException e) {
+    } catch (final IOException e) {
       printlnErr("updateCurrentSketch Error: " + e.getMessage());
     }
-
-//    try{
-//      BufferedReader br = null;
-//      if(cmd.hasOption("D")){
-//        br = new BufferedReader(new InputStreamReader(System.in, UTF_8));
-//      }else if (cmd.hasOption("d")) {
-//        br = new BufferedReader(new InputStreamReader(new FileInputStream(cmd.getOptionValue("d")), UTF_8));
-//      }else {
-//        return;
-//      }
-//      String itemStr = "";
-//      updateSketch(br);
-//      updateFlag = true;
-//    }catch(Exception e) {
-//        printlnErr("updateCurrentSketch Error: " + e.getMessage());
-//    }
-
   }
 
-  protected void runCommandLineUtil(final String[] args){
+  protected void runCommandLineUtil(final String[] args) {
       updateFlag = false;
       parser = new DefaultParser();
-      try{
+      try {
           cmd = parser.parse(options, args);
 
-          if(cmd.hasOption("help")){
+          if (cmd.hasOption("help")) {
             showHelp();
             return;
           }
 
-          if (cmd.hasOption("s")){
+          if (cmd.hasOption("s")) {
             loadInputSketches();
             updateFlag = true;
           }
@@ -195,19 +156,23 @@ public abstract class CommandLine<T> {
           }
 
           updateCurrentSketch();
-          if (updateFlag){
+          if (updateFlag) {
             queryCurrentSketch();
             if (cmd.hasOption("o")) {
               saveCurrentSketch();
             }
-          }else{
+          } else {
             showHelp();
           }
-      }catch(Exception e) {
+      } catch (final Exception e) {
               printlnErr("runCommandLineUtil Error: " + e.getMessage());
       }
   }
 
+  /**
+   * Entry point
+   * @param args array of tokens
+   */
   public static void main(final String[] args) {
     if ((args == null) || (args.length == 0) || (args[0].isEmpty())) {
           help();
@@ -216,27 +181,27 @@ public abstract class CommandLine<T> {
     final String token1 = args[0].toLowerCase();
     switch (token1) {
         case "quant":
-          QuantilesCL qcl = new QuantilesCL();
+          final QuantilesCL qcl = new QuantilesCL();
           qcl.runCommandLineUtil(args);
           break;
         case "freq":
-          FrequenciesCL fcl = new FrequenciesCL();
+          final FrequenciesCL fcl = new FrequenciesCL();
           fcl.runCommandLineUtil(args);
           break;
         case "theta":
-          ThetaCL tcl = new ThetaCL();
+          final ThetaCL tcl = new ThetaCL();
           tcl.runCommandLineUtil(args);
           break;
         case "rsamp":
-          ReservoirSamplingCL rscl = new ReservoirSamplingCL();
+          final ReservoirSamplingCL rscl = new ReservoirSamplingCL();
           rscl.runCommandLineUtil(args);
           break;
         case "vpsamp":
-          VarOptSamplingCL vpscl = new VarOptSamplingCL();
+          final VarOptSamplingCL vpscl = new VarOptSamplingCL();
           vpscl.runCommandLineUtil(args);
           break;
         case "hll":
-          HllCL hllcl = new HllCL();
+          final HllCL hllcl = new HllCL();
           hllcl.runCommandLineUtil(args);
           break;
         case "help":
@@ -252,6 +217,7 @@ public abstract class CommandLine<T> {
     }
     return;
   }
+
   protected static void printlnErr(final String s) {
     System.err.println(s);
   }
@@ -261,16 +227,17 @@ public abstract class CommandLine<T> {
   }
 
   protected String[] queryFileReader(final String pathToFile) {
-    ArrayList<String> values = new ArrayList<>();
+    final ArrayList<String> values = new ArrayList<>();
     String itemStr = "";
-    String[] valuesArray;
-    try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(pathToFile)))) {
+    final String[] valuesArray;
+    try (BufferedReader in =
+        new BufferedReader(new InputStreamReader(new FileInputStream(pathToFile)))) {
       while ((itemStr = in.readLine()) != null) {
         if (itemStr.isEmpty()) { continue; }
         values.add(itemStr);
       }
       valuesArray = new String[values.size()];
-      for (int i=0; i < valuesArray.length; i++) {
+      for (int i = 0; i < valuesArray.length; i++) {
           valuesArray[i] = values.get(i);
       }
     }
@@ -281,25 +248,36 @@ public abstract class CommandLine<T> {
     return valuesArray;
   }
 
+  /**
+   * Help function for level 0 tokens
+   */
   public static void help() {
     final StringBuilder sb = new StringBuilder();
     sb.append(BOLD + "NAME" + OFF).append(LS);
-    sb.append("    ds " + TAB + TAB + " sketches uniques, quantiles, pdf, and frequent items, ").append(LS);
+    sb.append("    ds " + TAB + TAB
+        + " sketches uniques, quantiles, pdf, and frequent items, ").append(LS);
     sb.append("       " + TAB + TAB + " implements reservoir and varopt sampling").append(LS);
-    sb.append("       " + TAB + TAB + " for details refer to https://datasketches.github.io/ ").append(LS);
+    sb.append("       " + TAB + TAB
+        + " for details refer to https://datasketches.github.io/ ").append(LS);
     sb.append(LS).append(BOLD + "SYNOPSIS" + OFF).append(LS);
     sb.append("    ds help").append(LS);
     sb.append("    ds ACTION").append(LS);
     sb.append("    ds ACTION -help").append(LS);
     sb.append(LS).append(BOLD + "ACTIONS" + OFF).append(LS);
-    sb.append("    ds theta " + TAB + " theta sketch for estimating stream expression cardinalities").append(LS);
-    sb.append("    ds quant " + TAB + " quantiles sketch for estimating distributions from a stream of values").append(LS);
-    sb.append("    ds freq  " + TAB + " frequency sketch for finding the heavy hitter objects from a stream").append(LS);
-    sb.append("    ds rsamp " + TAB + " reservoir sampling for uniform sampling of a stream into a fixed size space").append(LS);
-    sb.append("    ds vpsamp" + TAB + " varopt sampling for uniform sampling from stream of weighted values").append(LS);
-    sb.append("    ds hll   " + TAB + " Phillipe Flajolet’s HLL sketch for estimating the number of uniques from a stream of values").append(LS);
+    sb.append("    ds theta " + TAB
+        + " theta sketch for estimating stream expression cardinalities").append(LS);
+    sb.append("    ds quant " + TAB
+        + " quantiles sketch for estimating distributions from a stream of values").append(LS);
+    sb.append("    ds freq  " + TAB
+        + " frequency sketch for finding the heavy hitter objects from a stream").append(LS);
+    sb.append("    ds rsamp " + TAB
+        + " reservoir sampling for uniform sampling of a stream into a fixed size space").append(LS);
+    sb.append("    ds vpsamp" + TAB
+        + " varopt sampling for uniform sampling from stream of weighted values").append(LS);
+    sb.append("    ds hll   " + TAB
+        + " Phillipe Flajolet’s HLL sketch for estimating the number of uniques"
+        + " from a stream of values").append(LS);
     println(sb.toString());
   }
-
 
 }

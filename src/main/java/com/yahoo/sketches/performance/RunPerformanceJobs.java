@@ -16,30 +16,30 @@ public class RunPerformanceJobs {
   static final char TAB = '\t';
   static final String LS = System.getProperty("line.separator");
 
-  void parseJobs(String cmdFile) {
-    char[] chArr = Files.fileToCharArray(cmdFile); //includes line feeds
-    String cmdStr = new String(chArr);
-    String[] jobs = cmdStr.split(";");
+  void parseJobs(final String cmdFile) {
+    final char[] chArr = Files.fileToCharArray(cmdFile); //includes line feeds
+    final String cmdStr = new String(chArr);
+    final String[] jobs = cmdStr.split(";");
     for (int i = 0; i < jobs.length; i++) {
       prepareJobProperties(jobs[i], i + 1);
     }
   }
 
-  void prepareJobProperties(String job, int jobNum) {
-    Properties p = new Properties();
+  void prepareJobProperties(final String job, final int jobNum) {
+    final Properties p = new Properties();
     p.put("JOBNUM", Integer.toString(jobNum));
-    String[] lines = job.split(LS);
+    final String[] lines = job.split(LS);
     for (int i = 0; i < lines.length; i++) {
-      String line = lines[i].trim();
-      int commentIdx = line.indexOf('#');
-      String tmp;
+      final String line = lines[i].trim();
+      final int commentIdx = line.indexOf('#');
+      final String tmp;
       if (commentIdx >= 0) { //comment
         tmp = line.substring(0, commentIdx).trim();
       } else {
         tmp = line;
       }
       if (tmp.length() < 3) { continue; }
-      String[] kv = tmp.split("=", 2);
+      final String[] kv = tmp.split("=", 2);
       if (kv.length < 2) {
         throw new IllegalArgumentException("Missing valid key-value separator: " + tmp);
       }
@@ -49,7 +49,7 @@ public class RunPerformanceJobs {
     chooseSketchAndRunJob(p);
   }
 
-  void setDateFormats(Properties p) {
+  void setDateFormats(final Properties p) {
     String fileFormat = p.get("FileNameDateFormat");
     if (fileFormat == null) {
       fileFormat = "yyyyMMdd'_'HHmmssz";
@@ -72,9 +72,9 @@ public class RunPerformanceJobs {
     }
   }
 
-  void chooseSketchAndRunJob(Properties p) {
-    String sketch = p.mustGet("Sketch");
-    SketchTrial sketchTrial;
+  void chooseSketchAndRunJob(final Properties p) {
+    final String sketch = p.mustGet("Sketch");
+    final SketchTrial sketchTrial;
     if (sketch.equals("HLL")) {
       sketchTrial = new HllTrial();
     } else if (sketch.equals("HLLP")) {
@@ -85,7 +85,7 @@ public class RunPerformanceJobs {
       throw new IllegalArgumentException("Sketch type not found");
     }
     @SuppressWarnings("unused")
-    PerformanceJob ap = new PerformanceJob(p, sketchTrial);
+    final PerformanceJob ap = new PerformanceJob(p, sketchTrial);
   }
 
   @Test
@@ -93,12 +93,16 @@ public class RunPerformanceJobs {
     parseJobs("src/test/resources/HllAccuracyJob.txt");
   }
 
-  public static void main(String[] args) {
-    String cmdFile = args[0];
+  /**
+   * Run from the command line
+   * @param args Argument zero is the command file
+   */
+  public static void main(final String[] args) {
+    final String cmdFile = args[0];
     if ((cmdFile == null) || cmdFile.isEmpty()) {
       throw new IllegalArgumentException("No command file.");
     }
-    RunPerformanceJobs perfRun = new RunPerformanceJobs();
+    final RunPerformanceJobs perfRun = new RunPerformanceJobs();
     perfRun.parseJobs(cmdFile);
   }
 }

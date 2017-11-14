@@ -21,7 +21,7 @@ public class SerDeStats {
    * @param ser_nS the serialization time for this trial in nanoseconds.
    * @param deser_nS the deserialization time for this trial in nanoseconds.
    */
-  public void update(long ser_nS, long deser_nS) {
+  public void update(final long ser_nS, final long deser_nS) {
     serializeTime_nS = ser_nS;
     deserializeTime_nS = deser_nS;
   }

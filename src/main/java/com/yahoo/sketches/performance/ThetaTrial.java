@@ -31,8 +31,8 @@ public class ThetaTrial implements SketchTrial {
   private UpdateSketch sketch;
 
   @Override
-  public void configureSketch(Properties prop) {
-    String getSizeStr = prop.get("Trials_bytes");
+  public void configureSketch(final Properties prop) {
+    final String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
     lgK = Integer.parseInt(prop.mustGet("LgK"));
@@ -42,16 +42,16 @@ public class ThetaTrial implements SketchTrial {
     direct = Boolean.parseBoolean(prop.mustGet("THETA_direct"));
     rebuild = Boolean.parseBoolean(prop.mustGet("THETA_rebuild"));
 
-    int k = 1 << lgK;
-    UpdateSketchBuilder udBldr = UpdateSketch.builder()
+    final int k = 1 << lgK;
+    final UpdateSketchBuilder udBldr = UpdateSketch.builder()
         .setNominalEntries(k)
         .setFamily(family)
         .setP(p)
         .setResizeFactor(rf);
     if (direct) {
-      int bytes = Sketch.getMaxUpdateSketchBytes(k);
-      byte[] memArr = new byte[bytes];
-      WritableMemory wmem = WritableMemory.wrap(memArr);
+      final int bytes = Sketch.getMaxUpdateSketchBytes(k);
+      final byte[] memArr = new byte[bytes];
+      final WritableMemory wmem = WritableMemory.wrap(memArr);
       sketch = udBldr.build(wmem);
     } else {
       sketch = udBldr.build();
@@ -59,19 +59,19 @@ public class ThetaTrial implements SketchTrial {
   }
 
   @Override
-  public void setAccuracyStatsArray(AccuracyStats[] qArr) {
+  public void setAccuracyStatsArray(final AccuracyStats[] qArr) {
     this.qArr = qArr;
     qArrLen = qArr.length;
   }
 
   @Override
-  public long doAccuracyTrial(long vInStart) {
+  public long doAccuracyTrial(final long vInStart) {
     long vIn = vInStart;
     sketch.reset(); //reuse the same sketch
     int lastUniques = 0;
     for (int i = 0; i < qArrLen; i++) {
-      AccuracyStats q = qArr[i];
-      int delta = q.uniques - lastUniques;
+      final AccuracyStats q = qArr[i];
+      final int delta = q.uniques - lastUniques;
       for (int u = 0; u < delta; u++) {
         sketch.update(++vIn);
       }
@@ -86,41 +86,41 @@ public class ThetaTrial implements SketchTrial {
   }
 
   @Override
-  public long doUpdateSpeedTrial(SpeedStats stats, int uPerTrial, long vInStart) {
+  public long doUpdateSpeedTrial(final SpeedStats stats, final int uPerTrial, final long vInStart) {
     long vIn = vInStart;
     sketch.reset(); // reuse the same sketch
-    long startUpdateTime_nS = System.nanoTime();
+    final long startUpdateTime_nS = System.nanoTime();
     for (int u = uPerTrial; u-- > 0;) {
       sketch.update(++vIn);
     }
-    long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
+    final long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
     stats.update(updateTime_nS);
     return vIn;
   }
 
   @Override
-  public long doSerDeTrial(SerDeStats stats, int uPerTrial, long vInStart) {
+  public long doSerDeTrial(final SerDeStats stats, final int uPerTrial, final long vInStart) {
     long vIn = vInStart;
     sketch.reset(); // reuse the same sketch
 
     for (int u = uPerTrial; u-- > 0;) {
       sketch.update(++vIn);
     }
-    double est1 = sketch.getEstimate();
+    final double est1 = sketch.getEstimate();
 
-    long startSerTime_nS = System.nanoTime();
-    byte[] byteArr = sketch.compact().toByteArray();
+    final long startSerTime_nS = System.nanoTime();
+    final byte[] byteArr = sketch.compact().toByteArray();
 
-    long startDeSerTime_nS = System.nanoTime();
+    final long startDeSerTime_nS = System.nanoTime();
 
-    UpdateSketch sketch2 = UpdateSketch.heapify(Memory.wrap(byteArr));
-    long endDeTime_nS = System.nanoTime();
+    final UpdateSketch sketch2 = UpdateSketch.heapify(Memory.wrap(byteArr));
+    final long endDeTime_nS = System.nanoTime();
 
-    double est2 = sketch2.getEstimate();
+    final double est2 = sketch2.getEstimate();
     assert est1 == est2;
 
-    long serTime_nS = startDeSerTime_nS - startSerTime_nS;
-    long deSerTime_nS = endDeTime_nS - startDeSerTime_nS;
+    final long serTime_nS = startDeSerTime_nS - startSerTime_nS;
+    final long deSerTime_nS = endDeTime_nS - startDeSerTime_nS;
     stats.update(serTime_nS, deSerTime_nS);
     return vIn;
   }

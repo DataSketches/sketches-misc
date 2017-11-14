@@ -26,7 +26,11 @@ public class AccuracyTrialsManager implements TrialsManager {
   private Properties prop;
   private AccuracyStats[] qArr;
 
-  public AccuracyTrialsManager(PerformanceJob perf) {
+  /**
+   *
+   * @param perf a PerformanceJob
+   */
+  public AccuracyTrialsManager(final PerformanceJob perf) {
     this.perf = perf;
     prop = perf.getProperties();
     qArr = buildAccuracyStatsArray(prop);
@@ -37,25 +41,25 @@ public class AccuracyTrialsManager implements TrialsManager {
 
   @Override
   public void doTrials() {
-    int lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
-    int minT = 1 << lgMinT;
-    int lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
-    int maxT = 1 << lgMaxT;
-    boolean interData = Boolean.parseBoolean(prop.mustGet("Trials_interData"));
-    boolean postPMFs = Boolean.parseBoolean(prop.mustGet("Trials_postPMFs"));
-    int tPPO = Integer.parseInt(prop.mustGet("Trials_TPPO"));
-    int maxU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
+    final int lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
+    final int minT = 1 << lgMinT;
+    final int lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
+    final int maxT = 1 << lgMaxT;
+    final boolean interData = Boolean.parseBoolean(prop.mustGet("Trials_interData"));
+    final boolean postPMFs = Boolean.parseBoolean(prop.mustGet("Trials_postPMFs"));
+    final int tPPO = Integer.parseInt(prop.mustGet("Trials_TPPO"));
+    final int maxU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
 
     //This will generate a table of data up for each intermediate Trials point
     int lastT = 0;
     while (lastT < maxT) {
-      int nextT = (lastT == 0) ? minT : pwr2LawNext(tPPO, lastT);
-      int delta = nextT - lastT;
+      final int nextT = (lastT == 0) ? minT : pwr2LawNext(tPPO, lastT);
+      final int delta = nextT - lastT;
       for (int i = 0; i < delta; i++) {
         vIn = trial.doAccuracyTrial(vIn);
       }
       lastT = nextT;
-      StringBuilder sb = new StringBuilder();
+      final StringBuilder sb = new StringBuilder();
       if (nextT < maxT) { // intermediate
         if (interData) {
           perf.println(getHeader());
@@ -71,17 +75,17 @@ public class AccuracyTrialsManager implements TrialsManager {
       perf.println(prop.extractKvPairs());
       perf.println("Cum Trials             : " + lastT);
       perf.println("Cum Updates            : " + vIn);
-      long currentTime_mS = System.currentTimeMillis();
-      long cumTime_mS = currentTime_mS - perf.getStartTime();
+      final long currentTime_mS = System.currentTimeMillis();
+      final long cumTime_mS = currentTime_mS - perf.getStartTime();
       perf.println("Cum Trials Time        : " + milliSecToString(cumTime_mS));
-      double timePerTrial_mS = (cumTime_mS*1.0)/lastT;
-      double avgUpdateTime_ns = (timePerTrial_mS*1e6) / maxU;
+      final double timePerTrial_mS = (cumTime_mS * 1.0) / lastT;
+      final double avgUpdateTime_ns = (timePerTrial_mS * 1e6) / maxU;
       perf.println("Time Per Trial, mSec   : " + timePerTrial_mS);
       perf.println("Avg Update Time, nSec  : " + avgUpdateTime_ns);
       perf.println("Date Time              : "
           + perf.getReadableDateString(currentTime_mS));
 
-      long timeToComplete_mS = (long)(timePerTrial_mS * (maxT - lastT));
+      final long timeToComplete_mS = (long)(timePerTrial_mS * (maxT - lastT));
       perf.println("Est Time to Complete   : " + milliSecToString(timeToComplete_mS));
       perf.println("Est Time at Completion : "
           + perf.getReadableDateString(timeToComplete_mS + currentTime_mS));
@@ -94,23 +98,23 @@ public class AccuracyTrialsManager implements TrialsManager {
     }
   }
 
-  private static void process(Properties p, AccuracyStats[] qArr, int cumTrials,
-      StringBuilder sb) {
-    String getSizeStr = p.get("Trials_bytes");
-    boolean getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
+  private static void process(final Properties p, final AccuracyStats[] qArr, final int cumTrials,
+      final StringBuilder sb) {
+    final String getSizeStr = p.get("Trials_bytes");
+    final boolean getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
-    int points = qArr.length;
+    final int points = qArr.length;
     sb.setLength(0);
     for (int pt = 0; pt < points; pt++) {
-      AccuracyStats q = qArr[pt];
-      int uniques = q.uniques;
-      double meanEst = q.sumEst / cumTrials;
-      double meanRelErr = q.sumRelErr / cumTrials;
-      double meanSqErr = q.sumSqErr / cumTrials;
-      double normMeanSqErr = meanSqErr / (1.0*uniques * uniques);
-      double rmsRelErr = Math.sqrt(normMeanSqErr);
+      final AccuracyStats q = qArr[pt];
+      final int uniques = q.uniques;
+      final double meanEst = q.sumEst / cumTrials;
+      final double meanRelErr = q.sumRelErr / cumTrials;
+      final double meanSqErr = q.sumSqErr / cumTrials;
+      final double normMeanSqErr = meanSqErr / (1.0 * uniques * uniques);
+      final double rmsRelErr = Math.sqrt(normMeanSqErr);
       q.rmsre = rmsRelErr;
-      int bytes = q.bytes;
+      final int bytes = q.bytes;
 
       //OUTPUT
       //sb.setLength(0);
@@ -125,9 +129,9 @@ public class AccuracyTrialsManager implements TrialsManager {
       sb.append(cumTrials).append(TAB);
 
       //Quantiles
-      double[] quants = qArr[pt].qsk.getQuantiles(FRACTIONS);
+      final double[] quants = qArr[pt].qsk.getQuantiles(FRACTIONS);
       for (int i = 0; i < FRACT_LEN; i++) {
-        sb.append((quants[i]/uniques) - 1.0).append(TAB);
+        sb.append((quants[i] / uniques) - 1.0).append(TAB);
       }
       if (getSize) {
         sb.append(bytes).append(TAB);
@@ -141,7 +145,7 @@ public class AccuracyTrialsManager implements TrialsManager {
   }
 
   private static String getHeader() {
-    StringBuilder sb = new StringBuilder();
+    final StringBuilder sb = new StringBuilder();
     sb.append("InU").append(TAB);        //col 1
     //Estimates
     sb.append("MeanEst").append(TAB);    //col 2

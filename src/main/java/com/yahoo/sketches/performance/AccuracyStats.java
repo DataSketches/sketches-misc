@@ -22,7 +22,7 @@ public class AccuracyStats {
   public int uniques;
   public int bytes = 0;
 
-  public AccuracyStats(int k, int uniques) {
+  public AccuracyStats(final int k, final int uniques) {
     qsk = new DoublesSketchBuilder().setK(k).build(); //Quantiles
     this.uniques = uniques;
   }
@@ -33,11 +33,11 @@ public class AccuracyStats {
    * @param est the value of the estimate for this trial
    * nanoSeconds.
    */
-  public void update(double est) {
+  public void update(final double est) {
     qsk.update(est);
     sumEst += est;
     sumRelErr += (est / uniques) - 1.0;
-    double error = est - uniques;
+    final double error = est - uniques;
     sumSqErr += error * error;
   }
 }
