@@ -7,14 +7,6 @@ package com.yahoo.sketches.performance;
 
 import static com.yahoo.sketches.Util.pwr2LawNext;
 
-import java.io.BufferedWriter;
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.OutputStreamWriter;
-import java.io.PrintWriter;
-import java.nio.charset.Charset;
-
 import com.yahoo.sketches.quantiles.DoublesSketch;
 
 /**
@@ -70,40 +62,7 @@ public class PerformanceUtil {
    }
 
    /**
-    *
-    * @param fileName the name of the file to configure
-    * @return a PrintWriter
-    */
-   public static final PrintWriter configureFile(final String fileName) {
-     File file = null;
-     PrintWriter pw = null;
-     if ((fileName != null) && !fileName.isEmpty()) {
-       file = new File(fileName);
-       if (file.isFile()) {
-         file.delete(); //remove old file if it exists
-       } else {
-         try {
-           file.createNewFile();
-         } catch (final Exception e) {
-           throw new RuntimeException("Cannot create file: " + fileName + LS + e);
-         }
-       }
-       final BufferedWriter bw;
-       try {
-         final FileOutputStream fos = new FileOutputStream(file, true);
-         final OutputStreamWriter osw = new OutputStreamWriter(fos, Charset.defaultCharset());
-         bw = new BufferedWriter(osw, 8192);
-       } catch (final IOException e) {
-         // never opened, so don't close it.
-         throw new RuntimeException("Could not create: " + file.getPath() + LS + e);
-       }
-       pw = new PrintWriter(bw);
-     }
-     return pw;
-   }
-
-   /**
-    *
+    * Outputs the Probability Mass Function given the PerformanceJob and the AccuracyStats.
     * @param perf the given PerformanceJob
     * @param q the given AccuracyStats
     */

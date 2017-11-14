@@ -5,9 +5,9 @@
 
 package com.yahoo.sketches.performance;
 
+import static com.yahoo.sketches.Files.openPrintWriter;
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.performance.PerformanceUtil.LS;
-import static com.yahoo.sketches.performance.PerformanceUtil.configureFile;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
@@ -88,7 +88,7 @@ public class PerformanceJob {
     final String nowStr = fileSDF.format(gc.getTime());
     final String outputFileName = prop.mustGet("Sketch") + nowStr + ".txt";
     prop.put("OutputFileName", outputFileName);
-    out = configureFile(outputFileName);
+    out = openPrintWriter(outputFileName);
   }
 
   public String getReadableDateString(final long timeMillisec) {

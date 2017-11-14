@@ -111,7 +111,7 @@ public final class Files {
 
   /**
    * Opens a RandomAccessFile given a File object and String mode: "r", "rw",
-   * "rws" or "rwd". Remember to close this file when you are done!
+   * "rws" or "rwd". The returned object must be closed by the calling program.
    *
    * @param file the given file
    * @param mode the given mode
@@ -473,7 +473,7 @@ public final class Files {
 
   // Complete NIO BASED FILE WRITE OPERATIONS
   /**
-   * Writes the given String text to the fileName using NIO.
+   * Writes the given String text to the fileName using NIO FileChannel.
    *
    * @param text Source string to place in a file. Equivalent to: <br/>
    * stringToFileNIO(String, String, Charset.defaultCharset());
@@ -486,7 +486,7 @@ public final class Files {
   }
 
   /**
-   * Writes the given String text to the fileName using NIO.
+   * Writes the given String text to the fileName using NIO FileChannel
    *
    * @param text Source string to place in a file.
    * @param fileName name of target file
@@ -567,7 +567,7 @@ public final class Files {
 
   // Complete NIO BASED FILE READ OPERATIONS
   /**
-   * Reads a file into a char array using NIO, then closes the file. Useful when
+   * Reads a file into a char array using NIO FileChannel, then closes the file. Useful when
    * special handling of Line-Separation characters is required. Equivalent to:
    * <br/>
    * fileToCharArrayNIO(String, Charset.defaultCharset());
@@ -583,7 +583,7 @@ public final class Files {
   }
 
   /**
-   * Reads a file into a char array using NIO, then closes the file. Useful when
+   * Reads a file into a char array using NIO FileChannel, then closes the file. Useful when
    * special handling of Line-Separation characters is required.
    *
    * @param fileName the given fileName
@@ -598,7 +598,7 @@ public final class Files {
     final File file = getExistingFile(fileName);
     char[] chArr = null;
     try (RandomAccessFile raf = openRandomAccessFile(file, "r");
-        FileChannel fc = raf.getChannel();) {
+        FileChannel fc = raf.getChannel()) {
       final MappedByteBuffer mbBuf = getMappedByteBuffer(fc, READ_ONLY);
       final long len = size(fc);
       if (len > Integer.MAX_VALUE) {
@@ -616,9 +616,9 @@ public final class Files {
   }
 
   /**
-   * Reads a file into a String using NIO. Each line of the file is delimited by
+   * Reads a file into a String using NIO FileChannel. Each line of the file is delimited by
    * the current operating systems's "line.separator" characters. Closes the
-   * file. This method is equivalent to<br/>
+   * file. This method is equivalent to:<br/>
    * fileToStringNIO(String fileName, Charset.defaultCharset())
    *
    * @param fileName given fileName
@@ -630,7 +630,7 @@ public final class Files {
   }
 
   /**
-   * Reads a file into a String using NIO. Each line of the file is delimited by
+   * Reads a file into a String using NIO FileChannel. Each line of the file is delimited by
    * the current operating systems's "line.separator" characters. Closes the
    * file.
    *
@@ -665,7 +665,7 @@ public final class Files {
   /**
    * Opens a BufferedReader wrapped around a File. Equivalent to the call<br>
    * openBufferedReader(file, DEFAULT_BUFSIZE) Rethrows any IOException as a
-   * RuntimeException.
+   * RuntimeException. The returned object must be closed by the calling program.
    *
    * @param file the given file
    * @return BufferedReader object
@@ -678,7 +678,7 @@ public final class Files {
   /**
    * Opens a BufferedReader wrapped around a FileReader with a specified file
    * and buffer size. If bufSize is less than the default (8192) the default
-   * will be used.
+   * will be used. The returned object must be closed by the calling program.
    *
    * @param file the given file
    * @param bufSize the given buffer size
@@ -694,7 +694,7 @@ public final class Files {
    * InputStreamReader, which specifies a Charset. The InputStreamReader wraps a
    * FileInputStream. If bufSize is less than the default (8192) the default
    * will be used. If the charset is null, Charset.defaultCharset() will be
-   * used.
+   * used. The returned object must be closed by the calling program.
    *
    * @param file the given file
    * @param bufSize the given buffer size
@@ -716,6 +716,41 @@ public final class Files {
       throw new RuntimeException(LS + "File Not Found: " + file.getPath() + LS + e);
     }
     return in;
+  }
+
+  /**
+   * Configures a file for string writing. If a file by the same name exists, it will be
+   * deleted. If fileName is not fully qualified, it will be relative to the root of this
+   * package. The returned object must be closed by the calling program.
+   * @param fileName the name of the file to configure
+   * @return a PrintWriter
+   */
+  public static final PrintWriter openPrintWriter(final String fileName) {
+    File file = null;
+    PrintWriter pw = null;
+    if ((fileName != null) && !fileName.isEmpty()) {
+      file = new File(fileName);
+      if (file.isFile()) {
+        file.delete(); //remove old file if it exists
+      } else {
+        try {
+          file.createNewFile();
+        } catch (final Exception e) {
+          throw new RuntimeException("Cannot create file: " + fileName + LS + e);
+        }
+      }
+      final BufferedWriter bw;
+      try {
+        final FileOutputStream fos = new FileOutputStream(file, true);
+        final OutputStreamWriter osw = new OutputStreamWriter(fos, Charset.defaultCharset());
+        bw = new BufferedWriter(osw, 8192);
+      } catch (final IOException e) {
+        // never opened, so don't close it.
+        throw new RuntimeException("Could not create: " + file.getPath() + LS + e);
+      }
+      pw = new PrintWriter(bw);
+    }
+    return pw;
   }
 
   /**
@@ -871,7 +906,7 @@ public final class Files {
   /**
    * Opens a BufferedWriter wrapped around a FileWriter with a specified file
    * and buffer size. If bufSize is less than the default (8192) the default
-   * will be used.
+   * will be used. The returned object must be closed by the calling program.
    *
    * @param file the given file
    * @param bufSize the given buffer size
@@ -887,7 +922,7 @@ public final class Files {
   /**
    * Opens a BufferedWriter wrapped around a FileWriter with a specified file
    * and buffer size. If bufSize is less than the default (8192) the default
-   * will be used.
+   * will be used. The returned object must be closed by the calling program.
    *
    * @param file the given file
    * @param bufSize if less than 8192 it defaults to 8192.
