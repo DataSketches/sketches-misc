@@ -1,24 +1,10 @@
 package com.yahoo.sketches.cmd;
 
-import static com.yahoo.sketches.Util.LS;
-import static com.yahoo.sketches.Util.TAB;
-import static java.lang.Math.log10;
-import static java.lang.Math.pow;
-import static java.nio.charset.StandardCharsets.UTF_8;
-
 import java.io.BufferedReader;
-import java.io.FileInputStream;
-import java.io.FileOutputStream;
 import java.io.IOException;
-import java.io.InputStreamReader;
-import java.util.ArrayList;
 
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
 import org.apache.commons.cli.HelpFormatter;
-import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.OptionBuilder;
 
 import com.yahoo.memory.Memory;
 import com.yahoo.sketches.hll.HllSketch;
@@ -33,33 +19,36 @@ public class HllCL extends CommandLine <HllSketch> {
                                      .hasArg()
                                      .create("k"));
 
-    // output options       
+    // output options
     options.addOption(OptionBuilder.withLongOpt("upper-bound")
                                      .withDescription("upper bound on the estimate")
-                                     .create("u"));        
+                                     .create("u"));
 
-    options.addOption(OptionBuilder.withLongOpt("upper-bound")
+    options.addOption(OptionBuilder.withLongOpt("lower-bound")
                                      .withDescription("lower bound on the estimate")
-                                     .create("l"));        
+                                     .create("l"));
   }
 
+  @Override
   protected void showHelp(){
         HelpFormatter helpf = new HelpFormatter();
         helpf.setOptionComparator(null);
-        helpf.printHelp( "ds hll", options);  
+        helpf.printHelp( "ds hll", options);
   }
 
 
+  @Override
   protected void buildSketch(){
     HllSketch sketch;
     if( cmd.hasOption("k")){
       sketch =  new HllSketch(Integer.parseInt(cmd.getOptionValue("k"))); // user defined lgK
-    }else{  
+    }else{
       sketch =  new HllSketch(10); // default lgK is 10
     }
     sketches.add(sketch);
   }
-  
+
+  @Override
   protected void updateSketch(BufferedReader br){
     String itemStr = "";
     HllSketch sketch = sketches.get(sketches.size() - 1);
@@ -74,14 +63,17 @@ public class HllCL extends CommandLine <HllSketch> {
     }
   }
 
+  @Override
   protected HllSketch deserializeSketch(byte[] bytes){
     return HllSketch.heapify(Memory.wrap(bytes));
   }
 
+  @Override
   protected byte[] serializeSketch(HllSketch sketch){
     return sketch.toCompactByteArray();
   }
 
+  @Override
   protected void mergeSketches(){
       int lgk = sketches.get(sketches.size() - 1).getLgConfigK();
       Union union = new Union(lgk);
@@ -91,21 +83,22 @@ public class HllCL extends CommandLine <HllSketch> {
       sketches.add(union.getResult(TgtHllType.HLL_4));
   }
 
+  @Override
   protected void queryCurrentSketch(){
       HllSketch sketch =  sketches.get(sketches.size()-1);
       if (cmd.hasOption("u")){
-        System.out.println(sketch.getLowerBound(2));      
+        System.out.println(sketch.getLowerBound(2));
         return;
       }
       if (cmd.hasOption("l")){
-        System.out.println(sketch.getUpperBound(2)); 
+        System.out.println(sketch.getUpperBound(2));
         return;
       }
-      
+
       //default output is estimated number of uniques
-      System.out.println(sketch.getEstimate()); 
+      System.out.println(sketch.getEstimate());
       return;
-         
+
   }
 
 

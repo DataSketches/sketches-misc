@@ -7,8 +7,6 @@ package com.yahoo.sketches.cmd;
 
 import static com.yahoo.sketches.Util.LS;
 import static com.yahoo.sketches.Util.TAB;
-import static java.lang.Math.log10;
-import static java.lang.Math.pow;
 import static java.nio.charset.StandardCharsets.UTF_8;
 
 import java.io.BufferedReader;
@@ -16,25 +14,24 @@ import java.io.FileInputStream;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
-
 import java.util.ArrayList;
 
-import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.Options;
-import org.apache.commons.cli.Option;
-import org.apache.commons.cli.OptionBuilder;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.CommandLineParser;
+import org.apache.commons.cli.DefaultParser;
+import org.apache.commons.cli.HelpFormatter;
+import org.apache.commons.cli.Option;
+import org.apache.commons.cli.Options;
 
 /**
  * Command line access to the basic sketch functions.  This is intentionally a very simple parser
  * with limited functionality that can be used for small experiments and for demos.
  * Although the sketching library can be used on a single machine, the more typical use case is on
  * large, highly distributed system architectures where a CLI is not of much use.
+ * @param <T> Sketch Type
  */
 
-public abstract class CommandLine <TSketch> {
-  ArrayList<TSketch> sketches;
+public abstract class CommandLine<T> {
+  ArrayList<T> sketches;
   boolean updateFlag;
   String[] inputSketchesPathes;
   String dataInputFile;
@@ -47,88 +44,132 @@ public abstract class CommandLine <TSketch> {
   org.apache.commons.cli.CommandLine cmd;
 
   CommandLine(){
-    sketches = new ArrayList<TSketch>();
+    sketches = new ArrayList<>();
     options = new Options();
-    
-    options.addOption(OptionBuilder.withLongOpt("data-from-file")
-                                   .withDescription("read data from FILE")
-                                   .hasArg()
-                                   .withArgName("FILE")
-                                   .create("d"));
+    options.addOption(Option.builder("d")
+        .longOpt("data-from-file")
+        .desc("read data from FILE")
+        .hasArg()
+        .argName("FILE")
+        .build());
+    options.addOption(Option.builder("D")
+        .longOpt("data-from-system-in")
+        .desc("read data from system in")
+        .build());
+    options.addOption(Option.builder("s")
+        .longOpt("sketch-input-file")
+        .desc("read sketches from FILES")
+        .hasArgs() //unlimited
+        .argName("FILES")
+        .build());
+    options.addOption(Option.builder("o")
+        .longOpt("sketch-output-file")
+        .desc("save sketch to FILE")
+        .hasArg()
+        .argName("FILE")
+        .build());
+    options.addOption(Option.builder("help")
+        .desc("usage/help")
+        .build());
 
-    options.addOption(OptionBuilder.withLongOpt("data-from-system-in")
-                                   .withDescription("read data from system in")
-                                   .create("D"));
 
-    options.addOption(OptionBuilder.withLongOpt("sketch-input-file")
-                                   .withDescription("read sketches from FILES")
-                                   .hasArgs(Option.UNLIMITED_VALUES)
-                                   .withArgName("FILES")
-                                   .create("s"));
-    
-    options.addOption(OptionBuilder.withLongOpt("sketch-output-file")
-                                   .withDescription("save sketch to FILE")
-                                   .hasArg()
-                                   .withArgName("FILE")
-                                   .create("o"));
-
-    options.addOption(OptionBuilder.withDescription("usage/help")
-                                   .create("help"));
+//    options.addOption(OptionBuilder.withLongOpt("data-from-file")
+//                                   .withDescription("read data from FILE")
+//                                   .hasArg()
+//                                   .withArgName("FILE")
+//                                   .create("d"));
+//
+//    options.addOption(OptionBuilder.withLongOpt("data-from-system-in")
+//                                   .withDescription("read data from system in")
+//                                   .create("D"));
+//
+//    options.addOption(OptionBuilder.withLongOpt("sketch-input-file")
+//                                   .withDescription("read sketches from FILES")
+//                                   .hasArgs(Option.UNLIMITED_VALUES)
+//                                   .withArgName("FILES")
+//                                   .create("s"));
+//
+//    options.addOption(OptionBuilder.withLongOpt("sketch-output-file")
+//                                   .withDescription("save sketch to FILE")
+//                                   .hasArg()
+//                                   .withArgName("FILE")
+//                                   .create("o"));
+//
+//    options.addOption(OptionBuilder.withDescription("usage/help")
+//                                   .create("help"));
 
   }
 
   protected abstract void showHelp();
   protected abstract void buildSketch();
   protected abstract void updateSketch(BufferedReader br);
-  protected abstract TSketch deserializeSketch(byte[] bytes);
-  protected abstract byte[] serializeSketch(TSketch sketch);
+  protected abstract T deserializeSketch(byte[] bytes);
+  protected abstract byte[] serializeSketch(T sketch);
   protected abstract void mergeSketches();
   protected abstract void queryCurrentSketch();
-  
+
 
   protected void loadInputSketches(){
-    
+
       try{
         String[] inputSketchesPathes = cmd.getOptionValues("s");
         for (int i=0; i<inputSketchesPathes.length; i++) {
-          FileInputStream in = new FileInputStream(inputSketchesPathes[i]);
-          byte[] bytes = new byte[in.available()];
-          in.read(bytes);
-          in.close();
-          sketches.add(deserializeSketch(bytes));
+          try (FileInputStream in = new FileInputStream(inputSketchesPathes[i])) {
+            byte[] bytes = new byte[in.available()];
+            in.read(bytes);
+            sketches.add(deserializeSketch(bytes));
+          }
         }
-      }catch(Exception e) {      
+      }catch(IOException e) {
         printlnErr("loadInputSketches Error: " + e.getMessage());
       }
   }
 
   protected void saveCurrentSketch(){
-      try{
-        FileOutputStream out = new FileOutputStream(cmd.getOptionValue("o"));
+      try (FileOutputStream out = new FileOutputStream(cmd.getOptionValue("o"))) {
         out.write(serializeSketch(sketches.get(sketches.size() - 1)));
-        out.close();
-      }catch(Exception e) {      
+      } catch(IOException e) {
         printlnErr("saveCurrentSketch Error: " + e.getMessage());
       }
   }
 
   protected void updateCurrentSketch(){
-    try{  
-      BufferedReader br = null;
-      if(cmd.hasOption("D")){
-        br = new BufferedReader(new InputStreamReader(System.in, UTF_8));
-      }else if (cmd.hasOption("d")) {
-        br = new BufferedReader(new InputStreamReader(new FileInputStream(cmd.getOptionValue("d")), UTF_8));
-      }else {
-        return;
+    try {
+      if (cmd.hasOption("D")) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+            System.in, UTF_8))) {
+          updateSketch(br);
+          updateFlag = true;
+        }
       }
-      String itemStr = "";
-      updateSketch(br);
-      updateFlag = true;   
-    }catch(Exception e) {      
-        printlnErr("updateCurrentSketch Error: " + e.getMessage());
+      else if (cmd.hasOption("d")) {
+        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+            new FileInputStream(cmd.getOptionValue("d")), UTF_8))) {
+          updateSketch(br);
+          updateFlag = true;
+        }
+      }
+      else { return; }
+    } catch (IOException e) {
+      printlnErr("updateCurrentSketch Error: " + e.getMessage());
     }
-    
+
+//    try{
+//      BufferedReader br = null;
+//      if(cmd.hasOption("D")){
+//        br = new BufferedReader(new InputStreamReader(System.in, UTF_8));
+//      }else if (cmd.hasOption("d")) {
+//        br = new BufferedReader(new InputStreamReader(new FileInputStream(cmd.getOptionValue("d")), UTF_8));
+//      }else {
+//        return;
+//      }
+//      String itemStr = "";
+//      updateSketch(br);
+//      updateFlag = true;
+//    }catch(Exception e) {
+//        printlnErr("updateCurrentSketch Error: " + e.getMessage());
+//    }
+
   }
 
   protected void runCommandLineUtil(final String[] args){
@@ -136,35 +177,37 @@ public abstract class CommandLine <TSketch> {
       parser = new DefaultParser();
       try{
           cmd = parser.parse(options, args);
-          
+
           if(cmd.hasOption("help")){
             showHelp();
-            return; 
+            return;
           }
-          
+
           if (cmd.hasOption("s")){
             loadInputSketches();
             updateFlag = true;
           }
-          
-          if (sketches.size() > 1)
+
+          if (sketches.size() > 1) {
             mergeSketches();
-          else if (sketches.size() == 0)
+          } else if (sketches.size() == 0) {
             buildSketch();
-          
+          }
+
           updateCurrentSketch();
           if (updateFlag){
             queryCurrentSketch();
-            if (cmd.hasOption("o")) 
-              saveCurrentSketch();  
+            if (cmd.hasOption("o")) {
+              saveCurrentSketch();
+            }
           }else{
             showHelp();
           }
-      }catch(Exception e) {      
+      }catch(Exception e) {
               printlnErr("runCommandLineUtil Error: " + e.getMessage());
       }
   }
-  
+
   public static void main(final String[] args) {
     if ((args == null) || (args.length == 0) || (args[0].isEmpty())) {
           help();
@@ -172,34 +215,34 @@ public abstract class CommandLine <TSketch> {
     }
     final String token1 = args[0].toLowerCase();
     switch (token1) {
-        case "quant":     
+        case "quant":
           QuantilesCL qcl = new QuantilesCL();
           qcl.runCommandLineUtil(args);
           break;
-        case "freq":     
+        case "freq":
           FrequenciesCL fcl = new FrequenciesCL();
           fcl.runCommandLineUtil(args);
           break;
-        case "theta":     
+        case "theta":
           ThetaCL tcl = new ThetaCL();
           tcl.runCommandLineUtil(args);
           break;
-        case "rsamp":     
+        case "rsamp":
           ReservoirSamplingCL rscl = new ReservoirSamplingCL();
           rscl.runCommandLineUtil(args);
           break;
-        case "vpsamp":     
+        case "vpsamp":
           VarOptSamplingCL vpscl = new VarOptSamplingCL();
           vpscl.runCommandLineUtil(args);
           break;
-        case "hll":     
+        case "hll":
           HllCL hllcl = new HllCL();
           hllcl.runCommandLineUtil(args);
           break;
-        case "help":     
+        case "help":
           help();
           break;
-        case "-help":     
+        case "-help":
           help();
           break;
         default: {
@@ -217,20 +260,21 @@ public abstract class CommandLine <TSketch> {
     System.out.println(s);
   }
 
-  protected String[] queryFileReader(final String pathToFile){
-    ArrayList<String> values = new ArrayList<String>();
+  protected String[] queryFileReader(final String pathToFile) {
+    ArrayList<String> values = new ArrayList<>();
     String itemStr = "";
     String[] valuesArray;
-    try {
-      BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(pathToFile)));
+    try (BufferedReader in = new BufferedReader(new InputStreamReader(new FileInputStream(pathToFile)))) {
       while ((itemStr = in.readLine()) != null) {
+        if (itemStr.isEmpty()) { continue; }
         values.add(itemStr);
       }
       valuesArray = new String[values.size()];
-      for (int i=0; i < valuesArray.length; i++){
+      for (int i=0; i < valuesArray.length; i++) {
           valuesArray[i] = values.get(i);
       }
-    } catch (final IOException | NumberFormatException e ) {
+    }
+    catch (final IOException  e ) {
       printlnErr("File Read Error: Item: " + itemStr );
       throw new RuntimeException(e);
     }
