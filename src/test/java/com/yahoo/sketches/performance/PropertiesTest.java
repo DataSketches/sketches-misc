@@ -17,7 +17,7 @@ public class PropertiesTest {
   @Test
   public void checkLoadKvPairs() {
     Properties prop = new Properties();
-    String s = "k1=v1,k2:v2\tk3:v3\nk4=v4";
+    String s = "k1=v1,k2=v2\tk3=v3\nk4=v4";
     prop.loadKvPairs(s);
     String out = prop.extractKvPairs();
     println(out);
@@ -37,7 +37,7 @@ public class PropertiesTest {
   @Test
   public void checkSpaceRemoval() {
     Properties prop = new Properties();
-    String s = " key  :  value  ";
+    String s = " key  =  value  ";
     prop.loadKvPairs(s);
     String out = prop.extractKvPairs();
     println(out);
@@ -50,8 +50,12 @@ public class PropertiesTest {
     prop.loadKvPairs(s);
   }
 
+  /**
+   *
+   * @param s string to print
+   */
   static void println(String s) {
-    System.out.println(s);
+    //System.out.println(s); //Disable here
   }
 
 }

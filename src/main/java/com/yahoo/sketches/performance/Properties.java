@@ -70,7 +70,7 @@ public class Properties {
   /**
    * Load the string containing key-value pairs into the map.
    * key-value pairs are split by the RegEx: "[,\t\n]".
-   * Each key-value pair is split by the RegEx: "[:=]".
+   * Each key-value pair is split by the RegEx: "[=]".
    * Beginning and ending spaces are removed.
    * @param kvPairs the given string
    */
