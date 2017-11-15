@@ -5,8 +5,6 @@
 
 package com.yahoo.sketches.misc.performance;
 
-import org.testng.annotations.Test;
-
 import com.yahoo.sketches.misc.Files;
 
 /**
@@ -86,11 +84,6 @@ public class RunPerformanceJobs {
     }
     @SuppressWarnings("unused")
     final PerformanceJob ap = new PerformanceJob(p, sketchTrial);
-  }
-
-  @Test
-  public void runFromTest() {
-    parseJobs("src/test/resources/HllAccuracyJob.txt");
   }
 
   /**
