@@ -18,7 +18,6 @@ import java.util.ArrayList;
 
 import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
-import org.apache.commons.cli.HelpFormatter;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
 
@@ -31,16 +30,13 @@ import org.apache.commons.cli.Options;
  */
 
 public abstract class CommandLine<T> {
-  ArrayList<T> sketches;
-  boolean updateFlag;
-  String[] inputSketchesPathes;
-  String dataInputFile;
-  String outputSketchPath;
+
   private static final String BOLD = "\033[1m";
   private static final String OFF = "\033[0m";
+
+  ArrayList<T> sketches;
+  private boolean updateFlag;
   Options options;
-  HelpFormatter help;
-  CommandLineParser parser;
   org.apache.commons.cli.CommandLine cmd;
 
   CommandLine() {
@@ -135,7 +131,7 @@ public abstract class CommandLine<T> {
 
   protected void runCommandLineUtil(final String[] args) {
       updateFlag = false;
-      parser = new DefaultParser();
+      final CommandLineParser parser = new DefaultParser();
       try {
           cmd = parser.parse(options, args);
 

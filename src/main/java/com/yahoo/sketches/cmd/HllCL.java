@@ -55,10 +55,9 @@ public class HllCL extends CommandLine<HllSketch> {
     final HllSketch sketch = sketches.get(sketches.size() - 1);
     try {
       while ((itemStr = br.readLine()) != null) {
-        final int item = Integer.parseInt(itemStr);
-        sketch.update(item);
+        sketch.update(itemStr);
       }
-    } catch (final IOException | NumberFormatException e ) {
+    } catch (final IOException e) {
       printlnErr("Read Error: Item: " + itemStr + ", " + br.toString());
       throw new RuntimeException(e);
     }
