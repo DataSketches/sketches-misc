@@ -9,6 +9,7 @@ import static com.yahoo.sketches.quantiles.Util.computeCombinedBufferItemCapacit
 
 /**
  * Utility functions for computing space consumed by the QuantileSketch.
+ * This accesses package private methods in quantiles.Util so it must be in the same package.
  *
  * @author Kevin Lang
  * @author Lee Rhodes
