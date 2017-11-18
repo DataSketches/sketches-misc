@@ -16,7 +16,7 @@ public class CommandLineTest {
 
   @Test
   public void simpleTest1() {
-    String[] line = new String[] {"theta", "help"};
+    String[] line = new String[] {"theta", "-help"};
     CommandLine.main(line);
   }
 

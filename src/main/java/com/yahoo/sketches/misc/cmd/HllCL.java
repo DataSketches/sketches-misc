@@ -13,10 +13,12 @@ import com.yahoo.sketches.hll.Union;
 
 public class HllCL extends CommandLine<HllSketch> {
 
+  private static final int DEFAULT_LG_K = 12;
+
   HllCL() {
     super();
     // input options
-    options.addOption(Option.builder("k")
+    options.addOption(Option.builder("lgk")
         .desc("parameter lgK")
         .hasArg()
         .build());
@@ -35,16 +37,16 @@ public class HllCL extends CommandLine<HllSketch> {
   protected void showHelp() {
         final HelpFormatter helpf = new HelpFormatter();
         helpf.setOptionComparator(null);
-        helpf.printHelp( "ds hll", options);
+        helpf.printHelp("ds hll", options);
   }
 
   @Override
   protected void buildSketch() {
     final HllSketch sketch;
-    if (cmd.hasOption("k")) {
-      sketch =  new HllSketch(Integer.parseInt(cmd.getOptionValue("k"))); // user defined lgK
+    if (cmd.hasOption("lgk")) {
+      sketch =  new HllSketch(Integer.parseInt(cmd.getOptionValue("lgk"))); // user defined lgK
     } else {
-      sketch =  new HllSketch(10); //default lgK is 10
+      sketch =  new HllSketch(DEFAULT_LG_K);
     }
     sketches.add(sketch);
   }
@@ -75,7 +77,7 @@ public class HllCL extends CommandLine<HllSketch> {
 
   @Override
   protected void mergeSketches() {
-    final int lgk = sketches.get(sketches.size() - 1).getLgConfigK();
+    final int lgk = cmd.hasOption("k") ? Integer.parseInt(cmd.getOptionValue("lgk")) : DEFAULT_LG_K;
     final Union union = new Union(lgk);
     for (HllSketch sketch: sketches) {
       union.update(sketch);
@@ -86,11 +88,11 @@ public class HllCL extends CommandLine<HllSketch> {
   @Override
   protected void queryCurrentSketch() {
     final HllSketch sketch =  sketches.get(sketches.size() - 1);
-    if (cmd.hasOption("u")) {
+    if (cmd.hasOption("l")) {
       System.out.println(sketch.getLowerBound(2));
       return;
     }
-    if (cmd.hasOption("l")) {
+    if (cmd.hasOption("u")) {
       System.out.println(sketch.getUpperBound(2));
       return;
     }

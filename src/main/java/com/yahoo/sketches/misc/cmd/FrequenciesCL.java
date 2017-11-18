@@ -16,6 +16,8 @@ import com.yahoo.sketches.frequencies.ItemsSketch;
 
   public class FrequenciesCL extends CommandLine<ItemsSketch<String>> {
 
+    private static final int DEFAULT_SIZE = 1024;
+
     FrequenciesCL() {
       super();
       // input options
@@ -25,7 +27,7 @@ import com.yahoo.sketches.frequencies.ItemsSketch;
           .build());
 
       // output options
-      options.addOption(Option.builder("i")
+      options.addOption(Option.builder("t")
           .longOpt("topk-ids")
           .desc("query identities for top k frequent items")
           .build());
@@ -47,18 +49,17 @@ import com.yahoo.sketches.frequencies.ItemsSketch;
   protected void showHelp() {
         final HelpFormatter helpf = new HelpFormatter();
         helpf.setOptionComparator(null);
-        helpf.printHelp( "ds freq", options);
+        helpf.printHelp("ds freq", options);
   }
 
 
   @Override
   protected void buildSketch() {
     final ItemsSketch<String> sketch;
-    final int defaultSize = 1 << 17; //128K
     if (cmd.hasOption("k")) { //user defined k
-            sketch = new ItemsSketch<>(Integer.parseInt(cmd.getOptionValue("k")));
+      sketch = new ItemsSketch<>(Integer.parseInt(cmd.getOptionValue("k")));
     } else { //default k
-            sketch = new ItemsSketch<>(defaultSize);
+      sketch = new ItemsSketch<>(DEFAULT_SIZE);
     }
     sketches.add(sketch);
   }
@@ -89,10 +90,16 @@ import com.yahoo.sketches.frequencies.ItemsSketch;
 
   @Override
   protected void mergeSketches() {
-      final ItemsSketch<String> union = sketches.get(sketches.size() - 1);
-      for (int i = 0;i < (sketches.size() - 1); i++) {
-        union.merge(sketches.get(i));
-      }
+    final ItemsSketch<String> union;
+    if (cmd.hasOption("k")) { //user defined k
+      union = new ItemsSketch<>(Integer.parseInt(cmd.getOptionValue("k")));
+    } else { //default k
+      union = new ItemsSketch<>(DEFAULT_SIZE);
+    }
+    for (final ItemsSketch<String> sketch: sketches) {
+      union.merge(sketch);
+    }
+    sketches.add(union);
   }
 
   @Override
@@ -147,7 +154,6 @@ import com.yahoo.sketches.frequencies.ItemsSketch;
         println(rowArr[i].getItem() + TAB + rowArr[i].getEstimate());
       }
       return;
-
   }
 
 }

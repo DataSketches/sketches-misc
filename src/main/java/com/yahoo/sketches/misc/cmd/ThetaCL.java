@@ -10,6 +10,7 @@ import com.yahoo.memory.Memory;
 import com.yahoo.sketches.theta.AnotB;
 import com.yahoo.sketches.theta.Intersection;
 import com.yahoo.sketches.theta.SetOperation;
+import com.yahoo.sketches.theta.SetOperationBuilder;
 import com.yahoo.sketches.theta.Sketch;
 import com.yahoo.sketches.theta.Sketches;
 import com.yahoo.sketches.theta.Union;
@@ -29,12 +30,12 @@ public class ThetaCL extends CommandLine<Sketch> {
           .build());
       // sketch level operators
       options.addOption(Option.builder("i")
-          .longOpt("merge-intersection")
-          .desc("find intersection of sketches")
+          .longOpt("intersection")
+          .desc("intersection of sketches")
           .build());
       options.addOption(Option.builder("m")
-          .longOpt("merge-set-minus")
-          .desc("from first sketch subtract union of all others")
+          .longOpt("set-minus")
+          .desc("from the first sketch subtract all others")
           .build());
       // output options
       options.addOption(Option.builder("u")
@@ -51,7 +52,7 @@ public class ThetaCL extends CommandLine<Sketch> {
   protected void showHelp() {
     final HelpFormatter helpf = new HelpFormatter();
     helpf.setOptionComparator(null);
-    helpf.printHelp( "ds theta", options);
+    helpf.printHelp("ds theta", options);
   }
 
 
@@ -101,7 +102,6 @@ public class ThetaCL extends CommandLine<Sketch> {
 
   @Override
   protected void mergeSketches() {
-
       if (cmd.hasOption("i")) {
         final Intersection intersection = SetOperation.builder().buildIntersection();
         for (Sketch sketch: sketches) {
@@ -118,27 +118,31 @@ public class ThetaCL extends CommandLine<Sketch> {
         }
 
         final AnotB aNotB = Sketches.setOperationBuilder().buildANotB();
-        aNotB.update(sketches.get(0),union.getResult());
+        aNotB.update(sketches.get(0), union.getResult());
         sketches.add(aNotB.getResult());
         return;
       }
 
-      final Union union = SetOperation.builder().buildUnion();  //default merge is union
+      // default merge is union
+      final SetOperationBuilder builder = SetOperation.builder();
+      if (cmd.hasOption("k")) { // user defined k
+        builder.setNominalEntries(Integer.parseInt(cmd.getOptionValue("k")));
+      }
+      final Union union = builder.buildUnion();
       for (Sketch sketch: sketches) {
         union.update(sketch);
       }
       sketches.add(union.getResult());
       return;
-
   }
 
   @Override
   protected void queryCurrentSketch() {
     if (sketches.size() > 0) {
       final Sketch sketch = sketches.get(sketches.size() - 1);
-      if (cmd.hasOption("l")) {
+      if (cmd.hasOption("u")) {
           System.out.format("%f\n",sketch.getUpperBound(2));
-      } else if (cmd.hasOption("u")) {
+      } else if (cmd.hasOption("l")) {
           System.out.format("%f\n",sketch.getLowerBound(2));
       } else {
           System.out.format("%f\n",sketch.getEstimate()); // default output
