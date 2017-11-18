@@ -20,9 +20,10 @@ import org.apache.commons.cli.CommandLineParser;
 import org.apache.commons.cli.DefaultParser;
 import org.apache.commons.cli.Option;
 import org.apache.commons.cli.Options;
+import org.apache.commons.cli.ParseException;
 
 /**
- * Command line access to the basic sketch functions.  This is intentionally a very simple parser
+ * Command line access to the basic sketch functions. This is intentionally a very simple parser
  * with limited functionality that can be used for small experiments and for demos.
  * Although the sketching library can be used on a single machine, the more typical use case is on
  * large, highly distributed system architectures where a CLI is not of much use.
@@ -48,10 +49,6 @@ public abstract class CommandLine<T> {
         .hasArg()
         .argName("FILE")
         .build());
-    options.addOption(Option.builder("D")
-        .longOpt("data-from-system-in")
-        .desc("read data from system in")
-        .build());
     options.addOption(Option.builder("s")
         .longOpt("sketch-input-files")
         .desc("read sketches from FILES")
@@ -66,6 +63,10 @@ public abstract class CommandLine<T> {
         .build());
     options.addOption(Option.builder("help")
         .desc("usage/help")
+        .build());
+    options.addOption(Option.builder("p")
+        .desc("print sketch summary")
+        .longOpt("print")
         .build());
   }
 
@@ -109,21 +110,19 @@ public abstract class CommandLine<T> {
 
   protected void updateCurrentSketch() {
     try {
-      if (cmd.hasOption("D")) {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
+      if (cmd.hasOption("d")) {
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(
+            new FileInputStream(cmd.getOptionValue("d")), UTF_8))) {
+          updateSketch(br);
+          updateFlag = true;
+        }
+      } else if (!cmd.hasOption("s")){
+        try (final BufferedReader br = new BufferedReader(new InputStreamReader(
             System.in, UTF_8))) {
           updateSketch(br);
           updateFlag = true;
         }
       }
-      else if (cmd.hasOption("d")) {
-        try (BufferedReader br = new BufferedReader(new InputStreamReader(
-            new FileInputStream(cmd.getOptionValue("d")), UTF_8))) {
-          updateSketch(br);
-          updateFlag = true;
-        }
-      }
-      else { return; }
     } catch (final IOException e) {
       printlnErr("updateCurrentSketch Error: " + e.getMessage());
     }
@@ -153,14 +152,18 @@ public abstract class CommandLine<T> {
 
           updateCurrentSketch();
           if (updateFlag) {
-            queryCurrentSketch();
+            if (cmd.hasOption("p")) {
+              printCurrentSketchSummary();
+            } else {
+              queryCurrentSketch();
+            }
             if (cmd.hasOption("o")) {
               saveCurrentSketch();
             }
           } else {
             showHelp();
           }
-      } catch (final Exception e) {
+      } catch (final ParseException e) {
               printlnErr("runCommandLineUtil Error: " + e.getMessage());
       }
   }
@@ -247,7 +250,7 @@ public abstract class CommandLine<T> {
   /**
    * Help function for level 0 tokens
    */
-  public static void help() {
+  static void help() {
     final StringBuilder sb = new StringBuilder();
     sb.append(BOLD + "NAME" + OFF).append(LS);
     sb.append("    ds " + TAB + TAB
@@ -274,6 +277,11 @@ public abstract class CommandLine<T> {
         + " Phillipe Flajolet’s HLL sketch for estimating the number of uniques"
         + " from a stream of values").append(LS);
     println(sb.toString());
+  }
+
+  private void printCurrentSketchSummary() {
+    final T sketch = sketches.get(sketches.size() - 1);
+    println(sketch.toString());
   }
 
 }
