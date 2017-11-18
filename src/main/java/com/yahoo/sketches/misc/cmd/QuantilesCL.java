@@ -18,10 +18,14 @@ import org.apache.commons.cli.Option;
 
 import com.yahoo.memory.Memory;
 import com.yahoo.sketches.quantiles.DoublesSketch;
+import com.yahoo.sketches.quantiles.DoublesSketchBuilder;
 import com.yahoo.sketches.quantiles.DoublesUnion;
+import com.yahoo.sketches.quantiles.DoublesUnionBuilder;
 import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
 
   public class QuantilesCL extends CommandLine<UpdateDoublesSketch> {
+
+    private static final int DEFAULT_NUM_BINS = 10;
 
     QuantilesCL() {
       super();
@@ -84,15 +88,11 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
 
   @Override
   protected void buildSketch() {
-    final UpdateDoublesSketch sketch;
+    final DoublesSketchBuilder builder = DoublesSketch.builder();
     if (cmd.hasOption("k")) {
-      sketch = DoublesSketch.builder()
-                                  .setK(Integer.parseInt(cmd.getOptionValue("k")))
-                                  .build();  // user defined k
-    } else {
-      sketch = DoublesSketch.builder().build(); // default k
+      builder.setK(Integer.parseInt(cmd.getOptionValue("k")));
     }
-    sketches.add(sketch);
+    sketches.add(builder.build());
   }
 
   @Override
@@ -122,11 +122,15 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
 
   @Override
   protected void mergeSketches() {
-    final DoublesUnion union = DoublesUnion.builder().build(); // default k=128
-      for (UpdateDoublesSketch sketch: sketches) {
-        union.update(sketch);
-      }
-      sketches.add(union.getResult());
+    final DoublesUnionBuilder builder = DoublesUnion.builder();
+    if (cmd.hasOption("k")) {
+      builder.setMaxK(Integer.parseInt(cmd.getOptionValue("k")));
+    }
+    final DoublesUnion union = builder.build();
+    for (UpdateDoublesSketch sketch: sketches) {
+      union.update(sketch);
+    }
+    sketches.add(union.getResult());
   }
 
   @Override
@@ -135,9 +139,9 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
       final UpdateDoublesSketch sketch = sketches.get(sketches.size() - 1);
 
       if (cmd.hasOption("h")) {
-        int splitPoints = 30;
+        int splitPoints = DEFAULT_NUM_BINS - 1;
         if (cmd.hasOption("b")) {
-          splitPoints = Integer.parseInt(cmd.getOptionValue("b"));
+          splitPoints = Integer.parseInt(cmd.getOptionValue("b")) - 1;
         }
         final long n = sketch.getN();
         final double[] splitsArr = getEvenSplits(sketch, splitPoints);
@@ -156,9 +160,9 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
       }
 
       if (cmd.hasOption("lh")) {
-        int splitPoints = 30;
+        int splitPoints = DEFAULT_NUM_BINS - 1;
         if (cmd.hasOption("b")) {
-          splitPoints = Integer.parseInt(cmd.getOptionValue("b"));
+          splitPoints = Integer.parseInt(cmd.getOptionValue("b")) - 1;
         }
         final long n = sketch.getN();
         final double[] splitsArr = getLogSplits(sketch, splitPoints);
@@ -177,7 +181,7 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
       }
 
       if (cmd.hasOption("m")) {
-          final String median = String.format("%.2f",sketch.getQuantile(0.5));
+          final String median = String.format("%.2f", sketch.getQuantile(0.5));
           println(median);
         return;
       }
@@ -185,7 +189,7 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
       if (cmd.hasOption("R")) {
         final String[] items = cmd.getOptionValues("R");
         for (int i = 0; i < items.length; i++) {
-          final String quant = String.format("%.2f",sketch.getQuantile(Double.parseDouble(items[i])));
+          final String quant = String.format("%.2f", sketch.getQuantile(Double.parseDouble(items[i])));
           println(items[i] + TAB + quant);
         }
         return;
@@ -195,7 +199,7 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
         final String[] items = queryFileReader(cmd.getOptionValue("r"));
         println("Rank" + TAB + "Value");
         for (String item: items) {
-            final String quant = String.format("%.2f",sketch.getQuantile(Double.parseDouble(item)));
+            final String quant = String.format("%.2f", sketch.getQuantile(Double.parseDouble(item)));
             println(item + TAB + quant);
         }
         return;
@@ -207,7 +211,7 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
         Arrays.sort(valuesArray);
         final double[] cdf =  sketch.getCDF(valuesArray);
         for (int i = 0; i < valuesArray.length ; i++) {
-          println(String.format("%.2f",valuesArray[i]) + TAB + String.format("%.6f",cdf[i]));
+          println(String.format("%.2f", valuesArray[i]) + TAB + String.format("%.6f",cdf[i]));
         }
         return;
       }
@@ -217,18 +221,16 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
         final double[] valuesArray = Arrays.stream(items).mapToDouble(Double::parseDouble).toArray();
         final double[] cdf =  sketch.getCDF(valuesArray);
         for (int i = 0; i < valuesArray.length ; i++) {
-          println(String.format("%.2f",valuesArray[i]) + TAB + String.format("%.6f",cdf[i]));
+          println(String.format("%.2f", valuesArray[i]) + TAB + String.format("%.6f",cdf[i]));
         }
         return;
       }
 
-      //default output - all percentiles
-      final int ranks = 101;
-      final double[] valArr = sketch.getQuantiles(ranks);
+      // deciles by default
       println("Rank" + TAB + "Value");
-      for (int i = 0; i < ranks; i++) {
-        final String r = String.format("%.2f",(double)i / ranks);
-        println(r + TAB + valArr[i]);
+      for (int i = 0; i <= 10; i++) {
+        final double rank = (double) i / 10;
+        println(String.format("%.1f", rank) + TAB + sketch.getQuantile(rank));
       }
       return;
     }
@@ -258,7 +260,7 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
     final double delta = range / (splitPoints + 1);
     final double[] splits = new double[splitPoints];
     for (int i = 0; i < splitPoints; i++) {
-      splits[i] = delta * (i + 1);
+      splits[i] = min + delta * (i + 1);
     }
     return splits;
   }
