@@ -75,8 +75,8 @@ public class RunPerformanceJobs {
     final SketchTrial sketchTrial;
     if (sketch.equals("HLL")) {
       sketchTrial = new HllTrial();
-    } else if (sketch.equals("HLLP")) {
-      sketchTrial = new HllppTrial();
+    //    } else if (sketch.equals("HLLP")) {
+    //      sketchTrial = new HllppTrial();
     } else if (sketch.equals("THETA")) {
       sketchTrial = new ThetaTrial();
     } else {
