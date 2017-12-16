@@ -31,7 +31,7 @@ public class PerformanceJob {
   private long startTime_mS;
 
   /**
-   * Run the Performance Job
+   * Construct and Run the Performance Job
    * @param prop the given Properties
    * @param trial the given SketchTrial
    */
@@ -58,6 +58,11 @@ public class PerformanceJob {
       out.close();
     }
   }
+
+  public static void runPerformanceJob(final Properties prop, final SketchTrial trial) {
+    new PerformanceJob(prop, trial);
+  }
+
 
   private void configureDateFormats() {
     final String fileSdfStr = prop.mustGet("FileNameDateFormat");

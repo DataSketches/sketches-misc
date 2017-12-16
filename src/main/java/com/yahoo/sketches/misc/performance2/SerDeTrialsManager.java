@@ -8,9 +8,11 @@ package com.yahoo.sketches.misc.performance2;
 import static com.yahoo.sketches.Util.pwr2LawNext;
 
 /**
+ * This measures serialization and deserialization speed across a number of trials.
+ * Several SketchTrials may leverage this same class.
  * @author Lee Rhodes
  */
-public class SerDeTrialsManager extends SpeedTrialsManager {
+public class SerDeTrialsManager extends UpdateSpeedTrialsManager {
 
   public SerDeTrialsManager(final PerformanceJob perf) {
     super(perf);

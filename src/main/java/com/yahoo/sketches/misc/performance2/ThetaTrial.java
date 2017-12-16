@@ -17,7 +17,6 @@ import com.yahoo.sketches.theta.UpdateSketchBuilder;
  * @author Lee Rhodes
  */
 public class ThetaTrial implements SketchTrial {
-  private AccuracyStats[] qArr;
   private int qArrLen;
   private boolean getSize = false;
 
@@ -58,21 +57,15 @@ public class ThetaTrial implements SketchTrial {
     }
   }
 
-
-  public void setAccuracyStatsArray(final AccuracyStats[] qArr) {
-    this.qArr = qArr;
-    qArrLen = qArr.length;
-  }
-
   @Override
   public TrialsManager getTrialsManager(final Properties prop, final PerformanceJob perf) {
     final String jobType = prop.mustGet("JobType");
     TrialsManager trialsMgr = null;
     if (jobType.equalsIgnoreCase("Accuracy")) {
-      trialsMgr = new AccuracyTrialsManager(perf);
+      trialsMgr = new CountAccuracyTrialsManager(perf);
     }
     else if (jobType.equalsIgnoreCase("Speed")) {
-      trialsMgr = new SpeedTrialsManager(perf);
+      trialsMgr = new UpdateSpeedTrialsManager(perf);
     }
     else if (jobType.equalsIgnoreCase("SerDe")) {
       trialsMgr = new SerDeTrialsManager(perf);
@@ -85,12 +78,12 @@ public class ThetaTrial implements SketchTrial {
 
 
   @Override
-  public long doAccuracyTrial(final long vInStart) {
+  public long doAccuracyTrial(final CountAccuracyStats[] qArr, final long vInStart) {
     long vIn = vInStart;
     sketch.reset(); //reuse the same sketch
     int lastUniques = 0;
     for (int i = 0; i < qArrLen; i++) {
-      final AccuracyStats q = qArr[i];
+      final CountAccuracyStats q = qArr[i];
       final int delta = q.uniques - lastUniques;
       for (int u = 0; u < delta; u++) {
         sketch.update(++vIn);

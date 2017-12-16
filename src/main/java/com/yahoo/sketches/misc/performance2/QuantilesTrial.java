@@ -10,7 +10,7 @@ package com.yahoo.sketches.misc.performance2;
  */
 @SuppressWarnings("unused")
 public class QuantilesTrial implements SketchTrial {
-  private AccuracyStats[] qArr;
+  private CountAccuracyStats[] qArr;
   private int qArrLen;
 
 
@@ -21,7 +21,7 @@ public class QuantilesTrial implements SketchTrial {
 
 
   @Override
-  public long doAccuracyTrial(final long vInStart) {
+  public long doAccuracyTrial(final CountAccuracyStats[] qArr, final long vInStart) {
 
     return 0;
   }

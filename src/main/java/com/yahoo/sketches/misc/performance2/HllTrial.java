@@ -14,7 +14,6 @@ import com.yahoo.sketches.hll.TgtHllType;
  * @author Lee Rhodes
  */
 public class HllTrial implements SketchTrial {
-  private AccuracyStats[] qArr;
   private int qArrLen;
   private boolean getSize = false;
 
@@ -53,21 +52,15 @@ public class HllTrial implements SketchTrial {
     }
   }
 
-
-  public void setAccuracyStatsArray(final AccuracyStats[] qArr) {
-    this.qArr = qArr;
-    qArrLen = qArr.length;
-  }
-
   @Override
   public TrialsManager getTrialsManager(final Properties prop, final PerformanceJob perf) {
     final String jobType = prop.mustGet("JobType");
     TrialsManager trialsMgr = null;
     if (jobType.equalsIgnoreCase("Accuracy")) {
-      trialsMgr = new AccuracyTrialsManager(perf);
+      trialsMgr = new CountAccuracyTrialsManager(perf);
     }
     else if (jobType.equalsIgnoreCase("Speed")) {
-      trialsMgr = new SpeedTrialsManager(perf);
+      trialsMgr = new UpdateSpeedTrialsManager(perf);
     }
     else if (jobType.equalsIgnoreCase("SerDe")) {
       trialsMgr = new SerDeTrialsManager(perf);
@@ -79,7 +72,7 @@ public class HllTrial implements SketchTrial {
   }
 
   @Override
-  public long doAccuracyTrial(final long vInStart) {
+  public long doAccuracyTrial(final CountAccuracyStats[] qArr, final long vInStart) {
     long vIn = vInStart;
     sketch.reset(); //reuse the same sketch
     int lastUniques = 0;
@@ -87,7 +80,7 @@ public class HllTrial implements SketchTrial {
     switch (sw) {
       case 0: { //use longs; use HIP
         for (int i = 0; i < qArrLen; i++) {
-          final AccuracyStats q = qArr[i];
+          final CountAccuracyStats q = qArr[i];
           final int delta = q.uniques - lastUniques;
           for (int u = 0; u < delta; u++) {
             sketch.update(++vIn);
@@ -103,7 +96,7 @@ public class HllTrial implements SketchTrial {
       }
       case 1: { //use longs; use Composite
         for (int i = 0; i < qArrLen; i++) {
-          final AccuracyStats q = qArr[i];
+          final CountAccuracyStats q = qArr[i];
           final int delta = q.uniques - lastUniques;
           for (int u = 0; u < delta; u++) {
             sketch.update(++vIn);
@@ -119,7 +112,7 @@ public class HllTrial implements SketchTrial {
       }
       case 2: { //use char[]; use HIP
         for (int i = 0; i < qArrLen; i++) {
-          final AccuracyStats q = qArr[i];
+          final CountAccuracyStats q = qArr[i];
           final int delta = q.uniques - lastUniques;
           for (int u = 0; u < delta; u++) {
             final String vstr = Long.toHexString(++vIn);
@@ -136,7 +129,7 @@ public class HllTrial implements SketchTrial {
       }
       case 3: { //use char[]; use Composite
         for (int i = 0; i < qArrLen; i++) {
-          final AccuracyStats q = qArr[i];
+          final CountAccuracyStats q = qArr[i];
           final int delta = q.uniques - lastUniques;
           for (int u = 0; u < delta; u++) {
             final String vstr = Long.toHexString(++vIn);

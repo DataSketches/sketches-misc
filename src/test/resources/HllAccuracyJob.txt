@@ -24,7 +24,7 @@ FileNameDateFormat=yyyyMMdd'_'HHmmssz
 ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
 #Sketch Profile
-Sketch=HLL
+SketchTrial=com.yahoo.sketches.misc.performance2.HllTrial
 LgK=21
 HLL_direct=false #only for Theta, HLL. See javadocs.
 HLL_tgtHllType=HLL8

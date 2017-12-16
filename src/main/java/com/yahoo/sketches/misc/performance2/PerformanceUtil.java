@@ -34,17 +34,17 @@ public class PerformanceUtil {
    * @param prop the given Properties
    * @return an AccuracyStats array
    */
-  public static final AccuracyStats[] buildAccuracyStatsArray(final Properties prop) {
+  public static final CountAccuracyStats[] buildAccuracyStatsArray(final Properties prop) {
     final int lgMinU = Integer.parseInt(prop.mustGet("Trials_lgMinU"));
     final int lgMaxU = Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
     final int uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
     final int lgQK = Integer.parseInt(prop.mustGet("Trials_lgQK"));
 
     final int qLen = countPoints(lgMinU, lgMaxU, uPPO);
-    final AccuracyStats[] qArr = new AccuracyStats[qLen];
+    final CountAccuracyStats[] qArr = new CountAccuracyStats[qLen];
     int p = 1 << lgMinU;
     for (int i = 0; i < qLen; i++) {
-      qArr[i] = new AccuracyStats(1 << lgQK, p);
+      qArr[i] = new CountAccuracyStats(1 << lgQK, p);
       p = pwr2LawNext(uPPO, p);
     }
     return qArr;
@@ -66,7 +66,7 @@ public class PerformanceUtil {
     * @param perf the given PerformanceJob
     * @param q the given AccuracyStats
     */
-   public static void outputPMF(final PerformanceJob perf, final AccuracyStats q) {
+   public static void outputPMF(final PerformanceJob perf, final CountAccuracyStats q) {
      final DoublesSketch qSk = q.qsk;
      final double[] splitPoints = qSk.getQuantiles(FRACTIONS); //1:1
      final double[] reducedSp = reduceSplitPoints(splitPoints);

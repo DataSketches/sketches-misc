@@ -21,7 +21,7 @@ FileNameDateFormat=yyyyMMdd'_'HHmmssz
 ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
 #Sketch Profile
-Sketch=Theta
+SketchTrial=com.yahoo.sketches.misc.performance2.ThetaTrial
 LgK=21
 THETA_famName=ALPHA
 THETA_p=1.0

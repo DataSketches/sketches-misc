@@ -11,12 +11,14 @@ package com.yahoo.sketches.misc.performance2;
  */
 public interface SketchTrial {
 
+  /**
+   * Configure the sketch
+   * @param prop the Properties class
+   */
   void configureSketch(Properties prop);
 
-  //void setAccuracyStatsArray(AccuracyStats[] qArr);
-
   /**
-   * Choose the type of performance to run
+   * Choose the type of performance to run for the chosen sketch
    * @param prop Properties class
    * @param perf PerformanceJob class
    * @return TrialsManager
@@ -28,13 +30,15 @@ public interface SketchTrial {
    * An accuracy trial is one pass through all uniques, pausing to store the estimate into a
    * quantiles sketch at each point along the unique axis.
    *
+   * @param qArr the AccuracyStats array
    * @param vInStart the starting global unique value for this trial.
    * @return the updated global unique value after this trial is finished.
    */
-  long doAccuracyTrial(long vInStart);
+  long doAccuracyTrial(CountAccuracyStats[] qArr, long vInStart);
 
   /**
    * A speed trial is filling a sketch from empty to uPerTrial.
+
    * @param stats where the results are stored
    * @param uPerTrial the number of uniques to be fed to the sketch
    * @param vInStart the starting value of the uniques.

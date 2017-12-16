@@ -70,20 +70,17 @@ public class RunPerformanceJobs {
     }
   }
 
-  void chooseSketchAndRunJob(final Properties p) {
-    final String sketch = p.mustGet("Sketch");
+  void chooseSketchAndRunJob(final Properties prop) {
+    final String sketch = prop.mustGet("SketchTrial"); //TODO
     final SketchTrial sketchTrial;
     if (sketch.equals("HLL")) {
       sketchTrial = new HllTrial();
-    //    } else if (sketch.equals("HLLP")) {
-    //      sketchTrial = new HllppTrial();
     } else if (sketch.equals("THETA")) {
       sketchTrial = new ThetaTrial();
     } else {
-      throw new IllegalArgumentException("Sketch type not found");
+      throw new IllegalArgumentException("SketchTrial not found");
     }
-    @SuppressWarnings("unused")
-    final PerformanceJob ap = new PerformanceJob(p, sketchTrial);
+    new PerformanceJob(prop, sketchTrial);
   }
 
   /**

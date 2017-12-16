@@ -10,9 +10,11 @@ import static java.lang.Math.log;
 import static java.lang.Math.pow;
 
 /**
+ * This measures update speed across a number of trials.
+ * Several SketchTrials may leverage this same class.
  * @author Lee Rhodes
  */
-public class SpeedTrialsManager implements TrialsManager {
+public class UpdateSpeedTrialsManager implements TrialsManager {
   static final char TAB = '\t';
   static final double LN2 = log(2.0);
   PerformanceJob perf;
@@ -42,7 +44,7 @@ public class SpeedTrialsManager implements TrialsManager {
    *
    * @param perf the given PerformanceJob
    */
-  public SpeedTrialsManager(final PerformanceJob perf) {
+  public UpdateSpeedTrialsManager(final PerformanceJob perf) {
     this.perf = perf;
     prop = perf.getProperties();
     trial = perf.getSketchTrial();

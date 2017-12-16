@@ -13,10 +13,13 @@ import static com.yahoo.sketches.misc.performance2.PerformanceUtil.LS;
 import static com.yahoo.sketches.misc.performance2.PerformanceUtil.TAB;
 import static com.yahoo.sketches.misc.performance2.PerformanceUtil.buildAccuracyStatsArray;
 import static com.yahoo.sketches.misc.performance2.PerformanceUtil.outputPMF;
+
 /**
+ * This measures count accuracy across a number of trials.
+ * Several SketchTrials may leverage this same class.
  * @author Lee Rhodes
  */
-public class AccuracyTrialsManager implements TrialsManager {
+public class CountAccuracyTrialsManager implements TrialsManager {
   private PerformanceJob perf;
   private SketchTrial trial;
 
@@ -24,19 +27,18 @@ public class AccuracyTrialsManager implements TrialsManager {
   //This ensures that every trial is based on a different set of uniques
   private long vIn = 0;
   private Properties prop;
-  private AccuracyStats[] qArr;
+  private CountAccuracyStats[] qArr;
 
   /**
    *
    * @param perf a PerformanceJob
    */
-  public AccuracyTrialsManager(final PerformanceJob perf) {
+  public CountAccuracyTrialsManager(final PerformanceJob perf) {
     this.perf = perf;
     prop = perf.getProperties();
     qArr = buildAccuracyStatsArray(prop);
     trial = perf.getSketchTrial();
     trial.configureSketch(prop);
-    //trial.setAccuracyStatsArray(qArr);
   }
 
   @Override
@@ -56,7 +58,7 @@ public class AccuracyTrialsManager implements TrialsManager {
       final int nextT = (lastT == 0) ? minT : pwr2LawNext(tPPO, lastT);
       final int delta = nextT - lastT;
       for (int i = 0; i < delta; i++) {
-        vIn = trial.doAccuracyTrial(vIn);
+        vIn = trial.doAccuracyTrial(qArr, vIn);
       }
       lastT = nextT;
       final StringBuilder sb = new StringBuilder();
@@ -98,7 +100,7 @@ public class AccuracyTrialsManager implements TrialsManager {
     }
   }
 
-  private static void process(final Properties p, final AccuracyStats[] qArr, final int cumTrials,
+  private static void process(final Properties p, final CountAccuracyStats[] qArr, final int cumTrials,
       final StringBuilder sb) {
     final String getSizeStr = p.get("Trials_bytes");
     final boolean getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
@@ -106,7 +108,7 @@ public class AccuracyTrialsManager implements TrialsManager {
     final int points = qArr.length;
     sb.setLength(0);
     for (int pt = 0; pt < points; pt++) {
-      final AccuracyStats q = qArr[pt];
+      final CountAccuracyStats q = qArr[pt];
       final int uniques = q.uniques;
       final double meanEst = q.sumEst / cumTrials;
       final double meanRelErr = q.sumRelErr / cumTrials;

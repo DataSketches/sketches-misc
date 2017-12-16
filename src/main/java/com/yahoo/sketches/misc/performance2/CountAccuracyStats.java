@@ -13,7 +13,7 @@ import com.yahoo.sketches.quantiles.UpdateDoublesSketch;
  *
  * @author Lee Rhodes
  */
-public class AccuracyStats {
+public class CountAccuracyStats {
   public UpdateDoublesSketch qsk;
   public double sumEst = 0;
   public double sumRelErr = 0;
@@ -22,7 +22,7 @@ public class AccuracyStats {
   public int uniques;
   public int bytes = 0;
 
-  public AccuracyStats(final int k, final int uniques) {
+  public CountAccuracyStats(final int k, final int uniques) {
     qsk = new DoublesSketchBuilder().setK(k).build(); //Quantiles
     this.uniques = uniques;
   }
