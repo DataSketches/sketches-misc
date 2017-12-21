@@ -3,7 +3,7 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.misc.performance2;
+package com.yahoo.sketches.misc.performance;
 
 /**
  * @author Lee Rhodes

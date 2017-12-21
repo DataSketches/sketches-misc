@@ -3,16 +3,16 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.misc.performance2;
+package com.yahoo.sketches.misc.performance;
 
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.Util.pwr2LawNext;
-import static com.yahoo.sketches.misc.performance2.PerformanceUtil.FRACTIONS;
-import static com.yahoo.sketches.misc.performance2.PerformanceUtil.FRACT_LEN;
-import static com.yahoo.sketches.misc.performance2.PerformanceUtil.LS;
-import static com.yahoo.sketches.misc.performance2.PerformanceUtil.TAB;
-import static com.yahoo.sketches.misc.performance2.PerformanceUtil.buildAccuracyStatsArray;
-import static com.yahoo.sketches.misc.performance2.PerformanceUtil.outputPMF;
+import static com.yahoo.sketches.misc.performance.PerformanceUtil.FRACTIONS;
+import static com.yahoo.sketches.misc.performance.PerformanceUtil.FRACT_LEN;
+import static com.yahoo.sketches.misc.performance.PerformanceUtil.LS;
+import static com.yahoo.sketches.misc.performance.PerformanceUtil.TAB;
+import static com.yahoo.sketches.misc.performance.PerformanceUtil.buildAccuracyStatsArray;
+import static com.yahoo.sketches.misc.performance.PerformanceUtil.outputPMF;
 
 /**
  * This measures count accuracy across a number of trials.

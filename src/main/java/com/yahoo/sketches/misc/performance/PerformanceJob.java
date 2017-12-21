@@ -3,11 +3,11 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.misc.performance2;
+package com.yahoo.sketches.misc.performance;
 
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.misc.Files.openPrintWriter;
-import static com.yahoo.sketches.misc.performance2.PerformanceUtil.LS;
+import static com.yahoo.sketches.misc.performance.PerformanceUtil.LS;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;

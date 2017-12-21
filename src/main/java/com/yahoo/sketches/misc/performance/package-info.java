@@ -7,4 +7,4 @@
  * @author Lee Rhodes
  */
 
-package com.yahoo.sketches.misc.performance2;
+package com.yahoo.sketches.misc.performance;
