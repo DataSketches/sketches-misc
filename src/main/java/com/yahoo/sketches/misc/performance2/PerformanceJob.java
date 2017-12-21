@@ -7,7 +7,7 @@ package com.yahoo.sketches.misc.performance2;
 
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.misc.Files.openPrintWriter;
-import static com.yahoo.sketches.misc.performance.PerformanceUtil.LS;
+import static com.yahoo.sketches.misc.performance2.PerformanceUtil.LS;
 
 import java.io.PrintWriter;
 import java.text.SimpleDateFormat;
