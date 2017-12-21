@@ -211,7 +211,7 @@ public final class Files {
   /**
    * Gets a MappedByteBuffer from the given FileChannel and mode. Assumes a
    * start position of zero and size of the length of the file (via the
-   * FileChannel. Equivalent to:<br/>
+   * FileChannel. Equivalent to:<br>
    * getMappedByteBuffer(FileChannel, FileChanel.MapMode, 0L, size(fChan));
    *
    * @param fChan the given FileChannel
@@ -230,7 +230,7 @@ public final class Files {
    * excluding the CR and LF characters into a string. This method will work
    * with US-ASCII, ISO-8859 families, Windows 1252, and UTF-8. encodings. In
    * general any character encoding that is isomorphic with respect to the
-   * exclusive use of the CR (0xD) and the LF (0xA) codes. Equivalent to:<br/>
+   * exclusive use of the CR (0xD) and the LF (0xA) codes. Equivalent to:<br>
    * readLine(ByteBuffer, ByteArrayBuilder, Charset.defaultCharset());
    *
    * @param mbBuf Given ByteBuffer or MappedByteBuffer
@@ -357,7 +357,7 @@ public final class Files {
 
   /**
    * Appends the given string to the end of the file specified via the given
-   * FileChannel. Equivalent to:<br/>
+   * FileChannel. Equivalent to:<br>
    * append(String, FileChannel, Charset.defaultCharset());
    *
    * @param out the string to append
@@ -413,7 +413,7 @@ public final class Files {
 
   /**
    * Writes the given string out to the file specified via the given FileChannel
-   * starting at the given file position. Equivalent to:<br/>
+   * starting at the given file position. Equivalent to:<br>
    * write(String, FileChannel, long, Charset.defaultCharset());
    *
    * @param out the given string
@@ -475,7 +475,7 @@ public final class Files {
   /**
    * Writes the given String text to the fileName using NIO FileChannel.
    *
-   * @param text Source string to place in a file. Equivalent to: <br/>
+   * @param text Source string to place in a file. Equivalent to: <br>
    * stringToFileNIO(String, String, Charset.defaultCharset());
    * @param fileName name of target file
    * @return the total number of bytes written.
@@ -521,7 +521,7 @@ public final class Files {
    * creates a new empty file of that name. This closes the file after
    * appending.
    *
-   * @param text is the source String. Equivalent to: <br/>
+   * @param text is the source String. Equivalent to: <br>
    * appendStringToFileNIO(String, String, Charset.defautCharset());
    * @param fileName the given fileName
    * @return the total number of bytes written
@@ -569,7 +569,7 @@ public final class Files {
   /**
    * Reads a file into a char array using NIO FileChannel, then closes the file. Useful when
    * special handling of Line-Separation characters is required. Equivalent to:
-   * <br/>
+   * <br>
    * fileToCharArrayNIO(String, Charset.defaultCharset());
    *
    * @param fileName the given fileName
@@ -618,7 +618,7 @@ public final class Files {
   /**
    * Reads a file into a String using NIO FileChannel. Each line of the file is delimited by
    * the current operating systems's "line.separator" characters. Closes the
-   * file. This method is equivalent to:<br/>
+   * file. This method is equivalent to:<br>
    * fileToStringNIO(String fileName, Charset.defaultCharset())
    *
    * @param fileName given fileName
@@ -816,7 +816,7 @@ public final class Files {
 
   /**
    * Reads a file into a char array, then closes the file. Useful when special
-   * handling of Line-Separation characters is required. Equivalent to: <br/>
+   * handling of Line-Separation characters is required. Equivalent to: <br>
    * fileToCharArray(String, int, Charset.defaultCharset());
    *
    * @param fileName the given fileName
@@ -864,7 +864,7 @@ public final class Files {
   /**
    * Reads a file into a String. Each line of the file is delimited by the
    * current operating systems's "line.separator" characters. Closes the file.
-   * Equivalent to: <br/>
+   * Equivalent to: <br>
    * fileToString(String, 8192, Charset.defaultCharset());
    *
    * @param fileName the given fileName
