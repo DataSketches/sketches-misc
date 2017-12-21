@@ -5,16 +5,12 @@
 
 package com.yahoo.sketches.misc.cmd;
 
-import org.testng.annotations.Test;
-
-import com.yahoo.sketches.misc.cmd.CommandLine;
-
 /**
  * @author Lee Rhodes
  */
 public class CommandLineTest {
 
-  @Test
+  //@Test  //enable here for visual checking
   public void simpleTest1() {
     String[] line = new String[] {"theta", "-help"};
     CommandLine.main(line);
