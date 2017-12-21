@@ -23,6 +23,7 @@ FileNameDateFormat=yyyyMMdd'_'HHmmssz
 ReadableDateFormat=yyyy/MM/dd HH:mm:ss 
 
 #Sketch Profile
+SketchType=HLLP
 SketchTrial=com.yahoo.sketches.misc.performance2.HllppTrial
 LgK=12 #same as p
 HLLP_sp=32

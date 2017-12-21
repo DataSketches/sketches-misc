@@ -14,7 +14,6 @@ import com.yahoo.sketches.hll.TgtHllType;
  * @author Lee Rhodes
  */
 public class HllTrial implements SketchTrial {
-  private int qArrLen;
   private boolean getSize = false;
 
   //unique to sketch, used in doTrial
@@ -74,6 +73,7 @@ public class HllTrial implements SketchTrial {
   @Override
   public long doAccuracyTrial(final CountAccuracyStats[] qArr, final long vInStart) {
     long vIn = vInStart;
+    final int qArrLen = qArr.length;
     sketch.reset(); //reuse the same sketch
     int lastUniques = 0;
     final int sw = (useCharArr ? 2 : 0) | (useComposite ? 1 : 0);
