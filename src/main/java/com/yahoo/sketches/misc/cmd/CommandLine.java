@@ -116,7 +116,7 @@ public abstract class CommandLine<T> {
           updateSketch(br);
           updateFlag = true;
         }
-      } else if (!cmd.hasOption("s")){
+      } else if (!cmd.hasOption("s")) {
         try (final BufferedReader br = new BufferedReader(new InputStreamReader(
             System.in, UTF_8))) {
           updateSketch(br);
