@@ -26,6 +26,7 @@ ReadableDateFormat=yyyy/MM/dd HH:mm:ss
 SketchType=Theta
 SketchTrial=com.yahoo.sketches.misc.performance.ThetaTrial
 LgK=12
+THETA_lgRF=0     #set the log resize factor to 0 (RF = 1)
 THETA_famName=ALPHA
 THETA_p=1.0
 THETA_direct=false
