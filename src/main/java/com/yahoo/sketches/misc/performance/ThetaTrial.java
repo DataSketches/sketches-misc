@@ -18,13 +18,6 @@ import com.yahoo.sketches.theta.UpdateSketchBuilder;
  */
 public class ThetaTrial implements SketchTrial {
   private boolean getSize = false;
-
-  //unique to sketch
-  private int lgK;
-  private Family family;
-  private float p;
-  private ResizeFactor rf;
-  private boolean direct;
   private boolean rebuild;
   private UpdateSketch sketch;
 
@@ -33,11 +26,11 @@ public class ThetaTrial implements SketchTrial {
     final String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
-    lgK = Integer.parseInt(prop.mustGet("LgK"));
-    family = Family.stringToFamily(prop.mustGet("THETA_famName"));
-    p = Float.parseFloat(prop.mustGet("THETA_p"));
-    rf = ResizeFactor.getRF(Integer.parseInt(prop.mustGet("THETA_lgRF")));
-    direct = Boolean.parseBoolean(prop.mustGet("THETA_direct"));
+    final int lgK = Integer.parseInt(prop.mustGet("LgK"));
+    final Family family = Family.stringToFamily(prop.mustGet("THETA_famName"));
+    final float p = Float.parseFloat(prop.mustGet("THETA_p"));
+    final ResizeFactor rf = ResizeFactor.getRF(Integer.parseInt(prop.mustGet("THETA_lgRF")));
+    final boolean direct = Boolean.parseBoolean(prop.mustGet("THETA_direct"));
     rebuild = Boolean.parseBoolean(prop.mustGet("THETA_rebuild"));
 
     final int k = 1 << lgK;
