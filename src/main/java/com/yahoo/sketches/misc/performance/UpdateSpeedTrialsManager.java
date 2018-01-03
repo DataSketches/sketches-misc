@@ -10,8 +10,20 @@ import static java.lang.Math.log;
 import static java.lang.Math.pow;
 
 /**
- * This measures update speed across a number of trials.
- * Several SketchTrials may leverage this same class.
+ * Manages multiple trials for measuring update speed.
+ *
+ * <p>A speed trial is run at a single x-axis (count axis) point. A number of trials is run at
+ * each x-axis point. Data for each trial is collected into a SpeedStats class.
+ * There is one SpeedStats for each trial.  At the end of all the trials for a specific x-axis
+ * point, the distribution statistics for all the trials at that x-axis point is collected and
+ * output. This process is then repeated for the next x-axis point.
+ *
+ * <p>The number of trials at each x-axis point varies as a function of the number of updates
+ * at that point.  These parameters are specified by controling the relationships between the
+ * trials parameters.
+ *
+ * <p>Several SketchTrials may leverage this same class.
+ *
  * @author Lee Rhodes
  */
 public class UpdateSpeedTrialsManager implements TrialsManager {

@@ -134,7 +134,7 @@ public class RunPerformanceJobSet {
 
   @Test
   public void runJobs() {
-    final String fileName = "src/main/resources/ThetaAccuracyJob.txt";
+    final String fileName = "src/main/resources/HllAccuracyJob.txt";
     RunPerformanceJobSet.main(new String[] {fileName});
   }
 

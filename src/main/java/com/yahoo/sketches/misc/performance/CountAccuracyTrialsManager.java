@@ -16,7 +16,7 @@ import static com.yahoo.sketches.misc.performance.PerformanceUtil.outputPMF;
 
 /**
  * This measures count accuracy across a number of trials.
- * Several SketchTrials may leverage this same class.
+ * SketchTrials configured for different sketches could leverage this same class.
  * @author Lee Rhodes
  */
 public class CountAccuracyTrialsManager implements TrialsManager {
@@ -30,7 +30,22 @@ public class CountAccuracyTrialsManager implements TrialsManager {
   private CountAccuracyStats[] qArr;
 
   /**
+   * Manages multiple trials for measuring accuracy.
    *
+   * <p>An accuracy trial is run along the count axis (X-axis) first.  The "points" along the X-axis
+   * where accuracy data is collected is controled by the data loaded into the CountAccuracyStats
+   * array. A single trial consists of a single sketch being updated with the Trials_lgMaxU unique
+   * values, stopping at the configured x-axis points along the way where the accuracy is recorded
+   * into the corresponding stats array. Each stats array retains the distribtion of
+   * the accuracies measured for all the trials at that x-axis point.
+   *
+   * <p>Because accuracy trials take a long time, the trail manager will output intermediate
+   * accuracy results starting after Trials_lgMinT trials and then again and trial intervals
+   * determined by Trials_TPPO until Trials_lgMaxT.  This allows you to stop the testing at
+   * any intermediate trials point if you feel you have sufficient trials for the accuracy you
+   * need.
+   *
+   * <p>Several SketchTrials may leverage this same class.
    * @param perf a PerformanceJob
    */
   public CountAccuracyTrialsManager(final PerformanceJob perf) {
