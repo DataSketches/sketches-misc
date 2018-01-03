@@ -24,6 +24,6 @@ ReadableDateFormat=yyyy/MM/dd HH:mm:ss
 
 #Sketch Profile
 SketchType=HLLP
-SketchTrial=com.yahoo.sketches.misc.performance2.HllppTrial
+SketchTrial=com.yahoo.sketches.misc.performance.HllppTrial
 LgK=12 #same as p
 HLLP_sp=32

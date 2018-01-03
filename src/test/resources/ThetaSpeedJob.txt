@@ -22,7 +22,7 @@ ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
 #Sketch Profile
 SketchType=Theta
-SketchTrial=com.yahoo.sketches.misc.performance2.ThetaTrial
+SketchTrial=com.yahoo.sketches.misc.performance.ThetaTrial
 LgK=21
 THETA_famName=ALPHA
 THETA_p=1.0

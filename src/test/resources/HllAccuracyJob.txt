@@ -25,7 +25,7 @@ ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
 #Sketch Profile
 SketchType=HLL
-SketchTrial=com.yahoo.sketches.misc.performance2.HllTrial
+SketchTrial=com.yahoo.sketches.misc.performance.HllTrial
 LgK=12
 HLL_direct=false #only for Theta, HLL. See javadocs.
 HLL_tgtHllType=HLL8
