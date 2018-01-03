@@ -17,7 +17,6 @@ import com.yahoo.sketches.theta.UpdateSketchBuilder;
  * @author Lee Rhodes
  */
 public class ThetaTrial implements SketchTrial {
-  private int qArrLen;
   private boolean getSize = false;
 
   //unique to sketch
@@ -79,6 +78,7 @@ public class ThetaTrial implements SketchTrial {
 
   @Override
   public long doAccuracyTrial(final CountAccuracyStats[] qArr, final long vInStart) {
+    final int qArrLen = qArr.length;
     long vIn = vInStart;
     sketch.reset(); //reuse the same sketch
     int lastUniques = 0;
