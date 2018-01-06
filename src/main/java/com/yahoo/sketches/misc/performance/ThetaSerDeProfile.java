@@ -78,7 +78,7 @@ public class ThetaSerDeProfile implements JobProfile {
     final double est1 = sketch.getEstimate();
 
     final long startSerTime_nS = System.nanoTime();
-    final byte[] byteArr = sketch.compact().toByteArray();
+    final byte[] byteArr = sketch.toByteArray();
 
     final long startDeSerTime_nS = System.nanoTime();
 
