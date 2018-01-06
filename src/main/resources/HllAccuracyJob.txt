@@ -1,5 +1,4 @@
 # Job
-JobType=Accuracy
 
 # Trials Profile
 Trials_lgMinT=8  #prints intermediate results starting w/ this lgMinT
@@ -23,9 +22,8 @@ TimeZoneOffset=-28800000 # offset in millisec
 FileNameDateFormat=yyyyMMdd'_'HHmmssz
 ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
-#Sketch Profile
-SketchType=HLL
-SketchTrial=com.yahoo.sketches.misc.performance.HllTrial
+#Job Profile
+JobProfile=com.yahoo.sketches.misc.performance.HllAccuracyProfile
 LgK=12
 HLL_direct=false #only for Theta, HLL. See javadocs.
 HLL_tgtHllType=HLL8

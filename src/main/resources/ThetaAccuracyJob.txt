@@ -1,9 +1,8 @@
 # Job
-JobType=Accuracy
 
 # Trials Profile
-Trials_lgMinT=12  #prints intermediate results starting w/ this lgMinT
-Trials_lgMaxT=16  #The max trials
+Trials_lgMinT=8  #prints intermediate results starting w/ this lgMinT
+Trials_lgMaxT=12  #The max trials
 Trials_TPPO=1    #how often intermediate results are printed
 
 Trials_lgQK=13   #size of quantiles sketch
@@ -22,9 +21,8 @@ TimeZoneOffset=-28800000 # offset in millisec
 FileNameDateFormat=yyyyMMdd'_'HHmmssz
 ReadableDateFormat=yyyy/MM/dd HH:mm:ss 
 
-#Sketch Profile
-SketchType=Theta
-SketchTrial=com.yahoo.sketches.misc.performance.ThetaTrial
+#Job Profile
+JobProfile=com.yahoo.sketches.misc.performance.ThetaAccuracyProfile
 LgK=12
 THETA_lgRF=0     #set the log resize factor to 0 (RF = 1)
 THETA_famName=ALPHA

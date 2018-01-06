@@ -34,17 +34,17 @@ public class PerformanceUtil {
    * @param prop the given Properties
    * @return an AccuracyStats array
    */
-  public static final CountAccuracyStats[] buildAccuracyStatsArray(final Properties prop) {
+  public static final AccuracyStats[] buildAccuracyStatsArray(final Properties prop) {
     final int lgMinU = Integer.parseInt(prop.mustGet("Trials_lgMinU"));
     final int lgMaxU = Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
     final int uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
     final int lgQK = Integer.parseInt(prop.mustGet("Trials_lgQK"));
 
     final int qLen = countPoints(lgMinU, lgMaxU, uPPO);
-    final CountAccuracyStats[] qArr = new CountAccuracyStats[qLen];
+    final AccuracyStats[] qArr = new AccuracyStats[qLen];
     int p = 1 << lgMinU;
     for (int i = 0; i < qLen; i++) {
-      qArr[i] = new CountAccuracyStats(1 << lgQK, p);
+      qArr[i] = new AccuracyStats(1 << lgQK, p);
       p = pwr2LawNext(uPPO, p);
     }
     return qArr;
@@ -62,11 +62,11 @@ public class PerformanceUtil {
    }
 
    /**
-    * Outputs the Probability Mass Function given the PerformanceJob and the AccuracyStats.
-    * @param perf the given PerformanceJob
+    * Outputs the Probability Mass Function given the Job and the AccuracyStats.
+    * @param job the given Job
     * @param q the given AccuracyStats
     */
-   public static void outputPMF(final PerformanceJob perf, final CountAccuracyStats q) {
+   public static void outputPMF(final Job job, final AccuracyStats q) {
      final DoublesSketch qSk = q.qsk;
      final double[] splitPoints = qSk.getQuantiles(FRACTIONS); //1:1
      final double[] reducedSp = reduceSplitPoints(splitPoints);
@@ -76,15 +76,15 @@ public class PerformanceUtil {
      //output Histogram
      final String hdr = String.format("%10s%4s%12s", "Trials", "    ", "Est");
      final String fmt = "%10d%4s%12.2f";
-     perf.println("Histogram At " + q.uniques);
-     perf.println(hdr);
+     job.println("Histogram At " + q.trueValue);
+     job.println(hdr);
      for (int i = 0; i < reducedSp.length; i++) {
        final int hits = (int)(pmfArr[i + 1] * trials);
        final double est = reducedSp[i];
        final String line = String.format(fmt, hits, " >= ", est);
-       perf.println(line);
+       job.println(line);
      }
-     perf.println("");
+     job.println("");
    }
 
    /**

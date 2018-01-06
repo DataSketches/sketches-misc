@@ -1,5 +1,4 @@
 # Job
-JobType=SerDe
 
 # Trials Profile
 Trials_lgMaxT=16  #Max trials at start (low counts)
@@ -20,9 +19,8 @@ TimeZoneOffset=-28800000 # offset in millisec
 FileNameDateFormat=yyyyMMdd'_'HHmmssz
 ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
-#Sketch Profile
-SketchType=HLL
-SketchTrial=com.yahoo.sketches.misc.performance.HllTrial
+#Job Profile
+JobProfile=com.yahoo.sketches.misc.performance.HllSerDeProfile
 LgK=12
 HLL_direct=false
 HLL_tgtHllType=HLL4

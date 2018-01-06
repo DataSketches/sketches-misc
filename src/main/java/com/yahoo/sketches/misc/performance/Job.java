@@ -15,21 +15,14 @@ import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
 /**
- * This class runs a specific Performance Job which defined by a SketchTrial and a Properties
+ * This class runs a specific Job which defined by a JobProfile and a Properties
  * class that must already be loaded the properties key/value pairs required for this job.
- * This job will obtain a TrialsManager from the specified SketchTrial.  This TrialsManager
- * manages how the actual performance testing is to be done.
- *
- * <p>All specific configurations about the sketch, for the TrialsManager, and to configure the
- * date-time formatting is contained in the Properties class.
+ * All output to the file and to stdOut goes through this class.
  *
  * @author Lee Rhodes
  */
-public class PerformanceJob {
+public class Job {
   private final Properties prop;
-  private TrialsManager trialsMgr;
-  //Sketch
-  private final SketchTrial trial;
   //Output to File
   private PrintWriter out = null;
   //Date-Time
@@ -37,44 +30,34 @@ public class PerformanceJob {
   private SimpleDateFormat expandedSDF; //for human readability
   private GregorianCalendar gc;
   private long startTime_mS;
+  private String profileName;
 
   /**
-   * Construct and Run the Performance Job
+   * Construct and Run the Job
    * @param prop the given Properties
-   * @param trial the given SketchTrial
+   * @param profile the given JobProfile
    */
-  public PerformanceJob(final Properties prop, final SketchTrial trial) {
+  public Job(final Properties prop, final JobProfile profile) {
     startTime_mS = System.currentTimeMillis();
     this.prop = prop;
-    this.trial = trial;
+    profileName = profile.getClass().getSimpleName();
+
     configureDateFormats();
     configurePrintWriter();
-    final String jobType = prop.mustGet("JobType");
-    println("START " + jobType + " JOB");
+
+    println("START JOB " + profileName );
     println(prop.extractKvPairs(LS));
     flush(); //flush print buffer
 
-    trialsMgr = trial.getTrialsManager(prop, this);
-
-    trialsMgr.doTrials();
+    profile.start(this);
 
     final long testTime_mS = System.currentTimeMillis() - startTime_mS;
     println("Total Job Time        : " + milliSecToString(testTime_mS));
-    println("END " + jobType + " JOB" + LS + LS);
+    println("END JOB " + profileName +  LS + LS);
     flush();
     if (out != null) {
       out.close();
     }
-  }
-
-  /**
-   * Factory method for constructing this class
-   * @param prop the given Properties
-   * @param trial the given SketchTrial
-   * @return a new PerformanceJob
-   */
-  public static PerformanceJob runPerformanceJob(final Properties prop, final SketchTrial trial) {
-    return new PerformanceJob(prop, trial);
   }
 
   /**
@@ -101,7 +84,8 @@ public class PerformanceJob {
     //create file name
     gc.setTimeInMillis(System.currentTimeMillis());
     final String nowStr = compactSDF.format(gc.getTime());
-    final String outputFileName = prop.mustGet("SketchType") + nowStr + ".txt";
+
+    final String outputFileName = profileName + nowStr + ".txt";
     prop.put("OutputFileName", outputFileName);
     out = openPrintWriter(outputFileName);
   }
@@ -133,15 +117,7 @@ public class PerformanceJob {
   }
 
   /**
-   * Gets the configured SketchTrial
-   * @return the configured SketchTrial
-   */
-  public SketchTrial getSketchTrial() {
-    return trial;
-  }
-
-  /**
-   * Outputs a line to the configured PrintWriter.
+   * Outputs a line to the configured PrintWriter and stdOut.
    * @param s The String to print
    */
   public void println(final String s) {

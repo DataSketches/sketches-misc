@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Yahoo! Inc. Licensed under the terms of the
+ * Copyright 2018, Yahoo! Inc. Licensed under the terms of the
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
@@ -10,24 +10,89 @@ import static com.yahoo.sketches.Util.pwr2LawNext;
 import static com.yahoo.sketches.misc.performance.PerformanceUtil.FRACTIONS;
 import static com.yahoo.sketches.misc.performance.PerformanceUtil.FRACT_LEN;
 import static com.yahoo.sketches.misc.performance.PerformanceUtil.LS;
-import static com.yahoo.sketches.misc.performance.PerformanceUtil.TAB;
 import static com.yahoo.sketches.misc.performance.PerformanceUtil.buildAccuracyStatsArray;
 import static com.yahoo.sketches.misc.performance.PerformanceUtil.outputPMF;
 
+import com.yahoo.memory.WritableMemory;
+import com.yahoo.sketches.Family;
+import com.yahoo.sketches.ResizeFactor;
+import com.yahoo.sketches.theta.Sketch;
+import com.yahoo.sketches.theta.UpdateSketch;
+import com.yahoo.sketches.theta.UpdateSketchBuilder;
+
 /**
- * This measures count accuracy across a number of trials.
- * SketchTrials configured for different sketches could leverage this same class.
  * @author Lee Rhodes
  */
-public class CountAccuracyTrialsManager implements TrialsManager {
-  private PerformanceJob perf;
-  private SketchTrial trial;
-
-  //Global counter that increments for every new input value.
-  //This ensures that every trial is based on a different set of uniques
-  private long vIn = 0;
+public class ThetaAccuracyProfile implements JobProfile {
+  private static final char TAB = '\t';
   private Properties prop;
-  private CountAccuracyStats[] qArr;
+  private long vIn = 0;
+
+  private UpdateSketch sketch;
+  AccuracyStats[] qArr; //accuracy
+  private boolean getSize = false; //accuracy
+  private boolean rebuild; //Theta QS Sketch Accuracy
+
+  @Override
+  public void start(final Job job) {
+    prop = job.getProperties();
+    configure();
+    doTrials(job, this);
+  }
+
+  void configure() {
+    //Configure Sketch
+    final String getSizeStr = prop.get("Trials_bytes");
+    getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
+
+    final int lgK = Integer.parseInt(prop.mustGet("LgK"));
+    final Family family = Family.stringToFamily(prop.mustGet("THETA_famName"));
+    final float p = Float.parseFloat(prop.mustGet("THETA_p"));
+    final ResizeFactor rf = ResizeFactor.getRF(Integer.parseInt(prop.mustGet("THETA_lgRF")));
+    final boolean direct = Boolean.parseBoolean(prop.mustGet("THETA_direct"));
+    rebuild = Boolean.parseBoolean(prop.mustGet("THETA_rebuild"));
+
+    final int k = 1 << lgK;
+    final UpdateSketchBuilder udBldr = UpdateSketch.builder()
+        .setNominalEntries(k)
+        .setFamily(family)
+        .setP(p)
+        .setResizeFactor(rf);
+    if (direct) {
+      final int bytes = Sketch.getMaxUpdateSketchBytes(k);
+      final byte[] memArr = new byte[bytes];
+      final WritableMemory wmem = WritableMemory.wrap(memArr);
+      sketch = udBldr.build(wmem);
+    } else {
+      sketch = udBldr.build();
+    }
+    //configure stats array
+    qArr = buildAccuracyStatsArray(prop);
+  }
+
+  /**
+   * An accuracy trial is one pass through all uniques, pausing to store the estimate into a
+   * quantiles sketch at each point along the unique axis.
+   */
+  //@Override
+  void doTrial() {
+    final int qArrLen = qArr.length;
+    sketch.reset(); //reuse the same sketch
+    int lastUniques = 0;
+    for (int i = 0; i < qArrLen; i++) {
+      final AccuracyStats q = qArr[i];
+      final double delta = q.trueValue - lastUniques;
+      for (int u = 0; u < delta; u++) {
+        sketch.update(++vIn);
+      }
+      lastUniques += delta;
+      if (rebuild) { sketch.rebuild(); } //Resizes down to k. Only useful with QSSketch
+      q.update(sketch.getEstimate());
+      if (getSize) {
+        q.bytes = sketch.compact().toByteArray().length;
+      }
+    }
+  }
 
   /**
    * Manages multiple trials for measuring accuracy.
@@ -39,27 +104,19 @@ public class CountAccuracyTrialsManager implements TrialsManager {
    * into the corresponding stats array. Each stats array retains the distribtion of
    * the accuracies measured for all the trials at that x-axis point.
    *
-   * <p>Because accuracy trials take a long time, the trail manager will output intermediate
+   * <p>Because accuracy trials take a long time, this profile will output intermediate
    * accuracy results starting after Trials_lgMinT trials and then again and trial intervals
    * determined by Trials_TPPO until Trials_lgMaxT.  This allows you to stop the testing at
    * any intermediate trials point if you feel you have sufficient trials for the accuracy you
    * need.
    *
-   * <p>Several SketchTrials may leverage this same class.
-   * @param perf a PerformanceJob
+   * @param job the given job
+   * @param profile the given profile
    */
-  public CountAccuracyTrialsManager(final PerformanceJob perf) {
-    this.perf = perf;
-    prop = perf.getProperties();
-    qArr = buildAccuracyStatsArray(prop);
-    trial = perf.getSketchTrial();
-    trial.configureSketch(prop);
-  }
-
-  @Override
-  public void doTrials() {
-    final int lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
-    final int minT = 1 << lgMinT;
+  static void doTrials(final Job job, final ThetaAccuracyProfile profile) {
+    final Properties prop = job.getProperties();
+    final AccuracyStats[] qArr = profile.qArr;
+    final int minT = 1 << Integer.parseInt(prop.mustGet("Trials_lgMinT"));
     final int lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
     final int maxT = 1 << lgMaxT;
     final boolean interData = Boolean.parseBoolean(prop.mustGet("Trials_interData"));
@@ -73,58 +130,58 @@ public class CountAccuracyTrialsManager implements TrialsManager {
       final int nextT = (lastT == 0) ? minT : pwr2LawNext(tPPO, lastT);
       final int delta = nextT - lastT;
       for (int i = 0; i < delta; i++) {
-        vIn = trial.doAccuracyTrial(qArr, vIn);
+        profile.doTrial();
       }
       lastT = nextT;
       final StringBuilder sb = new StringBuilder();
       if (nextT < maxT) { // intermediate
         if (interData) {
-          perf.println(getHeader());
+          job.println(getHeader());
           process(prop, qArr, lastT, sb);
-          perf.println(sb.toString());
+          job.println(sb.toString());
         }
       } else { //done
-        perf.println(getHeader());
+        job.println(getHeader());
         process(prop, qArr, lastT, sb);
-        perf.println(sb.toString());
+        job.println(sb.toString());
       }
 
-      perf.println(prop.extractKvPairs());
-      perf.println("Cum Trials             : " + lastT);
-      perf.println("Cum Updates            : " + vIn);
+      job.println(prop.extractKvPairs());
+      job.println("Cum Trials             : " + lastT);
+      job.println("Cum Updates            : " + profile.vIn);
       final long currentTime_mS = System.currentTimeMillis();
-      final long cumTime_mS = currentTime_mS - perf.getStartTime();
-      perf.println("Cum Trials Time        : " + milliSecToString(cumTime_mS));
+      final long cumTime_mS = currentTime_mS - job.getStartTime();
+      job.println("Cum Trials Time        : " + milliSecToString(cumTime_mS));
       final double timePerTrial_mS = (cumTime_mS * 1.0) / lastT;
       final double avgUpdateTime_ns = (timePerTrial_mS * 1e6) / maxU;
-      perf.println("Time Per Trial, mSec   : " + timePerTrial_mS);
-      perf.println("Avg Update Time, nSec  : " + avgUpdateTime_ns);
-      perf.println("Date Time              : "
-          + perf.getReadableDateString(currentTime_mS));
+      job.println("Time Per Trial, mSec   : " + timePerTrial_mS);
+      job.println("Avg Update Time, nSec  : " + avgUpdateTime_ns);
+      job.println("Date Time              : "
+          + job.getReadableDateString(currentTime_mS));
 
       final long timeToComplete_mS = (long)(timePerTrial_mS * (maxT - lastT));
-      perf.println("Est Time to Complete   : " + milliSecToString(timeToComplete_mS));
-      perf.println("Est Time at Completion : "
-          + perf.getReadableDateString(timeToComplete_mS + currentTime_mS));
-      perf.println("");
+      job.println("Est Time to Complete   : " + milliSecToString(timeToComplete_mS));
+      job.println("Est Time at Completion : "
+          + job.getReadableDateString(timeToComplete_mS + currentTime_mS));
+      job.println("");
       if (postPMFs) {
         for (int i = 0; i < qArr.length; i++) {
-          outputPMF(perf, qArr[i]);
+          outputPMF(job, qArr[i]);
         }
       }
     }
   }
 
-  private static void process(final Properties p, final CountAccuracyStats[] qArr, final int cumTrials,
-      final StringBuilder sb) {
-    final String getSizeStr = p.get("Trials_bytes");
+  private static void process(final Properties prop, final AccuracyStats[] qArr,
+      final int cumTrials, final StringBuilder sb) {
+    final String getSizeStr = prop.get("Trials_bytes");
     final boolean getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
     final int points = qArr.length;
     sb.setLength(0);
     for (int pt = 0; pt < points; pt++) {
-      final CountAccuracyStats q = qArr[pt];
-      final int uniques = q.uniques;
+      final AccuracyStats q = qArr[pt];
+      final double uniques = q.trueValue;
       final double meanEst = q.sumEst / cumTrials;
       final double meanRelErr = q.sumRelErr / cumTrials;
       final double meanSqErr = q.sumSqErr / cumTrials;
