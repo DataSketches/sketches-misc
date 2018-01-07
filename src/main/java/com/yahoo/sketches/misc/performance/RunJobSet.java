@@ -1,5 +1,5 @@
 /*
- * Copyright 2017, Yahoo! Inc. Licensed under the terms of the
+ * Copyright 2018, Yahoo! Inc. Licensed under the terms of the
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
@@ -13,9 +13,9 @@ import com.yahoo.sketches.misc.Files;
 
 /**
  * This class parses an input string command file, which contains specific configuration
- * information for the JobProfile.
+ * information for the JobProfile, and then loads and runs the JobProfile.
  *
- * <p>Multiple jobs can be included in the same command file, each
+ * <p>A single JobProfile can actually contain multiple sub-jobs, each
  * separated by a semicolon ";".
  *
  * @author Lee Rhodes
@@ -26,7 +26,7 @@ public class RunJobSet {
   /**
    * Parse the command file for jobs.  Jobs are separated by a semicolon ";".
    * Each job is assigned a Job number starting with one.
-   * @param cmdFileName the name of the command file containing all the jobs to be run.
+   * @param cmdFileName the name of the command file containing the job(s) to be run.
    */
   private static void parseJobs(final String cmdFileName) {
     if (!isFileValid(cmdFileName)) {
@@ -37,9 +37,9 @@ public class RunJobSet {
     for (int i = 0; i < jobs.length; i++) {
       final Properties prop = parseJobProperties(jobs[i], i + 1);
       setDateFormats(prop);
-      final JobProfile sketchTrial = createJobProfile(prop);
+      final JobProfile profile = createJobProfile(prop);
       @SuppressWarnings("unused")
-      final Job pj = new Job(prop, sketchTrial);
+      final Job pj = new Job(prop, profile);
     }
   }
 
