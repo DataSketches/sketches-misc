@@ -3,30 +3,27 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.misc.performance;
+package com.yahoo.sketches.misc.performance.uniquecount;
 
 import static com.yahoo.sketches.Util.pwr2LawNext;
 import static java.lang.Math.log;
 import static java.lang.Math.pow;
 
-import com.yahoo.memory.WritableMemory;
-import com.yahoo.sketches.hll.HllSketch;
-import com.yahoo.sketches.hll.TgtHllType;
+import com.yahoo.sketches.misc.performance.Job;
+import com.yahoo.sketches.misc.performance.JobProfile;
+import com.yahoo.sketches.misc.performance.Properties;
 
 /**
  * @author Lee Rhodes
  */
-public class HllUpdateSpeedProfile implements JobProfile {
-  private static final char TAB = '\t';
-  private static final double LN2 = log(2.0);
-  private Properties prop;
-  private long vIn = 0;
-  private int lgMinT;
-  private int lgMaxT;
-  private int lgMinBpU;
-  private int lgMaxBpU;
-  private double slope;
-  private HllSketch sketch;
+public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
+  Properties prop;
+  long vIn = 0;
+  int lgMinT;
+  int lgMaxT;
+  int lgMinBpU;
+  int lgMaxBpU;
+  double slope;
 
   @Override
   public void start(final Job job) {
@@ -40,36 +37,9 @@ public class HllUpdateSpeedProfile implements JobProfile {
     doTrials(job, this);
   }
 
-  void configure() {
+  abstract void configure();
 
-    final int lgK = Integer.parseInt(prop.mustGet("LgK"));
-    final boolean direct = Boolean.parseBoolean(prop.mustGet("HLL_direct"));
-
-    final TgtHllType tgtHllType;
-    final String type = prop.mustGet("HLL_tgtHllType");
-    if (type.equalsIgnoreCase("HLL4")) { tgtHllType = TgtHllType.HLL_4; }
-    else if (type.equalsIgnoreCase("HLL6")) { tgtHllType = TgtHllType.HLL_6; }
-    else { tgtHllType = TgtHllType.HLL_8; }
-
-    if (direct) {
-      final int bytes = HllSketch.getMaxUpdatableSerializationBytes(lgK, tgtHllType);
-      final WritableMemory wmem = WritableMemory.allocate(bytes);
-      sketch = new HllSketch(lgK, tgtHllType, wmem);
-    } else {
-      sketch = new HllSketch(lgK, tgtHllType);
-    }
-  }
-
-  double doTrial(final int uPerTrial) {
-    sketch.reset(); // reuse the same sketch
-    final long startUpdateTime_nS = System.nanoTime();
-
-    for (int u = uPerTrial; u-- > 0;) {
-      sketch.update(++vIn);
-    }
-    final long updateTime_nS = System.nanoTime() - startUpdateTime_nS;
-    return updateTime_nS / uPerTrial;
-  }
+  abstract double doTrial(final int uPerTrial);
 
   /**
    * Traverses all the unique axis points and performs trials(u) at each point
@@ -78,7 +48,7 @@ public class HllUpdateSpeedProfile implements JobProfile {
    * @param job the given job
    * @param profile the given profile
    */
-  static void doTrials(final Job job, final HllUpdateSpeedProfile profile) {
+  private static void doTrials(final Job job, final UniqueCountUpdateSpeedProfile profile) {
     final Properties prop = job.getProperties();
     final int maxU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
     final int minU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMinU"));
@@ -119,7 +89,7 @@ public class HllUpdateSpeedProfile implements JobProfile {
    * @return the number of trials for a given current number of uniques for a
    * trial set.
    */
-  int getNumTrials(final int curU) {
+  private int getNumTrials(final int curU) {
     final int minBpU = 1 << lgMinBpU;
     final int maxBpU = 1 << lgMaxBpU;
     final int maxT = 1 << lgMaxT;
@@ -163,6 +133,5 @@ public class HllUpdateSpeedProfile implements JobProfile {
     sb.append("nS/u");
     return sb.toString();
   }
-
 
 }

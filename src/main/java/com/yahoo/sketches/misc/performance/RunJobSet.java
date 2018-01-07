@@ -123,7 +123,7 @@ public class RunJobSet {
 
   @Test
   public void runJobs() {
-    final String fileName = "src/main/resources/ThetaSerDeJob.txt";
+    final String fileName = "src/main/resources/uniquecount/ThetaSerDeJob.txt";
     RunJobSet.main(new String[] {fileName});
   }
 

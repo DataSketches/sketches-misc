@@ -3,142 +3,64 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.misc.performance;
+package com.yahoo.sketches.misc.performance.uniquecount;
 
 import static com.yahoo.sketches.Util.milliSecToString;
 import static com.yahoo.sketches.Util.pwr2LawNext;
 import static com.yahoo.sketches.misc.performance.PerformanceUtil.FRACTIONS;
 import static com.yahoo.sketches.misc.performance.PerformanceUtil.FRACT_LEN;
-import static com.yahoo.sketches.misc.performance.PerformanceUtil.LS;
-import static com.yahoo.sketches.misc.performance.PerformanceUtil.buildAccuracyStatsArray;
-import static com.yahoo.sketches.misc.performance.PerformanceUtil.outputPMF;
 
-import com.yahoo.memory.WritableMemory;
-import com.yahoo.sketches.hll.HllSketch;
-import com.yahoo.sketches.hll.TgtHllType;
+import com.yahoo.sketches.misc.performance.Job;
+import com.yahoo.sketches.misc.performance.JobProfile;
+import com.yahoo.sketches.misc.performance.Properties;
+import com.yahoo.sketches.quantiles.DoublesSketch;
 
-public class HllAccuracyProfile implements JobProfile {
-  private static final char TAB = '\t';
-  private Properties prop;
-  private long vIn = 0;
-
-  private HllSketch sketch;
-
-  private boolean getSize = false; //accuracy
-  private boolean useComposite; //accuracy, HLL
-  private boolean useCharArr; //accuracy ?? or speed HLL, Theta?
-
-  private AccuracyStats[] qArr; //accuracy
+/**
+ * @author Lee Rhodes
+ */
+public abstract class UniqueCountAccuracyProfile implements JobProfile {
+  Properties prop;
+  long vIn = 0;
+  int lgMinT;
+  int lgMaxT;
+  int tPPO;
+  int lgMinU;
+  int lgMaxU;
+  int uPPO;
+  int lgQK;
+  int lgK;
+  boolean interData;
+  boolean postPMFs;
+  boolean getSize = false;
+  AccuracyStats[] qArr;
 
   @Override
   public void start(final Job job) {
     prop = job.getProperties();
+    lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
+    lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
+    tPPO = Integer.parseInt(prop.mustGet("Trials_TPPO"));
+    lgMinU = Integer.parseInt(prop.mustGet("Trials_lgMinU"));
+    lgMaxU = Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
+    interData = Boolean.parseBoolean(prop.mustGet("Trials_interData"));
+    postPMFs = Boolean.parseBoolean(prop.mustGet("Trials_postPMFs"));
+    uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
+    lgQK = Integer.parseInt(prop.mustGet("Trials_lgQK"));
+    qArr = buildAccuracyStatsArray(prop, this);
+    lgK = Integer.parseInt(prop.mustGet("LgK"));
+    final String getSizeStr = prop.get("Trials_bytes");
+    getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
     configure();
     doTrials(job, this);
   }
 
-  void configure() {
-    //Configure Sketch
-    final String getSizeStr = prop.get("Trials_bytes");
-    getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
+  abstract void configure();
 
-    final int lgK = Integer.parseInt(prop.mustGet("LgK"));
-    final boolean direct = Boolean.parseBoolean(prop.mustGet("HLL_direct"));
-    useComposite = Boolean.parseBoolean(prop.mustGet("HLL_useComposite"));
-    final String useCharArrStr = prop.get("Trials_charArr");
-    useCharArr = (useCharArrStr == null) ? false : Boolean.parseBoolean(useCharArrStr);
-
-    final TgtHllType tgtHllType;
-    final String type = prop.mustGet("HLL_tgtHllType");
-    if (type.equalsIgnoreCase("HLL4")) { tgtHllType = TgtHllType.HLL_4; }
-    else if (type.equalsIgnoreCase("HLL6")) { tgtHllType = TgtHllType.HLL_6; }
-    else { tgtHllType = TgtHllType.HLL_8; }
-
-    if (direct) {
-      final int bytes = HllSketch.getMaxUpdatableSerializationBytes(lgK, tgtHllType);
-      final WritableMemory wmem = WritableMemory.allocate(bytes);
-      sketch = new HllSketch(lgK, tgtHllType, wmem);
-    } else {
-      sketch = new HllSketch(lgK, tgtHllType);
-    }
-    //configure stats array
-    qArr = buildAccuracyStatsArray(prop);
-  }
-
-  void doTrial() {
-    final int qArrLen = qArr.length;
-    sketch.reset(); //reuse the same sketch
-    int lastUniques = 0;
-    final int sw = (useCharArr ? 2 : 0) | (useComposite ? 1 : 0);
-    switch (sw) {
-      case 0: { //use longs; use HIP
-        for (int i = 0; i < qArrLen; i++) {
-          final AccuracyStats q = qArr[i];
-          final double delta = q.trueValue - lastUniques;
-          for (int u = 0; u < delta; u++) {
-            sketch.update(++vIn);
-          }
-          lastUniques += delta;
-          final double est = sketch.getEstimate();
-          q.update(est);
-          if (getSize) {
-            q.bytes = sketch.toCompactByteArray().length;
-          }
-        }
-        break;
-      }
-      case 1: { //use longs; use Composite
-        for (int i = 0; i < qArrLen; i++) {
-          final AccuracyStats q = qArr[i];
-          final double delta = q.trueValue - lastUniques;
-          for (int u = 0; u < delta; u++) {
-            sketch.update(++vIn);
-          }
-          lastUniques += delta;
-          final double est = sketch.getCompositeEstimate();
-          q.update(est);
-          if (getSize) {
-            q.bytes = sketch.toCompactByteArray().length;
-          }
-        }
-        break;
-      }
-      case 2: { //use char[]; use HIP
-        for (int i = 0; i < qArrLen; i++) {
-          final AccuracyStats q = qArr[i];
-          final double delta = q.trueValue - lastUniques;
-          for (int u = 0; u < delta; u++) {
-            final String vstr = Long.toHexString(++vIn);
-            sketch.update(vstr.toCharArray());
-          }
-          lastUniques += delta;
-          final double est = sketch.getEstimate();
-          q.update(est);
-          if (getSize) {
-            q.bytes = sketch.toCompactByteArray().length;
-          }
-        }
-        break;
-      }
-      case 3: { //use char[]; use Composite
-        for (int i = 0; i < qArrLen; i++) {
-          final AccuracyStats q = qArr[i];
-          final double delta = q.trueValue - lastUniques;
-          for (int u = 0; u < delta; u++) {
-            final String vstr = Long.toHexString(++vIn);
-            sketch.update(vstr.toCharArray());
-          }
-          lastUniques += delta;
-          final double est = sketch.getCompositeEstimate();
-          q.update(est);
-          if (getSize) {
-            q.bytes = sketch.toCompactByteArray().length;
-          }
-        }
-        break;
-      }
-    }
-  }
+  /**
+   * An accuracy trial is one pass through all uniques, pausing to store the estimate into a
+   * quantiles sketch at each point along the unique axis.
+   */
+  abstract void doTrial();
 
   /**
    * Manages multiple trials for measuring accuracy.
@@ -159,22 +81,17 @@ public class HllAccuracyProfile implements JobProfile {
    * @param job the given job
    * @param profile the given profile
    */
-  static void doTrials(final Job job, final HllAccuracyProfile profile) {
+  private static void doTrials(final Job job, final UniqueCountAccuracyProfile profile) {
     final Properties prop = job.getProperties();
     final AccuracyStats[] qArr = profile.qArr;
-    final int lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
-    final int minT = 1 << lgMinT;
-    final int lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
-    final int maxT = 1 << lgMaxT;
-    final boolean interData = Boolean.parseBoolean(prop.mustGet("Trials_interData"));
-    final boolean postPMFs = Boolean.parseBoolean(prop.mustGet("Trials_postPMFs"));
-    final int tPPO = Integer.parseInt(prop.mustGet("Trials_TPPO"));
-    final int maxU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
+    final int minT = 1 << profile.lgMinT;
+    final int maxT = 1 << profile.lgMaxT;
+    final int maxU = 1 << profile.lgMaxU;
 
     //This will generate a table of data up for each intermediate Trials point
     int lastT = 0;
     while (lastT < maxT) {
-      final int nextT = (lastT == 0) ? minT : pwr2LawNext(tPPO, lastT);
+      final int nextT = (lastT == 0) ? minT : pwr2LawNext(profile.tPPO, lastT);
       final int delta = nextT - lastT;
       for (int i = 0; i < delta; i++) {
         profile.doTrial();
@@ -182,7 +99,7 @@ public class HllAccuracyProfile implements JobProfile {
       lastT = nextT;
       final StringBuilder sb = new StringBuilder();
       if (nextT < maxT) { // intermediate
-        if (interData) {
+        if (profile.interData) {
           job.println(getHeader());
           process(prop, qArr, lastT, sb);
           job.println(sb.toString());
@@ -211,14 +128,13 @@ public class HllAccuracyProfile implements JobProfile {
       job.println("Est Time at Completion : "
           + job.getReadableDateString(timeToComplete_mS + currentTime_mS));
       job.println("");
-      if (postPMFs) {
+      if (profile.postPMFs) {
         for (int i = 0; i < qArr.length; i++) {
           outputPMF(job, qArr[i]);
         }
       }
     }
   }
-
 
   private static void process(final Properties prop, final AccuracyStats[] qArr,
       final int cumTrials, final StringBuilder sb) {
@@ -294,5 +210,90 @@ public class HllAccuracyProfile implements JobProfile {
     return sb.toString();
   }
 
+  /**
+   *
+   * @param prop the given Properties
+   * @return an AccuracyStats array
+   */
+  private static final AccuracyStats[] buildAccuracyStatsArray(final Properties prop,
+      final UniqueCountAccuracyProfile profile) {
+    final int lgMinU = profile.lgMinU;
+    final int lgMaxU = profile.lgMaxU;
+    final int uPPO = profile.uPPO;
+    final int lgQK = profile.lgQK;
+
+    final int qLen = countPoints(lgMinU, lgMaxU, uPPO);
+    final AccuracyStats[] qArr = new AccuracyStats[qLen];
+    int p = 1 << lgMinU;
+    for (int i = 0; i < qLen; i++) {
+      qArr[i] = new AccuracyStats(1 << lgQK, p);
+      p = pwr2LawNext(uPPO, p);
+    }
+    return qArr;
+  }
+
+  private static final int countPoints(final int lgStart, final int lgEnd, final int ppo) {
+    int p = 1 << lgStart;
+    final int end = 1 << lgEnd;
+    int count = 0;
+    while (p <= end) {
+      p = pwr2LawNext(ppo, p);
+      count++;
+    }
+    return count;
+  }
+
+  /**
+   * Outputs the Probability Mass Function given the Job and the AccuracyStats.
+   * @param job the given Job
+   * @param q the given AccuracyStats
+   */
+  private static void outputPMF(final Job job, final AccuracyStats q) {
+    final DoublesSketch qSk = q.qsk;
+    final double[] splitPoints = qSk.getQuantiles(FRACTIONS); //1:1
+    final double[] reducedSp = reduceSplitPoints(splitPoints);
+    final double[] pmfArr = qSk.getPMF(reducedSp); //pmfArr is one larger
+    final long trials = qSk.getN();
+
+    //output Histogram
+    final String hdr = String.format("%10s%4s%12s", "Trials", "    ", "Est");
+    final String fmt = "%10d%4s%12.2f";
+    job.println("Histogram At " + q.trueValue);
+    job.println(hdr);
+    for (int i = 0; i < reducedSp.length; i++) {
+      final int hits = (int)(pmfArr[i + 1] * trials);
+      final double est = reducedSp[i];
+      final String line = String.format(fmt, hits, " >= ", est);
+      job.println(line);
+    }
+    job.println("");
+  }
+
+  /**
+   *
+   * @param splitPoints the given splitPoints
+   * @return the reduced array of splitPoints
+   */
+  private static double[] reduceSplitPoints(final double[] splitPoints) {
+    int num = 1;
+    double lastV = splitPoints[0];
+    for (int i = 0; i < splitPoints.length; i++) {
+      final double v = splitPoints[i];
+      if (v <= lastV) { continue; }
+      num++;
+      lastV = v;
+    }
+    lastV = splitPoints[0];
+    int idx = 0;
+    final double[] sp = new double[num];
+    sp[0] = lastV;
+    for (int i = 0; i < splitPoints.length; i++) {
+      final double v = splitPoints[i];
+      if (v <= lastV) { continue; }
+      sp[++idx] = v;
+      lastV = v;
+    }
+    return sp;
+  }
 
 }

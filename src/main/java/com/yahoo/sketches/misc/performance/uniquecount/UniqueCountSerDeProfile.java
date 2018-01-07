@@ -3,101 +3,56 @@
  * Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.misc.performance;
+package com.yahoo.sketches.misc.performance.uniquecount;
 
 import static com.yahoo.sketches.Util.pwr2LawNext;
 import static java.lang.Math.log;
 import static java.lang.Math.pow;
 
-import com.yahoo.memory.Memory;
-import com.yahoo.memory.WritableMemory;
-import com.yahoo.sketches.Family;
-import com.yahoo.sketches.ResizeFactor;
-import com.yahoo.sketches.theta.Sketch;
-import com.yahoo.sketches.theta.UpdateSketch;
-import com.yahoo.sketches.theta.UpdateSketchBuilder;
+import com.yahoo.sketches.misc.performance.Job;
+import com.yahoo.sketches.misc.performance.JobProfile;
+import com.yahoo.sketches.misc.performance.Properties;
 
 /**
  * @author Lee Rhodes
  */
-public class ThetaSerDeProfile implements JobProfile {
-  private static final char TAB = '\t';
-  private static final double LN2 = log(2.0);
-  private Properties prop;
-  private long vIn = 0;
-  private int lgMinT;
-  private int lgMaxT;
-  private int lgMinBpU;
-  private int lgMaxBpU;
-  private double slope;
-
-  private UpdateSketch sketch;
+public abstract class UniqueCountSerDeProfile implements JobProfile {
+  Properties prop;
+  long vIn = 0;
+  int lgMinT;
+  int lgMaxT;
+  int lgMinU;
+  int lgMaxU;
+  int uPPO;
+  int lgMinBpU;
+  int lgMaxBpU;
+  double slope;
+  int lgK;
 
   @Override
   public void start(final Job job) {
     prop = job.getProperties();
     lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
     lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
+    lgMinU = Integer.parseInt(prop.mustGet("Trials_lgMinU"));
+    lgMaxU = Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
+    uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
     lgMinBpU = Integer.parseInt(prop.mustGet("Trials_lgMinBpU"));
     lgMaxBpU = Integer.parseInt(prop.mustGet("Trials_lgMaxBpU"));
     slope = (double) (lgMaxT - lgMinT) / (lgMinBpU - lgMaxBpU);
+    lgK = Integer.parseInt(prop.mustGet("LgK"));
     configure();
     doTrials(job, this);
   }
 
-  void configure() {
-    //Configure Sketch
-    final int lgK = Integer.parseInt(prop.mustGet("LgK"));
-    final Family family = Family.stringToFamily(prop.mustGet("THETA_famName"));
-    final float p = Float.parseFloat(prop.mustGet("THETA_p"));
-    final ResizeFactor rf = ResizeFactor.getRF(Integer.parseInt(prop.mustGet("THETA_lgRF")));
-    final boolean direct = Boolean.parseBoolean(prop.mustGet("THETA_direct"));
+  abstract void configure();
 
-    final int k = 1 << lgK;
-    final UpdateSketchBuilder udBldr = UpdateSketch.builder()
-        .setNominalEntries(k)
-        .setFamily(family)
-        .setP(p)
-        .setResizeFactor(rf);
-    if (direct) {
-      final int bytes = Sketch.getMaxUpdateSketchBytes(k);
-      final byte[] memArr = new byte[bytes];
-      final WritableMemory wmem = WritableMemory.wrap(memArr);
-      sketch = udBldr.build(wmem);
-    } else {
-      sketch = udBldr.build();
-    }
-  }
+  abstract void doTrial(SerDeStats stats, int uPerTrial);
 
-  void doTrial(final SerDeStats stats, final int uPerTrial) {
-    sketch.reset(); // reuse the same sketch
-
-    for (int u = uPerTrial; u-- > 0;) {
-      sketch.update(++vIn);
-    }
-    final double est1 = sketch.getEstimate();
-
-    final long startSerTime_nS = System.nanoTime();
-    final byte[] byteArr = sketch.toByteArray();
-
-    final long startDeSerTime_nS = System.nanoTime();
-
-    final UpdateSketch sketch2 = UpdateSketch.heapify(Memory.wrap(byteArr));
-    final long endDeTime_nS = System.nanoTime();
-
-    final double est2 = sketch2.getEstimate();
-    assert est1 == est2;
-
-    final long serTime_nS = startDeSerTime_nS - startSerTime_nS;
-    final long deSerTime_nS = endDeTime_nS - startDeSerTime_nS;
-    stats.update(serTime_nS, deSerTime_nS);
-  }
-
-  static void doTrials(final Job job, final ThetaSerDeProfile profile) {
-    final Properties prop = job.getProperties();
-    final int maxU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
-    final int minU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMinU"));
-    final int uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
+  static void doTrials(final Job job, final UniqueCountSerDeProfile profile) {
+    final int maxU = 1 << profile.lgMaxU;
+    final int minU = 1 << profile.lgMinU;
+    final int uPPO = profile.uPPO;
     int lastU = 0;
     final StringBuilder dataStr = new StringBuilder();
     job.println(getHeader());
@@ -125,7 +80,8 @@ public class ThetaSerDeProfile implements JobProfile {
 
   /**
    * Computes the number of trials for a given current number of uniques for a
-   * trial set.
+   * trial set. This is used in speed trials and decreases the number of trials
+   * as the number of uniques increase.
    *
    * @param curU the given current number of uniques for a trial set.
    * @return the number of trials for a given current number of uniques for a
@@ -175,4 +131,5 @@ public class ThetaSerDeProfile implements JobProfile {
     sb.append("DeSer_nS");
     return sb.toString();
   }
+
 }

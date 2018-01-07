@@ -1,20 +1,17 @@
 # Job
 
 # Trials Profile
-Trials_lgMinT=8  #prints intermediate results starting w/ this lgMinT
-Trials_lgMaxT=12 #The max trials
-Trials_TPPO=1    #how often intermediate results are printed
+Trials_lgMaxT=23 #Max trials at start (low counts)
+Trials_lgMinT=4  #Min trials at tail (high counts) 
 
-Trials_lgQK=13   #size of quantiles sketch
-Trials_interData=true
-Trials_postPMFs=false
-Trials_bytes=false
+#Trails Speed related
+Trials_lgMinBpU=4   #start the downward slope of trials at this LgU
+Trials_lgMaxBpU=20  #stop the downward slope of trials at this LgU
 
 #Uniques Profile
 Trials_lgMinU=0  #The starting # of uniques that is printed at the end.
 Trials_lgMaxU=20 #How high the # uniques go
 Trials_UPPO=16   #The horizontal x-resolution of trials points
-Trials_charArr=true
 
 # Date-Time Profile
 TimeZone=PST
@@ -23,7 +20,7 @@ FileNameDateFormat=yyyyMMdd'_'HHmmssz
 ReadableDateFormat=yyyy/MM/dd HH:mm:ss z
 
 #Job Profile
-JobProfile=com.yahoo.sketches.misc.performance.HllAccuracyProfile
+JobProfile=com.yahoo.sketches.misc.performance.uniquecount.HllUpdateSpeedProfile
 LgK=12
 HLL_direct=false #only for Theta, HLL. See javadocs.
 HLL_tgtHllType=HLL8

@@ -3,7 +3,7 @@
  * Licensed under the terms of the Apache License 2.0. See LICENSE file at the project root for terms.
  */
 
-package com.yahoo.sketches.misc.performance;
+package com.yahoo.sketches.misc.performance.uniquecount;
 
 /**
  * Holds key metrics from a single speed trial
