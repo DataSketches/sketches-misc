@@ -17,6 +17,7 @@ import com.yahoo.sketches.misc.performance.Properties;
  * @author Lee Rhodes
  */
 public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
+  Job job;
   Properties prop;
   long vIn = 0;
   int lgMinT;
@@ -27,6 +28,7 @@ public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
 
   @Override
   public void start(final Job job) {
+    this.job = job;
     prop = job.getProperties();
     lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
     lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
@@ -34,7 +36,12 @@ public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
     lgMaxBpU = Integer.parseInt(prop.mustGet("Trials_lgMaxBpU"));
     slope = (double) (lgMaxT - lgMinT) / (lgMinBpU - lgMaxBpU);
     configure();
-    doTrials(job, this);
+    doTrials();
+  }
+
+  @Override
+  public void println(final String s) {
+    job.println(s);
   }
 
   abstract void configure();
@@ -48,18 +55,18 @@ public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
    * @param job the given job
    * @param profile the given profile
    */
-  private static void doTrials(final Job job, final UniqueCountUpdateSpeedProfile profile) {
+  private void doTrials() {
     final Properties prop = job.getProperties();
     final int maxU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
     final int minU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMinU"));
     final int uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
     int lastU = 0;
     final StringBuilder dataStr = new StringBuilder();
-    job.println(getHeader());
+    println(getHeader());
     while (lastU < maxU) { //Trial for each U point on X-axis, and one row on output
       final int nextU = (lastU == 0) ? minU : pwr2LawNext(uPPO, lastU);
       lastU = nextU;
-      final int trials = profile.getNumTrials(nextU);
+      final int trials = getNumTrials(nextU);
       //Build stats arr
       final SpeedStats[] statsArr = new SpeedStats[trials];
       for (int t = 0; t < trials; t++) { //do # trials
@@ -72,11 +79,11 @@ public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
       System.gc();
       double sumUpdateTimePerU_nS = 0;
       for (int t = 0; t < trials; t++) {
-        sumUpdateTimePerU_nS += profile.doTrial(nextU);
+        sumUpdateTimePerU_nS += doTrial(nextU);
       }
       final double meanUpdateTimePerU_nS = sumUpdateTimePerU_nS / trials;
       process(meanUpdateTimePerU_nS, trials, nextU, dataStr);
-      job.println(dataStr.toString());
+      println(dataStr.toString());
     }
   }
 

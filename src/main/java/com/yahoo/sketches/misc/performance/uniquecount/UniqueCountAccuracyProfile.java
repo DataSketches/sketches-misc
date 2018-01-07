@@ -19,6 +19,7 @@ import com.yahoo.sketches.quantiles.DoublesSketch;
  * @author Lee Rhodes
  */
 public abstract class UniqueCountAccuracyProfile implements JobProfile {
+  Job job;
   Properties prop;
   long vIn = 0;
   int lgMinT;
@@ -36,6 +37,7 @@ public abstract class UniqueCountAccuracyProfile implements JobProfile {
 
   @Override
   public void start(final Job job) {
+    this.job = job;
     prop = job.getProperties();
     lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
     lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
@@ -51,7 +53,12 @@ public abstract class UniqueCountAccuracyProfile implements JobProfile {
     final String getSizeStr = prop.get("Trials_bytes");
     getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
     configure();
-    doTrials(job, this);
+    doTrials();
+  }
+
+  @Override
+  public void println(final String s) {
+    job.println(s);
   }
 
   abstract void configure();
@@ -73,7 +80,7 @@ public abstract class UniqueCountAccuracyProfile implements JobProfile {
    * the accuracies measured for all the trials at that x-axis point.
    *
    * <p>Because accuracy trials take a long time, this profile will output intermediate
-   * accuracy results starting after Trials_lgMinT trials and then again and trial intervals
+   * accuracy results starting after Trials_lgMinT trials and then again at trial intervals
    * determined by Trials_TPPO until Trials_lgMaxT.  This allows you to stop the testing at
    * any intermediate trials point if you feel you have sufficient trials for the accuracy you
    * need.
@@ -81,65 +88,61 @@ public abstract class UniqueCountAccuracyProfile implements JobProfile {
    * @param job the given job
    * @param profile the given profile
    */
-  private static void doTrials(final Job job, final UniqueCountAccuracyProfile profile) {
-    final Properties prop = job.getProperties();
-    final AccuracyStats[] qArr = profile.qArr;
-    final int minT = 1 << profile.lgMinT;
-    final int maxT = 1 << profile.lgMaxT;
-    final int maxU = 1 << profile.lgMaxU;
+  private void doTrials() {
+    final int minT = 1 << lgMinT;
+    final int maxT = 1 << lgMaxT;
+    final int maxU = 1 << lgMaxU;
 
     //This will generate a table of data up for each intermediate Trials point
     int lastT = 0;
     while (lastT < maxT) {
-      final int nextT = (lastT == 0) ? minT : pwr2LawNext(profile.tPPO, lastT);
+      final int nextT = (lastT == 0) ? minT : pwr2LawNext(tPPO, lastT);
       final int delta = nextT - lastT;
       for (int i = 0; i < delta; i++) {
-        profile.doTrial();
+        doTrial();
       }
       lastT = nextT;
       final StringBuilder sb = new StringBuilder();
       if (nextT < maxT) { // intermediate
-        if (profile.interData) {
+        if (interData) {
           job.println(getHeader());
-          process(prop, qArr, lastT, sb);
+          process(getSize, qArr, lastT, sb);
           job.println(sb.toString());
         }
       } else { //done
         job.println(getHeader());
-        process(prop, qArr, lastT, sb);
+        process(getSize, qArr, lastT, sb);
         job.println(sb.toString());
       }
 
-      job.println(prop.extractKvPairs());
-      job.println("Cum Trials             : " + lastT);
-      job.println("Cum Updates            : " + profile.vIn);
+      println(prop.extractKvPairs());
+      println("Cum Trials             : " + lastT);
+      println("Cum Updates            : " + vIn);
       final long currentTime_mS = System.currentTimeMillis();
       final long cumTime_mS = currentTime_mS - job.getStartTime();
-      job.println("Cum Trials Time        : " + milliSecToString(cumTime_mS));
+      println("Cum Trials Time        : " + milliSecToString(cumTime_mS));
       final double timePerTrial_mS = (cumTime_mS * 1.0) / lastT;
       final double avgUpdateTime_ns = (timePerTrial_mS * 1e6) / maxU;
-      job.println("Time Per Trial, mSec   : " + timePerTrial_mS);
-      job.println("Avg Update Time, nSec  : " + avgUpdateTime_ns);
-      job.println("Date Time              : "
+      println("Time Per Trial, mSec   : " + timePerTrial_mS);
+      println("Avg Update Time, nSec  : " + avgUpdateTime_ns);
+      println("Date Time              : "
           + job.getReadableDateString(currentTime_mS));
 
       final long timeToComplete_mS = (long)(timePerTrial_mS * (maxT - lastT));
-      job.println("Est Time to Complete   : " + milliSecToString(timeToComplete_mS));
-      job.println("Est Time at Completion : "
+      println("Est Time to Complete   : " + milliSecToString(timeToComplete_mS));
+      println("Est Time at Completion : "
           + job.getReadableDateString(timeToComplete_mS + currentTime_mS));
-      job.println("");
-      if (profile.postPMFs) {
+      println("");
+      if (postPMFs) {
         for (int i = 0; i < qArr.length; i++) {
-          outputPMF(job, qArr[i]);
+          println(outputPMF(qArr[i]));
         }
       }
     }
   }
 
-  private static void process(final Properties prop, final AccuracyStats[] qArr,
+  private static void process(final boolean getSize, final AccuracyStats[] qArr,
       final int cumTrials, final StringBuilder sb) {
-    final String getSizeStr = prop.get("Trials_bytes");
-    final boolean getSize = (getSizeStr == null) ? false : Boolean.parseBoolean(getSizeStr);
 
     final int points = qArr.length;
     sb.setLength(0);
@@ -244,29 +247,29 @@ public abstract class UniqueCountAccuracyProfile implements JobProfile {
   }
 
   /**
-   * Outputs the Probability Mass Function given the Job and the AccuracyStats.
-   * @param job the given Job
+   * Outputs the Probability Mass Function given the AccuracyStats.
    * @param q the given AccuracyStats
    */
-  private static void outputPMF(final Job job, final AccuracyStats q) {
+  private static String outputPMF(final AccuracyStats q) {
     final DoublesSketch qSk = q.qsk;
     final double[] splitPoints = qSk.getQuantiles(FRACTIONS); //1:1
     final double[] reducedSp = reduceSplitPoints(splitPoints);
     final double[] pmfArr = qSk.getPMF(reducedSp); //pmfArr is one larger
     final long trials = qSk.getN();
+    final StringBuilder sb = new StringBuilder();
 
     //output Histogram
     final String hdr = String.format("%10s%4s%12s", "Trials", "    ", "Est");
     final String fmt = "%10d%4s%12.2f";
-    job.println("Histogram At " + q.trueValue);
-    job.println(hdr);
+    sb.append("Histogram At " + q.trueValue).append(LS);
+    sb.append(hdr).append(LS);
     for (int i = 0; i < reducedSp.length; i++) {
       final int hits = (int)(pmfArr[i + 1] * trials);
       final double est = reducedSp[i];
       final String line = String.format(fmt, hits, " >= ", est);
-      job.println(line);
+      sb.append(line).append(LS);
     }
-    job.println("");
+    return sb.toString();
   }
 
   /**

@@ -17,6 +17,7 @@ import com.yahoo.sketches.misc.performance.Properties;
  * @author Lee Rhodes
  */
 public abstract class UniqueCountSerDeProfile implements JobProfile {
+  Job job;
   Properties prop;
   long vIn = 0;
   int lgMinT;
@@ -31,6 +32,7 @@ public abstract class UniqueCountSerDeProfile implements JobProfile {
 
   @Override
   public void start(final Job job) {
+    this.job = job;
     prop = job.getProperties();
     lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
     lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
@@ -42,24 +44,28 @@ public abstract class UniqueCountSerDeProfile implements JobProfile {
     slope = (double) (lgMaxT - lgMinT) / (lgMinBpU - lgMaxBpU);
     lgK = Integer.parseInt(prop.mustGet("LgK"));
     configure();
-    doTrials(job, this);
+    doTrials();
+  }
+
+  @Override
+  public void println(final String s) {
+    job.println(s);
   }
 
   abstract void configure();
 
   abstract void doTrial(SerDeStats stats, int uPerTrial);
 
-  static void doTrials(final Job job, final UniqueCountSerDeProfile profile) {
-    final int maxU = 1 << profile.lgMaxU;
-    final int minU = 1 << profile.lgMinU;
-    final int uPPO = profile.uPPO;
+  private void doTrials() {
+    final int maxU = 1 << lgMaxU;
+    final int minU = 1 << lgMinU;
     int lastU = 0;
     final StringBuilder dataStr = new StringBuilder();
-    job.println(getHeader());
+    println(getHeader());
     while (lastU < maxU) { //for each U point on X-axis, OR one row on output
       final int nextU = (lastU == 0) ? minU : pwr2LawNext(uPPO, lastU);
       lastU = nextU;
-      final int trials = profile.getNumTrials(nextU);
+      final int trials = getNumTrials(nextU);
       //Build stats arr
       final SerDeStats[] statsArr = new SerDeStats[trials];
       for (int t = 0; t < trials; t++) {
@@ -71,10 +77,10 @@ public abstract class UniqueCountSerDeProfile implements JobProfile {
 
       System.gc();
       for (int t = 0; t < trials; t++) {
-        profile.doTrial(statsArr[t], nextU); //at this # of uniques
+        doTrial(statsArr[t], nextU); //at this # of uniques
       }
       process(statsArr, trials, nextU, dataStr);
-      job.println(dataStr.toString());
+      println(dataStr.toString());
     }
   }
 
