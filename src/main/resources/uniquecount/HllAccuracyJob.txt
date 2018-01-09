@@ -1,5 +1,11 @@
 # Job
 
+#Uniques Profile
+Trials_lgMinU=0  #The starting # of uniques that is printed at the end.
+Trials_lgMaxU=20 #How high the # uniques go
+Trials_UPPO=16   #The horizontal x-resolution of trials points
+Trials_charArr=true
+
 # Trials Profile
 Trials_lgMinT=8  #prints intermediate results starting w/ this lgMinT
 Trials_lgMaxT=12 #The max trials
@@ -9,12 +15,6 @@ Trials_lgQK=13   #size of quantiles sketch
 Trials_interData=true
 Trials_postPMFs=false
 Trials_bytes=false
-
-#Uniques Profile
-Trials_lgMinU=0  #The starting # of uniques that is printed at the end.
-Trials_lgMaxU=20 #How high the # uniques go
-Trials_UPPO=16   #The horizontal x-resolution of trials points
-Trials_charArr=true
 
 # Date-Time Profile
 TimeZone=PST

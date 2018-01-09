@@ -15,7 +15,7 @@ import com.yahoo.sketches.theta.UpdateSketchBuilder;
 /**
  * @author Lee Rhodes
  */
-public class ThetaAccuracyProfile extends UniqueCountAccuracyProfile {
+public class ThetaAccuracyProfile extends BaseAccuracyProfile {
   private UpdateSketch sketch;
   private boolean rebuild; //Theta QS Sketch Accuracy
 

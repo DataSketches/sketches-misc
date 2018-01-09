@@ -16,7 +16,7 @@ import com.yahoo.sketches.theta.UpdateSketchBuilder;
 /**
  * @author Lee Rhodes
  */
-public class ThetaSerDeProfile extends UniqueCountSerDeProfile {
+public class ThetaSerDeProfile extends BaseSerDeProfile {
   private UpdateSketch sketch;
 
   @Override

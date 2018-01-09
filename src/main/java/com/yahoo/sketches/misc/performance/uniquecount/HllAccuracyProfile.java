@@ -9,7 +9,7 @@ import com.yahoo.memory.WritableMemory;
 import com.yahoo.sketches.hll.HllSketch;
 import com.yahoo.sketches.hll.TgtHllType;
 
-public class HllAccuracyProfile extends UniqueCountAccuracyProfile {
+public class HllAccuracyProfile extends BaseAccuracyProfile {
   private HllSketch sketch;
   private boolean useComposite; //accuracy, HLL
   private boolean useCharArr; //accuracy ?? or speed HLL, Theta?

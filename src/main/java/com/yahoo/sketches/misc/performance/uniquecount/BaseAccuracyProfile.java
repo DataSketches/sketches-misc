@@ -18,7 +18,7 @@ import com.yahoo.sketches.quantiles.DoublesSketch;
 /**
  * @author Lee Rhodes
  */
-public abstract class UniqueCountAccuracyProfile implements JobProfile {
+public abstract class BaseAccuracyProfile implements JobProfile {
   Job job;
   Properties prop;
   long vIn = 0;
@@ -219,7 +219,7 @@ public abstract class UniqueCountAccuracyProfile implements JobProfile {
    * @return an AccuracyStats array
    */
   private static final AccuracyStats[] buildAccuracyStatsArray(final Properties prop,
-      final UniqueCountAccuracyProfile profile) {
+      final BaseAccuracyProfile profile) {
     final int lgMinU = profile.lgMinU;
     final int lgMaxU = profile.lgMaxU;
     final int uPPO = profile.uPPO;

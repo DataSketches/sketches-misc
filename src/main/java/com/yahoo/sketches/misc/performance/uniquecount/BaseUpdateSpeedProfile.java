@@ -16,7 +16,7 @@ import com.yahoo.sketches.misc.performance.Properties;
 /**
  * @author Lee Rhodes
  */
-public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
+public abstract class BaseUpdateSpeedProfile implements JobProfile {
   Job job;
   Properties prop;
   long vIn = 0;

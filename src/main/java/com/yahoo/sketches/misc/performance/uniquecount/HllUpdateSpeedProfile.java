@@ -12,7 +12,7 @@ import com.yahoo.sketches.hll.TgtHllType;
 /**
  * @author Lee Rhodes
  */
-public class HllUpdateSpeedProfile extends UniqueCountUpdateSpeedProfile {
+public class HllUpdateSpeedProfile extends BaseUpdateSpeedProfile {
   private HllSketch sketch;
 
   @Override

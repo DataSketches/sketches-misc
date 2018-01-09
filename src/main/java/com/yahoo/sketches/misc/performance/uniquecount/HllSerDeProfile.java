@@ -13,7 +13,7 @@ import com.yahoo.sketches.hll.TgtHllType;
 /**
  * @author Lee Rhodes
  */
-public class HllSerDeProfile extends UniqueCountSerDeProfile {
+public class HllSerDeProfile extends BaseSerDeProfile {
   private HllSketch sketch;
 
   private boolean compact;
