@@ -14,8 +14,6 @@ import java.text.SimpleDateFormat;
 import java.util.GregorianCalendar;
 import java.util.SimpleTimeZone;
 
-import org.testng.annotations.Test;
-
 import com.yahoo.sketches.misc.Files;
 
 /**
@@ -35,7 +33,7 @@ public class Job {
   private GregorianCalendar gc;
   private long startTime_mS;
   private JobProfile profile;
-  private String profileName;
+  private final String profileName;
 
   /**
    * Build properties and run the Job Profile
@@ -45,15 +43,16 @@ public class Job {
    */
   public Job(final String jobFileName) {
     if (!isFileValid(jobFileName)) {
-      throw new IllegalArgumentException("File not valid.");
+      throw new IllegalArgumentException("File not valid. " + jobFileName);
     }
     final String jobStr = Files.fileToString(jobFileName); //includes line feeds
     prop = parseJobProperties(jobStr);
-    setDateFormats();
-    configurePrintWriter();
 
     profile = createJobProfile();
     profileName = profile.getClass().getSimpleName();
+
+    setDateFormats();
+    configurePrintWriter();
 
     println("START JOB " + profileName );
     println(prop.extractKvPairs(LS));
@@ -234,19 +233,15 @@ public class Job {
     }
   }
 
-  @Test
-  public void runJobs() {
-    final String fileName = "src/main/resources/uniquecount/ThetaSerDeJob.txt";
-    Job.main(new String[] {fileName});
-  }
-
   /**
    * Run from the command line
    * @param args Argument zero is the command file
    */
   @SuppressWarnings("unused")
   public static void main(final String[] args) {
-    new Job(args[0]);
+    for (int j = 0; j < args.length; j++) {
+      new Job(args[j]);
+    }
   }
 
 }

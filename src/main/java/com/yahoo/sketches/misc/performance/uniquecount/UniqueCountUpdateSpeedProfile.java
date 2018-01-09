@@ -22,6 +22,9 @@ public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
   long vIn = 0;
   int lgMinT;
   int lgMaxT;
+  int lgMinU;
+  int lgMaxU;
+  int uPPO;
   int lgMinBpU;
   int lgMaxBpU;
   double slope;
@@ -32,6 +35,9 @@ public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
     prop = job.getProperties();
     lgMinT = Integer.parseInt(prop.mustGet("Trials_lgMinT"));
     lgMaxT = Integer.parseInt(prop.mustGet("Trials_lgMaxT"));
+    lgMinU = Integer.parseInt(prop.mustGet("Trials_lgMinU"));
+    lgMaxU = Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
+    uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
     lgMinBpU = Integer.parseInt(prop.mustGet("Trials_lgMinBpU"));
     lgMaxBpU = Integer.parseInt(prop.mustGet("Trials_lgMaxBpU"));
     slope = (double) (lgMaxT - lgMinT) / (lgMinBpU - lgMaxBpU);
@@ -56,20 +62,18 @@ public abstract class UniqueCountUpdateSpeedProfile implements JobProfile {
    * @param profile the given profile
    */
   private void doTrials() {
-    final Properties prop = job.getProperties();
-    final int maxU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMaxU"));
-    final int minU = 1 << Integer.parseInt(prop.mustGet("Trials_lgMinU"));
-    final int uPPO = Integer.parseInt(prop.mustGet("Trials_UPPO"));
+    final int maxU = 1 << lgMaxU;
+    final int minU = 1 << lgMinU;
     int lastU = 0;
     final StringBuilder dataStr = new StringBuilder();
     println(getHeader());
-    while (lastU < maxU) { //Trial for each U point on X-axis, and one row on output
+    while (lastU < maxU) { //Trials for each U point on X-axis, and one row on output
       final int nextU = (lastU == 0) ? minU : pwr2LawNext(uPPO, lastU);
       lastU = nextU;
       final int trials = getNumTrials(nextU);
       //Build stats arr
       final SpeedStats[] statsArr = new SpeedStats[trials];
-      for (int t = 0; t < trials; t++) { //do # trials
+      for (int t = 0; t < trials; t++) { //fill the stats arr
         SpeedStats stats = statsArr[t];
         if (stats == null) {
           stats = statsArr[t] = new SpeedStats();
