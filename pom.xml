@@ -8,10 +8,9 @@
 
     <groupId>com.yahoo.datasketches</groupId>
     <artifactId>sketches-misc</artifactId>
+    <packaging>jar</packaging> <!-- jar is the default -->
     <version>0.8.3-SNAPSHOT</version>
-    <packaging>jar</packaging>
 
-    <!-- Project Information -->
     <name>${project.groupId}:${project.artifactId}</name>
     <description>Data Sketches Miscellaneous</description>
     <url>https://datasketches.github.io/</url>
@@ -24,31 +23,81 @@
         </license>
     </licenses>
 
-    <organization>
-        <name>Yahoo! Inc.</name>
-        <url>https://www.yahoo.com</url>
-    </organization>
-
     <developers>
         <developer>
-            <name>Lee Rhodes</name>
-            <roles>
-                <role>founder, project admin, lead developer</role>
-            </roles>
-            <url>https://github.com/leerho</url>
+            <name>DataSketchesDevelopers</name>
+            <organization>DataSketches</organization>
+            <organizationUrl>https://github.com/orgs/DataSketches/people</organizationUrl>
+        </developer>
+        <developer>
+            <name>DataSketchesCollaborators</name>
+            <organization>DataSketches</organization>
+            <organizationUrl>https://github.com/orgs/DataSketches/outside-collaborators</organizationUrl>
         </developer>
     </developers>
-    <!-- End Project Information -->
+
+    <mailingLists>
+        <mailingList>
+            <name>sketches-user</name>
+            <archive>https://groups.google.com/forum/#!forum/sketches-user</archive>
+            <subscribe>mailto:sketches-user%2Bsubscribe@googlegroups.com</subscribe>
+            <unsubscribe>mailto:sketches-user%2Bunsubscribe@googlegroups.com</unsubscribe>
+            <post>mailto:sketches-user@googlegroups.com</post>
+        </mailingList>
+    </mailingLists>
 
     <properties>
-        <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <project.build.resourceEncoding>UTF-8</project.build.resourceEncoding>
-        <project.reporting.outputEncoding>UTF-8</project.reporting.outputEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
+        <!-- System-wide properties -->
+        <argLine>-Xmx1024m -Duser.language=en -Duser.country=US -Dfile.encoding=UTF-8</argLine>
+        <charset.encoding>UTF-8</charset.encoding>
+        <project.build.sourceEncoding>${charset.encoding}</project.build.sourceEncoding>
+        <project.build.resourceEncoding>${charset.encoding}</project.build.resourceEncoding>
+        <project.reporting.outputEncoding>${charset.encoding}</project.reporting.outputEncoding>
+        <java.version>1.8</java.version>
+        <maven.compiler.source>${java.version}</maven.compiler.source>
+        <maven.compiler.target>${java.version}</maven.compiler.target>
+        
+        <!-- Dependencies -->
+        <sketches-core.version>0.11.0</sketches-core.version>
+        <memory.version>0.10.3</memory.version>
+        <commons-cli.version>1.4</commons-cli.version>
+        <testng.version>6.13.1</testng.version>
+        
+        <!-- Maven Plugins -->
+        <maven-assembly-plugin.version>3.1.0</maven-assembly-plugin.version>
+        <maven-clean-plugin.version>3.0.0</maven-clean-plugin.version>
+        <maven-compiler-plugin.version>3.7.0</maven-compiler-plugin.version>
+        <maven-dependency-plugin.version>3.0.2</maven-dependency-plugin.version>
+        <maven-deploy-plugin.version>2.8.2</maven-deploy-plugin.version>
+        <maven-gpg-plugin.version>1.6</maven-gpg-plugin.version>
+        <maven-help-plugin.version>2.2</maven-help-plugin.version>
+        <maven-install-plugin.version>2.5.2</maven-install-plugin.version>
+        <maven-javadoc-plugin.version>3.0.0</maven-javadoc-plugin.version>
+        <maven-release-plugin.version>2.5.3</maven-release-plugin.version>
+        <maven-resources-plugin.version>3.0.2</maven-resources-plugin.version>
+        <maven-shade-plugin.version>3.1.0</maven-shade-plugin.version>
+        <maven-source-plugin.version>3.0.1</maven-source-plugin.version>
+        <maven-surefire-plugin.version>2.20.1</maven-surefire-plugin.version>
+        
+        <!-- Codehaus.org Plugins -->
+        <exec-maven-plugin.version>1.6.0</exec-maven-plugin.version>
+        <license-maven-plugin.version>1.14</license-maven-plugin.version>
+        <plexus-compiler-javac-errorprone.version>2.8.2</plexus-compiler-javac-errorprone.version>
+        
+        <!-- Jacoco.org Plugins -->
+        <jacoco-maven-plugin.version>0.7.9</jacoco-maven-plugin.version>
+        
+        <!-- Sonatype.org Plugins -->
+        <nexus-staging-maven-plugin.version>1.6.8</nexus-staging-maven-plugin.version>
+        
+        <!-- Versioneye.com Plugins -->
+        <versioneye-maven-plugin.version>3.11.4</versioneye-maven-plugin.version>
     </properties>
 
-    <!-- Environment Settings -->
+    <prerequisites>
+        <maven>3.0.4</maven>
+    </prerequisites>
+
     <scm>
         <connection>scm:git:ssh://git@github.com/DataSketches/sketches-misc.git</connection>
         <developerConnection>scm:git:ssh://git@github.com/DataSketches/sketches-misc.git</developerConnection>
@@ -56,17 +105,15 @@
         <tag>HEAD</tag>
     </scm>
 
-    <prerequisites>
-        <maven>3.0.4</maven>
-    </prerequisites>
+    <issueManagement>
+        <system>GitHub Issues</system>
+        <url>https://github.com/DataSketches/sketches-misc/issues</url>
+    </issueManagement>
 
-    <repositories>
-        <repository>
-            <id>jcenter</id>
-            <name>bintray</name>
-            <url>https://jcenter.bintray.com</url>
-        </repository>
-    </repositories>
+    <ciManagement>
+        <system>travis</system>
+        <url>https://travis-ci.org/DataSketches/sketches-misc</url>
+    </ciManagement>
 
     <distributionManagement>
         <repository>
@@ -75,76 +122,42 @@
         </repository>
     </distributionManagement>
 
-    <!-- This is optional -->
-    <profiles>
-        <profile>
-            <id>strict</id>
-            <build>
-                <pluginManagement>
-                    <plugins>
-
-                        <plugin>
-                            <groupId>org.apache.maven.plugins</groupId>
-                            <artifactId>maven-compiler-plugin</artifactId>
-                            <configuration>
-                                <source>${maven.compiler.source}</source>
-                                <target>${maven.compiler.target}</target>
-                                <compilerId>javac-with-errorprone</compilerId>
-                                <forceJavacCompilerUse>true</forceJavacCompilerUse>
-                            </configuration>
-                            <dependencies>
-                                <dependency>
-                                    <groupId>org.codehaus.plexus</groupId>
-                                    <artifactId>plexus-compiler-javac-errorprone</artifactId>
-                                    <version>2.8.2</version>
-                                </dependency>
-                            </dependencies>
-                        </plugin>
-
-                    </plugins>
-                </pluginManagement>
-            </build>
-        </profile>
-    </profiles>
-    <!-- End of Environment Settings -->
-
     <dependencies>
-        <!-- sketches-core -->
         <dependency>
             <groupId>com.yahoo.datasketches</groupId>
             <artifactId>sketches-core</artifactId>
-            <version>0.10.3</version>
+            <version>${sketches-core.version}</version>
         </dependency>         
 
         <dependency>
             <groupId>com.yahoo.datasketches</groupId>
             <artifactId>memory</artifactId>
-            <version>0.10.3</version>
-        </dependency>
-
-        <!-- Test Scope -->
-        <dependency>
-            <groupId>org.testng</groupId>
-            <artifactId>testng</artifactId>
-            <version>6.11</version>
-            <scope>test</scope>
+            <version>${memory.version}</version>
         </dependency>
 
         <!-- https://mvnrepository.com/artifact/commons-cli/commons-cli -->
         <dependency>
             <groupId>commons-cli</groupId>
             <artifactId>commons-cli</artifactId>
-            <version>1.4</version>
+            <version>${commons-cli.version}</version>
         </dependency>
 
-        <!-- https://mvnrepository.com/artifact/com.clearspring.analytics/stream 
+        <!-- Test Scope -->
         <dependency>
-            <groupId>com.clearspring.analytics</groupId>
-            <artifactId>stream</artifactId>
-            <version>2.9.5</version>
+            <groupId>org.testng</groupId>
+            <artifactId>testng</artifactId>
+            <version>${testng.version}</version>
+            <scope>test</scope>
         </dependency>
-        -->
     </dependencies>
+
+    <repositories>
+        <repository>
+            <id>jcenter</id>
+            <name>bintray</name>
+            <url>https://jcenter.bintray.com</url>
+        </repository>
+    </repositories>
 
     <build>
         <plugins>
@@ -189,11 +202,11 @@
                 <groupId>org.apache.maven.plugins</groupId>
                 <artifactId>maven-javadoc-plugin</artifactId>
                 <configuration>
-                    <!--
-                        <show>private</show>
-                    -->
-                    <stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
-                    <docfilessubdirs>true</docfilessubdirs>
+                  <!--
+                    <show>private</show>
+                  -->
+                  <stylesheetfile>src/main/javadoc/stylesheet.css</stylesheetfile>
+                  <docfilessubdirs>true</docfilessubdirs>
                 </configuration>
                 <executions>
                     <execution>
@@ -224,7 +237,7 @@
                 <artifactId>nexus-staging-maven-plugin</artifactId>
                 <extensions>true</extensions>
                 <configuration>
-                    <serverId>sonatype-nexus-staging</serverId>
+                    <serverId>sonatype-nexus-staging</serverId> <!-- from ~/.m2/settings.xml -->
                     <nexusUrl>https://oss.sonatype.org/</nexusUrl>
                     <autoReleaseAfterClose>false</autoReleaseAfterClose>
                 </configuration>
@@ -278,113 +291,152 @@
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-assembly-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>${maven-assembly-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-clean-plugin</artifactId>
-                    <version>3.0.0</version>
+                    <version>${maven-clean-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-compiler-plugin</artifactId>
-                    <version>3.7.0</version>
+                    <version>${maven-compiler-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-dependency-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>${maven-dependency-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-deploy-plugin</artifactId>
-                    <version>2.8.2</version>
+                    <version>${maven-deploy-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-gpg-plugin</artifactId>
-                    <version>1.6</version>
+                    <version>${maven-gpg-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-help-plugin</artifactId>
-                    <version>2.2</version>
+                    <version>${maven-help-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-install-plugin</artifactId>
-                    <version>2.5.2</version>
+                    <version>${maven-install-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-javadoc-plugin</artifactId>
-                    <version>2.10.4</version>
+                    <version>${maven-javadoc-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-release-plugin</artifactId>
-                    <version>2.5.3</version>
+                    <version>${maven-release-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-resources-plugin</artifactId>
-                    <version>3.0.2</version>
+                    <version>${maven-resources-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-shade-plugin</artifactId>
-                    <version>3.1.0</version>
+                    <version>${maven-shade-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-source-plugin</artifactId>
-                    <version>3.0.1</version>
+                    <version>${maven-source-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.apache.maven.plugins</groupId>
                     <artifactId>maven-surefire-plugin</artifactId>
-                    <version>2.20.1</version>
+                    <version>${maven-surefire-plugin.version}</version>
                 </plugin>
 
                 <!-- OTHER -->
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>exec-maven-plugin</artifactId>
-                    <version>1.6.0</version>
+                    <version>${exec-maven-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.codehaus.mojo</groupId>
                     <artifactId>license-maven-plugin</artifactId>
-                    <version>1.14</version>
+                    <version>${license-maven-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.jacoco</groupId>
                     <artifactId>jacoco-maven-plugin</artifactId>
-                    <version>0.7.9</version>
+                    <version>${jacoco-maven-plugin.version}</version>
                 </plugin>
 
                 <plugin>
                     <groupId>org.sonatype.plugins</groupId>
                     <artifactId>nexus-staging-maven-plugin</artifactId>
-                    <version>1.6.8</version>
+                    <version>${nexus-staging-maven-plugin.version}</version>
+                </plugin>
+
+                <plugin>
+                    <groupId>com.versioneye</groupId>
+                    <artifactId>versioneye-maven-plugin</artifactId>
+                    <version>${versioneye-maven-plugin.version}</version>
                 </plugin>
 
             </plugins>
         </pluginManagement>
     </build>
+
+    <reporting />
+
+    <profiles>
+        <profile>
+            <id>strict</id>
+            <build>
+                <pluginManagement>
+                    <plugins>
+
+                        <plugin>
+                            <groupId>org.apache.maven.plugins</groupId>
+                            <artifactId>maven-compiler-plugin</artifactId>
+                            <configuration>
+                                <source>${maven.compiler.source}</source>
+                                <target>${maven.compiler.target}</target>
+                                <compilerId>javac-with-errorprone</compilerId>
+                                <forceJavacCompilerUse>true</forceJavacCompilerUse>
+                            </configuration>
+                            <dependencies>
+                                <dependency>
+                                    <groupId>org.codehaus.plexus</groupId>
+                                    <artifactId>plexus-compiler-javac-errorprone</artifactId>
+                                    <version>${plexus-compiler-javac-errorprone.version}</version>
+                                </dependency>
+                            </dependencies>
+                        </plugin>
+
+                    </plugins>
+                </pluginManagement>
+            </build>
+        </profile>
+    </profiles>
 </project>
