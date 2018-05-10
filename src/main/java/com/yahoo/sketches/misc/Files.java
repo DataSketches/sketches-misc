@@ -731,7 +731,11 @@ public final class Files {
     if ((fileName != null) && !fileName.isEmpty()) {
       file = new File(fileName);
       if (file.isFile()) {
-        file.delete(); //remove old file if it exists
+        try {
+          java.nio.file.Files.delete(file.toPath()); //remove old file if it exists
+        } catch (Exception e) {
+          throw new RuntimeException(e);
+        }
       } else {
         try {
           file.createNewFile();
@@ -775,18 +779,15 @@ public final class Files {
    *
    * @param in the given Reader
    * @param skipLen in bytes.
-   * @throws RuntimeException if IOException occurs.
    */
   public static void skip(final Reader in, final long skipLen) {
     try {
-      in.skip(skipLen);
-    } catch (final IOException e) {
-      try {
-        in.close();
-      } catch (final IOException f) {
-        throw new RuntimeException(LS + "Close Unsuccessful" + LS + f);
+      long actual = in.skip(skipLen);
+      if (actual != skipLen) {
+        throw new RuntimeException("Reader.skip(len) unsuccessful: " + actual + " != " + skipLen);
       }
-      throw new RuntimeException(LS + "Reader.skip(len) unsuccessful: " + LS + e);
+    } catch (final IOException | IllegalArgumentException e) {
+      throw new RuntimeException(e);
     }
   }
 
