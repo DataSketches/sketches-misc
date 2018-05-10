@@ -60,9 +60,9 @@ public abstract class HyperLogLogCollector implements Comparable<HyperLogLogColl
   public static final double CORRECTION_PARAMETER = ALPHA * NUM_BUCKETS * NUM_BUCKETS;
 
   private static final int bucketMask = 0x7ff;
-  private static final int minBytesRequired = 10;
+  private static final int minBytesRequired = 10; //why?
   private static final int bitsPerBucket = 4;
-  private static final int range = (int) Math.pow(2, bitsPerBucket) - 1;
+  private static final int range = (int) Math.pow(2, bitsPerBucket) - 1; //15
 
   private static final double[][] minNumRegisterLookup = new double[64][256];
 
@@ -292,7 +292,7 @@ public abstract class HyperLogLogCollector implements Comparable<HyperLogLogColl
     return storageBuffer;
   }
 
-  public void add(byte[] hashedValue)
+  public void add(byte[] hashedValue) //hashed value must be >= 10 bytes!
   {
     if (hashedValue.length < minBytesRequired) {
       throw new IllegalArgumentException(
