@@ -103,7 +103,7 @@ public final class KevinsQuantizationModel {
   }
 
   @Test
-  public static void runTest2() {
+  public static void runTest2() { //models the Druid HLL sketch
     int lgK = 11;
     int k = 1 << lgK;
     int kFactor = 1;
