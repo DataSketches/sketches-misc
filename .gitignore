@@ -32,6 +32,7 @@ build.xml
 *.next
 *.tag
 /*.txt
+/doc/
 
 # Jekyll
 Gemfile
